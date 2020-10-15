@@ -1,0 +1,191 @@
+\chapter{Análisis del problema}
+ 
+En este punto se tiene que ser capaz de plantear los objetivos que han de ser alcanzados a lo largo del desarollo del producto final.Para hacer esto se hará uso de una serie de historias de usuarios, un elemento básico a la hora de aplicar metodologías ágiles en un proyecto y especialmente para poder aplicar SCRUM. Las historias de usuario representarán de manera breve las características demandadas por el cliente las cuales deberán formar parte de la funcionalidad del producto, satisfaciendo sus exigencias.
+
+El proceso por el cual se realiza la extracción de información relacionada con la funcionalidad del proyecto se debe llevar a cabo entre los miembros del equipo y el propio cliente. Al aplicar SCRUM, este proceso no solo se realizará en la fase inicial del proyecto, si no que se realizan en cada sprint del proyecto, de manera que se pueda obtener el resultado esperado en un corto espacio de tiempo y permitiendo amoldar el proyecto a lo requerido por el cliente de la forma mas eficiente posible.
+
+Las historias de usuario, en terminos generales, siempre han de extraerse durante las reuniones con el cliente y es deseable que sean escritas por el mismo y en un lenguaje claro, sin entrar en detalles. Estas han de aportarnos la funcionalidad requeriada por el proyecto, entregando de esta forma un valor particular al cliente.
+
+Estas han de desglosarse en tres apartados:
+\begin{itemize}
+	\item \textbf{Como}: representa el rol que va a utilizar el proyecto
+	\item \textbf{Quiere}: representa la acción o evento que quiere que ocurra
+	\item \textbf{Para}: representa la funcionalidad que se quiere cubrir.
+\end{itemize}
+
+\newpage
+A su vez tambien puede usarse la estructura presentada por la web Scrum Manager\cite{scrum-manager}:
+\begin{itemize}
+	\item Nombre breve y descriptivo.
+	\item Descripción de la funcionalidad en forma de diálogo o monólogo del usuario describiendo la funcionalidad que desea realizar.
+	\item Criterio de validación y verificación que determinará para considerar terminado y aceptable por el cliente el desarrollo de la funcionalidad descrita.
+\end{itemize}
+
+Como se ha dicho antes, las historias de usuario ayudan a modelar el producto según las necesidades del cliente y mediante una reunión entre el equipo y este. El cliente aportará la idea que tiene, las necesidades que pretende cubrir y las funcionalidades que en cada momento el estima oportunas para el proyecto. A su vez el equipo encargado del desarrollo también podrán aportar su punto de vista en ciertos puntos con la finalidad de poder enriquecer el proyecto. Para finalizar el Product Owner, que actúa como la voz del cliente dentro del equipo, será el encargado de redactar las historias de usuario y de extraer las diferentes tareas resultantes de las mismas, identificandolas según el coste su coste y prioridad. Con esto lo que se consigue es definir el Product Backlog, base a la hora de aplicar SCRUM a un proyecto.
+
+Es importante recalcar que en el Product Backlog se indicaran los diferentes sprints del proyecto y las tareas asociadas a los mismos. Esto no quiere decir que se mantenga durante todo el proyecto, pues la definición obtenida al inicio del mismo puede varias dependiendo de las necesidades del cliente. Dado que el proyecto estará dividido en una serie de sprints, durante los mismos debería realizarse una reunión entre los diferentes miembros del equipo y el cliente donde se podrán hacer adaptaciones que se consideren convenientes permitiendo cambiar o replantear los objetivos del proyecto con el fin de maximizar su utilidad.
+
+Las historias de usuario serán definidas con la siguiente estructura:
+
+
+\rowcolors{1}{gray!30}{gray!10}
+\begin{table}[h]
+	\begin{center}
+		\begin{tabular}{| c | p{9cm} |}
+			\hline
+			
+			Historia de Usuario &  \\ \hline
+		 
+		 
+			ID & HUXX \\
+			Nombre &  \\
+			Prioridad &  \\
+			Riesgo &  \\
+			Descripción &  \\
+			Validación &  \\ \hline
+		\end{tabular}
+		\caption{Modelo historia de Usuario}
+		\label{tab:historia-usuario}
+	\end{center}
+\end{table}
+
+\newpage
+Cada campo representa lo siguiente:
+\begin{itemize}
+	\item \textbf{ID}: Identificar único de la historia de usuario.
+	\item \textbf{Nombre}: Nombre asignado a la historia de usuario
+	\item \textbf{Prioridad}: Importancia a la hora de llevar a cabo en el desarrollo, pudiendo ser alta, media o baja
+	\item \textbf{Riesgo}: Importancia en relación al conjunto del proyecto, indicando así en caso de fallo el daño provocado, pudiendo ser alto, medio o bajo. .
+	\item \textbf{Descripción}: Explicación de la historia de usuario, dejando clara la idea de la misma
+	\item \textbf{Validación}: Condiciones que se han de cumplir para dar la histordia por finalizada.
+\end{itemize}
+
+
+\rowcolors{1}{gray!30}{gray!10}
+\begin{table}[h]
+	\begin{center}
+		\begin{tabular}{| c | p{9cm} |}
+			\hline
+			
+			Historia de Usuario &  \\ \hline
+			
+			
+			ID & HU01 \\
+			Nombre & Apariencia \\
+			Prioridad & Baja \\
+			Riesgo & Baja \\
+			Descripción & Como usuario quiero que el producto tenga un diseño, simple, sencillo e intuitivo. \\
+			Validación & \begin{itemize}
+							\item Quiero acceder a la información pulsando un boton.
+							\item Quiero ver todos los datos de manera clara.
+						\end{itemize} \\ \hline
+		\end{tabular}
+		\caption{Historia de Usuario Apariencia}
+		\label{tab:historia-usuario-01}
+	\end{center}
+\end{table}
+
+\rowcolors{1}{gray!30}{gray!10}
+\begin{table}[h]
+	\begin{center}
+		\begin{tabular}{| c | p{9cm} |}
+			\hline
+			
+			Historia de Usuario &  \\ \hline
+			
+			
+			ID & HU02 \\
+			Nombre & Funcionamiento \\
+			Prioridad & Baja \\
+			Riesgo & Baja \\
+			Descripción & Como usuario quiero que el producto pueda usarlo en todo momento, a ser posible desde un dispositivo movil. \\
+			Validación & \begin{itemize}
+				\item Quiero que funcione sobre todo en moviles.
+				\item Quiero que tenga un acceso fácil.
+			\end{itemize} \\ \hline
+		\end{tabular}
+		\caption{Historia de Usuario Funcionamiento}
+		\label{tab:historia-usuario-02}
+	\end{center}
+\end{table}
+
+\rowcolors{1}{gray!30}{gray!10}
+\begin{table}[h]
+	\begin{center}
+		\begin{tabular}{| c | p{9cm} |}
+			\hline
+			
+			Historia de Usuario &  \\ \hline
+			
+			
+			ID & HU03 \\
+			Nombre & Seleccionar provincia \\
+			Prioridad & Baja \\
+			Riesgo & Baja \\
+			Descripción & Como usuario quiero poder seccionar la provincia de la que quiero consultar los datos. \\
+			Validación & \begin{itemize}
+				\item Quiero poder seleccionar todas las provincias.
+				\item Quiero poder seleccionar toda España.
+			\end{itemize} \\ \hline
+		\end{tabular}
+		\caption{Historia de Usuario Seleccion provincia}
+		\label{tab:historia-usuario-03}
+	\end{center}
+\end{table}
+
+\rowcolors{1}{gray!30}{gray!10}
+\begin{table}[h]
+	\begin{center}
+		\begin{tabular}{| c | p{9cm} |}
+			\hline
+			
+			Historia de Usuario &  \\ \hline
+			
+			
+			ID & HU04 \\
+			Nombre & Seleccionar datos \\
+			Prioridad & Alta \\
+			Riesgo & Baja \\
+			Descripción & Como usuario quiero poder seccionar los datos que quiero consultar. \\
+			Validación & \begin{itemize}
+				\item Quiero poder ver los datos mas actuales.
+				\item Quiero poder ver los datos desde el inicio de la pandemia.
+				\item Quiero poder ver graficas para ver los cambios en los datos.
+				\item Quiero poder ver la acumulacion de casos.
+				\item Quiero poder ver los fallecimientos.
+				\item Quiero poder ver las altas.
+				\item Quiero poder ver los casos por provincias (solo España).
+				\item Quiero poder ver las incidencias más actuales por cada 100k habitantes por provincias (solo España)
+				\item Quiero poder ver las incidenciasdesde el inicio por cada 100k habitantes por provincias (solo España)
+				\item Quiero poder ver como afecta el virus según la edad (solo España)
+				
+			\end{itemize} \\ \hline
+		\end{tabular}
+		\caption{Historia de Usuario Selección datos}
+		\label{tab:historia-usuario-04}
+	\end{center}
+\end{table}
+
+\rowcolors{1}{gray!30}{gray!10}
+\begin{table}[h]
+	\begin{center}
+		\begin{tabular}{| c | p{9cm} |}
+			\hline
+			
+			Historia de Usuario &  \\ \hline
+			
+			
+			ID & HU05 \\
+			Nombre & Seleccionar ayuda \\
+			Prioridad & Alta \\
+			Riesgo & Baja \\
+			Descripción & Como usuario quiero poder usar una opción para . \\
+			Validación & \begin{itemize}
+				\item Quiero poder ver que es cada uno de los apartados del proyecto.
+			\end{itemize} \\ \hline
+		\end{tabular}
+		\caption{Historia de Usuario Selección ayuda}
+		\label{tab:historia-usuario-05}
+	\end{center}
+\end{table}
+

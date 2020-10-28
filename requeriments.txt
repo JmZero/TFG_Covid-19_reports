@@ -1,0 +1,5 @@
+pytest==6.1.1
+tgintegration
+python-decouple
+pytest-asyncio==0.14.0
+

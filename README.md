@@ -6,4 +6,4 @@ Trabajo Fin de Grado orientado a la realización de un Bot para la consulta de d
 Este proyecto cuenta con una licencia AGPL, sentios libres de usarlos si os es util.
 
 ## Integración Continua
-### Travis [![Build Status](https://travis-ci.org/JmZero/TFG_Covid-19_reports.svg?branch=master)](https://travis-ci.org/github/JmZero/TFG_Covid-19_reports)
+### Travis [![Build Status](https://travis-ci.com/JmZero/TFG_Covid-19_reports.svg?branch=master)](https://travis-ci.com/github/JmZero/TFG_Covid-19_reports)

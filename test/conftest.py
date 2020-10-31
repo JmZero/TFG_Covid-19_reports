@@ -40,11 +40,12 @@ async def client() -> Client:
 @pytest.fixture(scope="module")
 async def controller(client):
     c = BotController(
-        peer="@CovidReportsBot",  # We are going to run tests on https://t.me/CovidReportsBot
         client=client,
+        peer="@CovidReportsBot",    # We are going to run tests on https://t.me/CovidReportsBot
         max_wait=10.0,              # Maximum timeout for responses (optional)
         wait_consecutive=0.8,       # Minimum time to wait for more/consecutive messages (optional)
     )
 
+    await c.clear_chat()
     await c.initialize(start_client=False)
     yield c

@@ -2,7 +2,6 @@ import logging
 import os
 import sys
 import pandas as pd
-import unicodedata
 from datetime import date, timedelta, datetime
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Updater, CommandHandler, ConversationHandler, MessageHandler, Filters, CallbackQueryHandler
@@ -17,7 +16,8 @@ INFO_ANDALUCIA, INFO_ANDALUCIA_INCREMENT, INFO_ANDALUCIA_CUMULATIVE, INFO_ANDALU
 INFO_ANDALUCIA_ALL, INFO_ARAGON, INFO_ARAGON_INCREMENT, INFO_ARAGON_CUMULATIVE, INFO_ARAGON_DEATH, INFO_ARAGON_HOSPITAL,\
 INFO_ARAGON_ALL, INFO_ASTURIAS, INFO_ASTURIAS_INCREMENT, INFO_ASTURIAS_CUMULATIVE, INFO_ASTURIAS_DEATH,\
 INFO_ASTURIAS_HOSPITAL, INFO_ASTURIAS_ALL, INFO_CVALENCIANA, INFO_CVALENCIANA_INCREMENT, INFO_CVALENCIANA_CUMULATIVE,\
-INFO_CVALENCIANA_DEATH, INFO_CVALENCIANA_HOSPITAL, INFO_CVALENCIANA_ALL = range(30)
+INFO_CVALENCIANA_DEATH, INFO_CVALENCIANA_HOSPITAL, INFO_CVALENCIANA_ALL, INFO_CANARIAS, INFO_CANARIAS_INCREMENT,\
+INFO_CANARIAS_CUMULATIVE, INFO_CANARIAS_DEATH, INFO_CANARIAS_HOSPITAL, INFO_CANARIAS_ALL = range(36)
 
 # Getting mode, so we could define run function for local and Heroku setup
 mode = os.getenv("MODE")
@@ -302,6 +302,37 @@ def show_cvalenciana_info(update, context):
     return INFO_CVALENCIANA
 
 
+def show_canarias_info(update, context):
+    global current_state, current_autonomy
+
+    username = update.callback_query.message.chat.username
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='canarias_increment'),
+         InlineKeyboardButton("Casos acumulados", callback_data='canarias_cumulative'),
+         InlineKeyboardButton("Fallecimientos", callback_data='canarias_death')],
+
+        [InlineKeyboardButton("Hospitalizaciones", callback_data='canarias_hospital'),
+         InlineKeyboardButton("Ver todo", callback_data='canarias_all'),
+         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    message.reply_photo(
+        photo=open('./img/mapa_canarias.png', 'rb')
+    )
+
+    message.reply_text(
+        text="{} elige los datos que quieres consultar.".format(username),
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_CANARIAS"
+    current_autonomy = "Canarias"
+    return INFO_CANARIAS
+
+
 def show_increment(update, context):
     global current_state, current_autonomy
 
@@ -573,8 +604,6 @@ def show_all_info(update, context):
 
 
 # ANDALUCÍA
-
-
 def show_andalucia_increment(update, context):
     show_increment(update, context)
 
@@ -606,8 +635,6 @@ def show_andalucia_all(update, context):
 
 
 # ARAGÓN
-
-
 def show_aragon_increment(update, context):
     show_increment(update, context)
 
@@ -639,8 +666,6 @@ def show_aragon_all(update, context):
 
 
 # ASTURIAS
-
-
 def show_asturias_increment(update, context):
     show_increment(update, context)
 
@@ -700,6 +725,37 @@ def show_cvalenciana_all(update, context):
     show_all_info(update, context)
 
     return INFO_CVALENCIANA_ALL
+
+
+# CANARIAS
+def show_canarias_increment(update, context):
+    show_increment(update, context)
+
+    return INFO_CANARIAS_INCREMENT
+
+
+def show_canarias_cumulative(update, context):
+    show_cumulative(update, context)
+
+    return INFO_CANARIAS_CUMULATIVE
+
+
+def show_canarias_death(update, context):
+    show_death(update, context)
+
+    return INFO_CANARIAS_DEATH
+
+
+def show_canarias_hospital(update, context):
+    show_hospital(update, context)
+
+    return INFO_CANARIAS_HOSPITAL
+
+
+def show_canarias_all(update, context):
+    show_all_info(update, context)
+
+    return INFO_CANARIAS_ALL
 
 
 def show_info(update, context):
@@ -794,7 +850,7 @@ def main():
                                                CallbackQueryHandler(show_aragon_info, pattern='aragon_info'),
                                                CallbackQueryHandler(show_asturias_info, pattern='asturias_info'),
                                                CallbackQueryHandler(show_cvalenciana_info, pattern='cvalenciana_info'),
-                                               # CallbackQueryHandler(show_canarias_info, pattern='canarias_info'),
+                                               CallbackQueryHandler(show_canarias_info, pattern='canarias_info'),
                                                # CallbackQueryHandler(show_cantabria_info, pattern='cantabria_info'),
                                                # CallbackQueryHandler(show_castillalamancha_info, pattern='castillalamancha_info'),
                                                # CallbackQueryHandler(show_castillayleon_info, pattern='castillayleon_info'),
@@ -1093,6 +1149,73 @@ def main():
                                                CallbackQueryHandler(show_cvalenciana_cumulative, pattern='cvalenciana_cumulative'),
                                                CallbackQueryHandler(show_cvalenciana_death, pattern='cvalenciana_death'),
                                                CallbackQueryHandler(show_cvalenciana_hospital, pattern='cvalenciana_hospital'),
+                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                           ],
+                                           INFO_CANARIAS: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_canarias_increment, pattern='canarias_increment'),
+                                               CallbackQueryHandler(show_canarias_cumulative, pattern='canarias_cumulative'),
+                                               CallbackQueryHandler(show_canarias_death, pattern='canarias_death'),
+                                               CallbackQueryHandler(show_canarias_hospital, pattern='canarias_hospital'),
+                                               CallbackQueryHandler(show_canarias_all, pattern='canarias_all'),
+                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                           ],
+                                           INFO_CANARIAS_INCREMENT: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_canarias_cumulative, pattern='canarias_cumulative'),
+                                               CallbackQueryHandler(show_canarias_death, pattern='canarias_death'),
+                                               CallbackQueryHandler(show_canarias_hospital, pattern='canarias_hospital'),
+                                               CallbackQueryHandler(show_canarias_all, pattern='canarias_all'),
+                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                           ],
+                                           INFO_CANARIAS_CUMULATIVE: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_canarias_increment, pattern='canarias_increment'),
+                                               CallbackQueryHandler(show_canarias_death, pattern='canarias_death'),
+                                               CallbackQueryHandler(show_canarias_hospital, pattern='canarias_hospital'),
+                                               CallbackQueryHandler(show_canarias_all, pattern='canarias_all'),
+                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                           ],
+                                           INFO_CANARIAS_DEATH: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_canarias_increment, pattern='canarias_increment'),
+                                               CallbackQueryHandler(show_canarias_cumulative, pattern='canarias_cumulative'),
+                                               CallbackQueryHandler(show_canarias_hospital, pattern='canarias_hospital'),
+                                               CallbackQueryHandler(show_canarias_all, pattern='canarias_all'),
+                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                           ],
+                                           INFO_CANARIAS_HOSPITAL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_canarias_increment, pattern='canarias_increment'),
+                                               CallbackQueryHandler(show_canarias_cumulative, pattern='canarias_cumulative'),
+                                               CallbackQueryHandler(show_canarias_death, pattern='canarias_death'),
+                                               CallbackQueryHandler(show_canarias_all, pattern='canarias_all'),
+                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                           ],
+                                           INFO_CANARIAS_ALL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_canarias_increment, pattern='canarias_increment'),
+                                               CallbackQueryHandler(show_canarias_cumulative, pattern='canarias_cumulative'),
+                                               CallbackQueryHandler(show_canarias_death, pattern='canarias_death'),
+                                               CallbackQueryHandler(show_canarias_hospital, pattern='canarias_hospital'),
                                                CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
                                            ],
                                            NOT_IMPLEMENTED: [

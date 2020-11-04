@@ -25,7 +25,8 @@ INFO_CASTILLAYLEON_INCREMENT, INFO_CASTILLAYLEON_CUMULATIVE, INFO_CASTILLAYLEON_
 INFO_CASTILLAYLEON_ALL, INFO_CATALUÑA, INFO_CATALUÑA_INCREMENT, INFO_CATALUÑA_CUMULATIVE, INFO_CATALUÑA_DEATH, \
 INFO_CATALUÑA_HOSPITAL, INFO_CATALUÑA_ALL, INFO_CEUTA, INFO_CEUTA_INCREMENT, INFO_CEUTA_CUMULATIVE, INFO_CEUTA_DEATH, \
 INFO_CEUTA_HOSPITAL, INFO_CEUTA_ALL, INFO_EXTREMADURA, INFO_EXTREMADURA_INCREMENT, INFO_EXTREMADURA_CUMULATIVE, \
-INFO_EXTREMADURA_DEATH, INFO_EXTREMADURA_HOSPITAL, INFO_EXTREMADURA_ALL = range(72)
+INFO_EXTREMADURA_DEATH, INFO_EXTREMADURA_HOSPITAL, INFO_EXTREMADURA_ALL, INFO_GALICIA, INFO_GALICIA_INCREMENT, \
+INFO_GALICIA_CUMULATIVE, INFO_GALICIA_DEATH, INFO_GALICIA_HOSPITAL, INFO_GALICIA_ALL = range(78)
 
 
 # Getting mode, so we could define run function for local and Heroku setup
@@ -526,6 +527,37 @@ def show_extremadura_info(update, context):
     current_state = "INFO_EXTREMADURA"
     current_autonomy = "Extremadura"
     return INFO_EXTREMADURA
+
+
+def show_galicia_info(update, context):
+    global current_state, current_autonomy
+
+    username = update.callback_query.message.chat.username
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='galicia_increment'),
+         InlineKeyboardButton("Casos acumulados", callback_data='galicia_cumulative'),
+         InlineKeyboardButton("Fallecimientos", callback_data='galicia_death')],
+
+        [InlineKeyboardButton("Hospitalizaciones", callback_data='galicia_hospital'),
+         InlineKeyboardButton("Ver todo", callback_data='galicia_all'),
+         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    message.reply_photo(
+        photo=open('./img/mapa_galicia.png', 'rb')
+    )
+
+    message.reply_text(
+        text="{} elige los datos que quieres consultar.".format(username),
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_GALICIA"
+    current_autonomy = "Galicia"
+    return INFO_GALICIA
 
 
 def show_increment(update, context):
@@ -1139,6 +1171,37 @@ def show_extremadura_all(update, context):
     return INFO_EXTREMADURA_ALL
 
 
+# GALICIA
+def show_galicia_increment(update, context):
+    show_increment(update, context)
+
+    return INFO_GALICIA_INCREMENT
+
+
+def show_galicia_cumulative(update, context):
+    show_cumulative(update, context)
+
+    return INFO_GALICIA_CUMULATIVE
+
+
+def show_galicia_death(update, context):
+    show_death(update, context)
+
+    return INFO_GALICIA_DEATH
+
+
+def show_galicia_hospital(update, context):
+    show_hospital(update, context)
+
+    return INFO_GALICIA_HOSPITAL
+
+
+def show_galicia_all(update, context):
+    show_all_info(update, context)
+
+    return INFO_GALICIA_ALL
+
+
 def show_info(update, context):
     global current_state
 
@@ -1238,7 +1301,7 @@ def main():
                                                CallbackQueryHandler(show_cataluña_info, pattern='cataluña_info'),
                                                CallbackQueryHandler(show_ceuta_info, pattern='ceuta_info'),
                                                CallbackQueryHandler(show_extremadura_info, pattern='extremadura_info'),
-                                               # CallbackQueryHandler(show_galicia_info, pattern='galicia_info'),
+                                               CallbackQueryHandler(show_galicia_info, pattern='galicia_info'),
                                                # CallbackQueryHandler(show_baleares_info, pattern='baleares_info'),
                                                # CallbackQueryHandler(show_larioja_info, pattern='larioja_info'),
                                                # CallbackQueryHandler(show_madrid_info, pattern='madrid_info'),
@@ -2341,6 +2404,104 @@ def main():
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
+                                           INFO_GALICIA: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_galicia_increment,
+                                                                    pattern='galicia_increment'),
+                                               CallbackQueryHandler(show_galicia_cumulative,
+                                                                    pattern='galicia_cumulative'),
+                                               CallbackQueryHandler(show_galicia_death,
+                                                                    pattern='galicia_death'),
+                                               CallbackQueryHandler(show_galicia_hospital,
+                                                                    pattern='galicia_hospital'),
+                                               CallbackQueryHandler(show_galicia_all,
+                                                                    pattern='galicia_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_GALICIA_INCREMENT: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_galicia_cumulative,
+                                                                    pattern='galicia_cumulative'),
+                                               CallbackQueryHandler(show_galicia_death,
+                                                                    pattern='galicia_death'),
+                                               CallbackQueryHandler(show_galicia_hospital,
+                                                                    pattern='galicia_hospital'),
+                                               CallbackQueryHandler(show_galicia_all,
+                                                                    pattern='galicia_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_GALICIA_CUMULATIVE: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_galicia_increment,
+                                                                    pattern='galicia_increment'),
+                                               CallbackQueryHandler(show_galicia_death,
+                                                                    pattern='galicia_death'),
+                                               CallbackQueryHandler(show_galicia_hospital,
+                                                                    pattern='galicia_hospital'),
+                                               CallbackQueryHandler(show_galicia_all,
+                                                                    pattern='galicia_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_GALICIA_DEATH: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_galicia_increment,
+                                                                    pattern='galicia_increment'),
+                                               CallbackQueryHandler(show_galicia_cumulative,
+                                                                    pattern='galicia_cumulative'),
+                                               CallbackQueryHandler(show_galicia_hospital,
+                                                                    pattern='galicia_hospital'),
+                                               CallbackQueryHandler(show_galicia_all,
+                                                                    pattern='galicia_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_GALICIA_HOSPITAL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_galicia_increment,
+                                                                    pattern='galicia_increment'),
+                                               CallbackQueryHandler(show_galicia_cumulative,
+                                                                    pattern='galicia_cumulative'),
+                                               CallbackQueryHandler(show_galicia_death,
+                                                                    pattern='galicia_death'),
+                                               CallbackQueryHandler(show_galicia_all,
+                                                                    pattern='galicia_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_GALICIA_ALL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_galicia_increment,
+                                                                    pattern='galicia_increment'),
+                                               CallbackQueryHandler(show_galicia_cumulative,
+                                                                    pattern='galicia_cumulative'),
+                                               CallbackQueryHandler(show_galicia_death,
+                                                                    pattern='galicia_death'),
+                                               CallbackQueryHandler(show_galicia_hospital,
+                                                                    pattern='galicia_hospital'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
                                            NOT_IMPLEMENTED: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
@@ -2488,6 +2649,18 @@ def main():
                                                                 pattern='extremadura_hospital'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='extremadura_all'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='galicia_info'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='galicia_increment'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='galicia_cumulative'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='galicia_death'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='galicia_hospital'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='galicia_all'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='show_not_implemented'),
                                        ])

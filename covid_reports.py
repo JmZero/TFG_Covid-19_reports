@@ -19,7 +19,8 @@ INFO_ASTURIAS_DEATH, INFO_ASTURIAS_HOSPITAL, INFO_ASTURIAS_ALL, INFO_CVALENCIANA
 INFO_CVALENCIANA_CUMULATIVE, INFO_CVALENCIANA_DEATH, INFO_CVALENCIANA_HOSPITAL, INFO_CVALENCIANA_ALL, INFO_CANARIAS, \
 INFO_CANARIAS_INCREMENT, INFO_CANARIAS_CUMULATIVE, INFO_CANARIAS_DEATH, INFO_CANARIAS_HOSPITAL, INFO_CANARIAS_ALL, \
 INFO_CANTABRIA, INFO_CANTABRIA_INCREMENT, INFO_CANTABRIA_CUMULATIVE, INFO_CANTABRIA_DEATH, INFO_CANTABRIA_HOSPITAL, \
-INFO_CANTABRIA_ALL = range(42)
+INFO_CANTABRIA_ALL, INFO_CASTILLALAMANCHA, INFO_CASTILLALAMANCHA_INCREMENT, INFO_CASTILLALAMANCHA_CUMULATIVE, \
+INFO_CASTILLALAMANCHA_DEATH, INFO_CASTILLALAMANCHA_HOSPITAL, INFO_CASTILLALAMANCHA_ALL = range(48)
 
 
 # Getting mode, so we could define run function for local and Heroku setup
@@ -365,6 +366,37 @@ def show_cantabria_info(update, context):
     current_state = "INFO_CANTABRIA"
     current_autonomy = "Cantabria"
     return INFO_CANTABRIA
+
+
+def show_castillalamancha_info(update, context):
+    global current_state, current_autonomy
+
+    username = update.callback_query.message.chat.username
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='castillalamancha_increment'),
+         InlineKeyboardButton("Casos acumulados", callback_data='castillalamancha_cumulative'),
+         InlineKeyboardButton("Fallecimientos", callback_data='castillalamancha_death')],
+
+        [InlineKeyboardButton("Hospitalizaciones", callback_data='castillalamancha_hospital'),
+         InlineKeyboardButton("Ver todo", callback_data='castillalamancha_all'),
+         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    message.reply_photo(
+        photo=open('./img/mapa_castillalamancha.png', 'rb')
+    )
+
+    message.reply_text(
+        text="{} elige los datos que quieres consultar.".format(username),
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_CASTILLALAMANCHA"
+    current_autonomy = "Castilla La Mancha"
+    return INFO_CASTILLALAMANCHA
 
 
 def show_increment(update, context):
@@ -823,6 +855,37 @@ def show_cantabria_all(update, context):
     return INFO_CANTABRIA_ALL
 
 
+# CASTILLA LA MANCHA
+def show_castillalamancha_increment(update, context):
+    show_increment(update, context)
+
+    return INFO_CASTILLALAMANCHA_INCREMENT
+
+
+def show_castillalamancha_cumulative(update, context):
+    show_cumulative(update, context)
+
+    return INFO_CASTILLALAMANCHA_CUMULATIVE
+
+
+def show_castillalamancha_death(update, context):
+    show_death(update, context)
+
+    return INFO_CASTILLALAMANCHA_DEATH
+
+
+def show_castillalamancha_hospital(update, context):
+    show_hospital(update, context)
+
+    return INFO_CASTILLALAMANCHA_HOSPITAL
+
+
+def show_castillalamancha_all(update, context):
+    show_all_info(update, context)
+
+    return INFO_CASTILLALAMANCHA_ALL
+
+
 def show_info(update, context):
     global current_state
 
@@ -917,7 +980,7 @@ def main():
                                                CallbackQueryHandler(show_cvalenciana_info, pattern='cvalenciana_info'),
                                                CallbackQueryHandler(show_canarias_info, pattern='canarias_info'),
                                                CallbackQueryHandler(show_cantabria_info, pattern='cantabria_info'),
-                                               # CallbackQueryHandler(show_castillalamancha_info, pattern='castillalamancha_info'),
+                                               CallbackQueryHandler(show_castillalamancha_info, pattern='castillalamancha_info'),
                                                # CallbackQueryHandler(show_castillayleon_info, pattern='castillayleon_info'),
                                                # CallbackQueryHandler(show_cataluña_info, pattern='cataluña_info'),
                                                # CallbackQueryHandler(show_ceuta_info, pattern='ceuta_info'),
@@ -1535,6 +1598,104 @@ def main():
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
+                                           INFO_CASTILLALAMANCHA: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_castillalamancha_increment,
+                                                                    pattern='castillalamancha_increment'),
+                                               CallbackQueryHandler(show_castillalamancha_cumulative,
+                                                                    pattern='castillalamancha_cumulative'),
+                                               CallbackQueryHandler(show_castillalamancha_death,
+                                                                    pattern='castillalamancha_death'),
+                                               CallbackQueryHandler(show_castillalamancha_hospital,
+                                                                    pattern='castillalamancha_hospital'),
+                                               CallbackQueryHandler(show_castillalamancha_all,
+                                                                    pattern='castillalamancha_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CASTILLALAMANCHA_INCREMENT: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_castillalamancha_cumulative,
+                                                                    pattern='castillalamancha_cumulative'),
+                                               CallbackQueryHandler(show_castillalamancha_death,
+                                                                    pattern='castillalamancha_death'),
+                                               CallbackQueryHandler(show_castillalamancha_hospital,
+                                                                    pattern='castillalamancha_hospital'),
+                                               CallbackQueryHandler(show_castillalamancha_all,
+                                                                    pattern='castillalamancha_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CASTILLALAMANCHA_CUMULATIVE: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_castillalamancha_increment,
+                                                                    pattern='castillalamancha_increment'),
+                                               CallbackQueryHandler(show_castillalamancha_death,
+                                                                    pattern='castillalamancha_death'),
+                                               CallbackQueryHandler(show_castillalamancha_hospital,
+                                                                    pattern='castillalamancha_hospital'),
+                                               CallbackQueryHandler(show_castillalamancha_all,
+                                                                    pattern='castillalamancha_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CASTILLALAMANCHA_DEATH: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_castillalamancha_increment,
+                                                                    pattern='castillalamancha_increment'),
+                                               CallbackQueryHandler(show_castillalamancha_cumulative,
+                                                                    pattern='castillalamancha_cumulative'),
+                                               CallbackQueryHandler(show_castillalamancha_hospital,
+                                                                    pattern='castillalamancha_hospital'),
+                                               CallbackQueryHandler(show_castillalamancha_all,
+                                                                    pattern='castillalamancha_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CASTILLALAMANCHA_HOSPITAL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_castillalamancha_increment,
+                                                                    pattern='castillalamancha_increment'),
+                                               CallbackQueryHandler(show_castillalamancha_cumulative,
+                                                                    pattern='castillalamancha_cumulative'),
+                                               CallbackQueryHandler(show_castillalamancha_death,
+                                                                    pattern='castillalamancha_death'),
+                                               CallbackQueryHandler(show_castillalamancha_all,
+                                                                    pattern='castillalamancha_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CASTILLALAMANCHA_ALL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_castillalamancha_increment,
+                                                                    pattern='castillalamancha_increment'),
+                                               CallbackQueryHandler(show_castillalamancha_cumulative,
+                                                                    pattern='castillalamancha_cumulative'),
+                                               CallbackQueryHandler(show_castillalamancha_death,
+                                                                    pattern='castillalamancha_death'),
+                                               CallbackQueryHandler(show_castillalamancha_hospital,
+                                                                    pattern='castillalamancha_hospital'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
                                            NOT_IMPLEMENTED: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
@@ -1622,6 +1783,18 @@ def main():
                                                                 pattern='cantabria_hospital'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='cantabria_all'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='castillalamancha_info'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='castillalamancha_increment'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='castillalamancha_cumulative'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='castillalamancha_death'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='castillalamancha_hospital'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='castillalamancha_all'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='show_not_implemented'),
                                        ])

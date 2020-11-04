@@ -11,30 +11,34 @@ logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger()
 
-WELCOME, INICIO, HELP, STATUS_INFO, WELCOME_BAD, NOT_IMPLEMENTED,\
-INFO_ANDALUCIA, INFO_ANDALUCIA_INCREMENT, INFO_ANDALUCIA_CUMULATIVE, INFO_ANDALUCIA_DEATH, INFO_ANDALUCIA_HOSPITAL,\
-INFO_ANDALUCIA_ALL, INFO_ARAGON, INFO_ARAGON_INCREMENT, INFO_ARAGON_CUMULATIVE, INFO_ARAGON_DEATH, INFO_ARAGON_HOSPITAL,\
-INFO_ARAGON_ALL, INFO_ASTURIAS, INFO_ASTURIAS_INCREMENT, INFO_ASTURIAS_CUMULATIVE, INFO_ASTURIAS_DEATH,\
-INFO_ASTURIAS_HOSPITAL, INFO_ASTURIAS_ALL, INFO_CVALENCIANA, INFO_CVALENCIANA_INCREMENT, INFO_CVALENCIANA_CUMULATIVE,\
-INFO_CVALENCIANA_DEATH, INFO_CVALENCIANA_HOSPITAL, INFO_CVALENCIANA_ALL, INFO_CANARIAS, INFO_CANARIAS_INCREMENT,\
-INFO_CANARIAS_CUMULATIVE, INFO_CANARIAS_DEATH, INFO_CANARIAS_HOSPITAL, INFO_CANARIAS_ALL = range(36)
+WELCOME, INICIO, HELP, STATUS_INFO, WELCOME_BAD, NOT_IMPLEMENTED, \
+INFO_ANDALUCIA, INFO_ANDALUCIA_INCREMENT, INFO_ANDALUCIA_CUMULATIVE, INFO_ANDALUCIA_DEATH, INFO_ANDALUCIA_HOSPITAL, \
+INFO_ANDALUCIA_ALL, INFO_ARAGON, INFO_ARAGON_INCREMENT, INFO_ARAGON_CUMULATIVE, INFO_ARAGON_DEATH, \
+INFO_ARAGON_HOSPITAL, INFO_ARAGON_ALL, INFO_ASTURIAS, INFO_ASTURIAS_INCREMENT, INFO_ASTURIAS_CUMULATIVE, \
+INFO_ASTURIAS_DEATH, INFO_ASTURIAS_HOSPITAL, INFO_ASTURIAS_ALL, INFO_CVALENCIANA, INFO_CVALENCIANA_INCREMENT, \
+INFO_CVALENCIANA_CUMULATIVE, INFO_CVALENCIANA_DEATH, INFO_CVALENCIANA_HOSPITAL, INFO_CVALENCIANA_ALL, INFO_CANARIAS, \
+INFO_CANARIAS_INCREMENT, INFO_CANARIAS_CUMULATIVE, INFO_CANARIAS_DEATH, INFO_CANARIAS_HOSPITAL, INFO_CANARIAS_ALL, \
+INFO_CANTABRIA, INFO_CANTABRIA_INCREMENT, INFO_CANTABRIA_CUMULATIVE, INFO_CANTABRIA_DEATH, INFO_CANTABRIA_HOSPITAL, \
+INFO_CANTABRIA_ALL = range(42)
+
 
 # Getting mode, so we could define run function for local and Heroku setup
 mode = os.getenv("MODE")
 TOKEN = os.getenv("TOKEN")
 
 # Database used in proyect
-url = 'https://raw.githubusercontent.com/datadista/datasets/master/COVID%2019/ccaa_covid19_datos_isciii_nueva_serie.csv'
+url_casos = 'https://raw.githubusercontent.com/datadista/datasets/master/COVID%2019/ccaa_covid19_datos_isciii_nueva_serie.csv'
 util_cols = ['fecha', 'ccaa', 'num_casos']
-df_ccaa_casos = pd.read_csv(url, sep=',', usecols=util_cols)
+df_ccaa_casos = pd.read_csv(url_casos, sep=',', usecols=util_cols)
 
-url = 'https://raw.githubusercontent.com/datadista/datasets/master/COVID%2019/ccaa_covid19_fallecidos_por_fecha_defuncion_nueva_serie_original.csv'
-df_ccaa_muertes = pd.read_csv(url, sep=',')
+url_muertes = 'https://raw.githubusercontent.com/datadista/datasets/master/COVID%2019/ccaa_covid19_fallecidos_por_fecha_defuncion_nueva_serie_original.csv'
+df_ccaa_muertes = pd.read_csv(url_muertes, sep=',')
 
-url = 'https://raw.githubusercontent.com/datadista/datasets/master/COVID%2019/ccaa_ingresos_camas_convencionales_uci.csv'
-util_cols = ['Fecha', 'CCAA', 'Total Pacientes COVID ingresados', '% Camas Ocupadas COVID', 'Total pacientes COVID en UCI',
-             '% Camas Ocupadas UCI COVID', 'Ingresos COVID últimas 24 h', 'Altas COVID últimas 24 h']
-df_ccaa_hospital = pd.read_csv(url, sep=',', usecols=util_cols)
+url_hospital = 'https://raw.githubusercontent.com/datadista/datasets/master/COVID%2019/ccaa_ingresos_camas_convencionales_uci.csv'
+util_cols = ['Fecha', 'CCAA', 'Total Pacientes COVID ingresados', '% Camas Ocupadas COVID',
+             'Total pacientes COVID en UCI', '% Camas Ocupadas UCI COVID', 'Ingresos COVID últimas 24 h',
+             'Altas COVID últimas 24 h']
+df_ccaa_hospital = pd.read_csv(url_hospital, sep=',', usecols=util_cols)
 
 global current_state, conv_handler, current_autonomy
 
@@ -62,7 +66,6 @@ else:
 
 
 def start_handler(update, context):
-    # Handler-function for /random command
     global current_state
 
     chat_id = update.effective_user["id"]
@@ -85,8 +88,8 @@ def start_handler(update, context):
 
         # Sends message with languages menu
         update.message.reply_text(text="¡Bienvenido a Covid-19 Report! {}\n"
-                                       "Gracias a este bot podrás conocer el estado de la situación actual provocada por "
-                                       "el Covid-19.".format(username),
+                                       "Gracias a este bot podrás conocer el estado de la situación actual provocada "
+                                       "por el Covid-19.".format(username),
                                   reply_markup=reply_kb_markup)
 
     current_state = 'WELCOME'
@@ -333,6 +336,37 @@ def show_canarias_info(update, context):
     return INFO_CANARIAS
 
 
+def show_cantabria_info(update, context):
+    global current_state, current_autonomy
+
+    username = update.callback_query.message.chat.username
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='cantabria_increment'),
+         InlineKeyboardButton("Casos acumulados", callback_data='cantabria_cumulative'),
+         InlineKeyboardButton("Fallecimientos", callback_data='cantabria_death')],
+
+        [InlineKeyboardButton("Hospitalizaciones", callback_data='cantabria_hospital'),
+         InlineKeyboardButton("Ver todo", callback_data='cantabria_all'),
+         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    message.reply_photo(
+        photo=open('./img/mapa_cantabria.png', 'rb')
+    )
+
+    message.reply_text(
+        text="{} elige los datos que quieres consultar.".format(username),
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_CANTABRIA"
+    current_autonomy = "Cantabria"
+    return INFO_CANTABRIA
+
+
 def show_increment(update, context):
     global current_state, current_autonomy
 
@@ -356,17 +390,17 @@ def show_increment(update, context):
     # )
 
     message.reply_text(
-        text = "Incremento de casos en {}\n\n"
-               "\t - Casos acumulados: <b>{}</b>.\n"
-               "\t - Incremento de casos últimas 24h: <b>{}</b>.\n"
-               "\t - Media del incremento de casos semanal: <b>{}</b>.\n\n"
-               "Información actualizada a {}.\n"
-               "<b>Los datos pueden tardar unos días en consolidarse y "
-               "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
-                                                                           casos_acumulados(current_autonomy),
-                                                                           incremento_ultimo_dia(current_autonomy),
-                                                                           media_casos_semana(current_autonomy),
-                                                                           format_date(fecha_actualizacion(current_autonomy))),
+        text="Incremento de casos en {}\n\n"
+             "\t - Casos acumulados: <b>{}</b>.\n"
+             "\t - Incremento de casos últimas 24h: <b>{}</b>.\n"
+             "\t - Media del incremento de casos semanal: <b>{}</b>.\n\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
+                                                                         casos_acumulados(current_autonomy),
+                                                                         incremento_ultimo_dia(current_autonomy),
+                                                                         media_casos_semana(current_autonomy),
+                                                                         format_date(fecha_actualizacion(current_autonomy))),
         parse_mode='HTML',
         reply_markup=reply_markup
     )
@@ -397,13 +431,13 @@ def show_cumulative(update, context):
     # )
 
     message.reply_text(
-        text = "Incremento de casos en {}\n\n"
-               "\t - Casos acumulados: <b>{}</b>.\n\n"
-               "Información actualizada a {}.\n"
-               "<b>Los datos pueden tardar unos días en consolidarse y "
-               "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
-                                                                           casos_acumulados(current_autonomy),
-                                                                           format_date(fecha_actualizacion(current_autonomy))),
+        text="Incremento de casos en {}\n\n"
+             "\t - Casos acumulados: <b>{}</b>.\n\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
+                                                                         casos_acumulados(current_autonomy),
+                                                                         format_date(fecha_actualizacion(current_autonomy))),
         parse_mode='HTML',
         reply_markup=reply_markup
     )
@@ -434,19 +468,19 @@ def show_death(update, context):
     # )
 
     message.reply_text(
-        text = "Evolución de fallecimientos en {}\n\n"
-               "\t - Fallecimientos totales: <b>{}</b>.\n"
-               "\t - Fallecidos últimas 24h: <b>{}</b>.\n"
-               "\t - Media fallecimientos semanal: <b>{}</b>.\n"
-               "\t - Tasa de letalidad: <b>{}</b>.\n\n"
-               "Información actualizada a {}.\n"
-               "<b>Los datos pueden tardar unos días en consolidarse y "
-               "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
-                                                                           muertes_totales(current_autonomy),
-                                                                           muertes_ultimo_dia(current_autonomy),
-                                                                           media_muertes_semana(current_autonomy),
-                                                                           tasa_letalidad(current_autonomy),
-                                                                           format_date(fecha_actualizacion_muertes(current_autonomy))),
+        text="Evolución de fallecimientos en {}\n\n"
+             "\t - Fallecimientos totales: <b>{}</b>.\n"
+             "\t - Fallecidos últimas 24h: <b>{}</b>.\n"
+             "\t - Media fallecimientos semanal: <b>{}</b>.\n"
+             "\t - Tasa de letalidad: <b>{}</b>.\n\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
+                                                                         muertes_totales(current_autonomy),
+                                                                         muertes_ultimo_dia(current_autonomy),
+                                                                         media_muertes_semana(current_autonomy),
+                                                                         tasa_letalidad(current_autonomy),
+                                                                         format_date(fecha_actualizacion_muertes())),
         parse_mode='HTML',
         reply_markup=reply_markup
     )
@@ -477,23 +511,23 @@ def show_hospital(update, context):
     # )
 
     message.reply_text(
-        text = "Datos de hospitalización por COVID en {}\n\n"
-               "\t - Pacientes ingresados actualmente: <b>{}</b>.\n"
-               "\t - Camas ocupadas actualmente (%): <b>{}</b>.\n"
-               "\t - Pacientes ingresados en UCI actualmente: <b>{}</b>.\n"
-               "\t - Camas ocupadas en UCI actualmente (%): <b>{}</b>.\n"
-               "\t - Pacientes ingresados últimas 24h: <b>{}</b>.\n"
-               "\t - Pacientes dados de alta últimas 24h: <b>{}</b>.\n\n"
-               "Información actualizada a {}.\n"
-               "<b>Los datos pueden tardar unos días en consolidarse y "
-               "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
-                                                                           pacientes_ingresados(current_autonomy),
-                                                                           porcentaje_camas_ocupadas(current_autonomy),
-                                                                           pacientes_ingresados_uci(current_autonomy),
-                                                                           porcentaje_camas_uci_ocupadas(current_autonomy),
-                                                                           ingresados_ultimo_dia(current_autonomy),
-                                                                           altas_ultimo_dia(current_autonomy),
-                                                                           format_date(fecha_actualizacion_hospital(current_autonomy))),
+        text="Datos de hospitalización por COVID en {}\n\n"
+             "\t - Pacientes ingresados actualmente: <b>{}</b>.\n"
+             "\t - Camas ocupadas actualmente (%): <b>{}</b>.\n"
+             "\t - Pacientes ingresados en UCI actualmente: <b>{}</b>.\n"
+             "\t - Camas ocupadas en UCI actualmente (%): <b>{}</b>.\n"
+             "\t - Pacientes ingresados últimas 24h: <b>{}</b>.\n"
+             "\t - Pacientes dados de alta últimas 24h: <b>{}</b>.\n\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
+                                                                         pacientes_ingresados(current_autonomy),
+                                                                         porcentaje_camas_ocupadas(current_autonomy),
+                                                                         pacientes_ingresados_uci(current_autonomy),
+                                                                         porcentaje_camas_uci_ocupadas(current_autonomy),
+                                                                         ingresados_ultimo_dia(current_autonomy),
+                                                                         altas_ultimo_dia(current_autonomy),
+                                                                         format_date(fecha_actualizacion_hospital(current_autonomy))),
         parse_mode='HTML',
         reply_markup=reply_markup
     )
@@ -570,7 +604,7 @@ def show_all_info(update, context):
                                                                          muertes_ultimo_dia(current_autonomy),
                                                                          media_muertes_semana(current_autonomy),
                                                                          tasa_letalidad(current_autonomy),
-                                                                         format_date(fecha_actualizacion_muertes(current_autonomy))),
+                                                                         format_date(fecha_actualizacion_muertes())),
         parse_mode='HTML',
     )
 
@@ -758,27 +792,57 @@ def show_canarias_all(update, context):
     return INFO_CANARIAS_ALL
 
 
+# CANTABRIA
+def show_cantabria_increment(update, context):
+    show_increment(update, context)
+
+    return INFO_CANTABRIA_INCREMENT
+
+
+def show_cantabria_cumulative(update, context):
+    show_cumulative(update, context)
+
+    return INFO_CANTABRIA_CUMULATIVE
+
+
+def show_cantabria_death(update, context):
+    show_death(update, context)
+
+    return INFO_CANTABRIA_DEATH
+
+
+def show_cantabria_hospital(update, context):
+    show_hospital(update, context)
+
+    return INFO_CANTABRIA_HOSPITAL
+
+
+def show_cantabria_all(update, context):
+    show_all_info(update, context)
+
+    return INFO_CANTABRIA_ALL
+
+
 def show_info(update, context):
     global current_state
-
-    username = update.message.chat.username
 
     update.message.reply_text(
         text="Este proyecto ha sido desarrollado como Trabajo Fin de Grado\n\n"
              "Este proyecto cuenta con una licencia AGPL, por lo que podeis usarlo si os es útil\n\n"
              "<b>Fuentes de datos</b>\n"
-             "Fuentes de datos para España y sus provincias de <a href='https://github.com/datadista/datasets/'>Datadista</a>\n\n"
+             "Fuentes de datos para España y sus provincias de "
+             "<a href='https://github.com/datadista/datasets/'>Datadista</a>\n\n"
              "<b>Contacto</b>\n"
              "Puedes ponerte en contacto con el desarrollador @JmZero\n\n"
              "<b>Código Fuente</b>\n"
-             "<a href='https://github.com/JmZero/TFG_Covid-19_reports'>Covid-19 Reports</a>\n\n"
-        ,
+             "<a href='https://github.com/JmZero/TFG_Covid-19_reports'>Covid-19 Reports</a>\n\n",
         parse_mode='HTML',
         disable_web_page_preview=True
     )
 
     current_state = "STATUS_INFO"
     return STATUS_INFO
+
 
 def usuario_pulsa_boton_anterior(update, context):
     update.callback_query.message.reply_text(
@@ -825,7 +889,8 @@ def main():
     updater = Updater(TOKEN)
 
     conv_handler = ConversationHandler(entry_points=[CommandHandler('start', start_handler),
-                                                     MessageHandler(Filters.text & (~Filters.command), any_message_start)],
+                                                     MessageHandler(Filters.text & (~Filters.command),
+                                                                    any_message_start)],
                                        states={
                                            WELCOME: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -851,7 +916,7 @@ def main():
                                                CallbackQueryHandler(show_asturias_info, pattern='asturias_info'),
                                                CallbackQueryHandler(show_cvalenciana_info, pattern='cvalenciana_info'),
                                                CallbackQueryHandler(show_canarias_info, pattern='canarias_info'),
-                                               # CallbackQueryHandler(show_cantabria_info, pattern='cantabria_info'),
+                                               CallbackQueryHandler(show_cantabria_info, pattern='cantabria_info'),
                                                # CallbackQueryHandler(show_castillalamancha_info, pattern='castillalamancha_info'),
                                                # CallbackQueryHandler(show_castillayleon_info, pattern='castillayleon_info'),
                                                # CallbackQueryHandler(show_cataluña_info, pattern='cataluña_info'),
@@ -865,7 +930,8 @@ def main():
                                                # CallbackQueryHandler(show_murcia_info, pattern='murcia_info'),
                                                # CallbackQueryHandler(show_navarra_info, pattern='navarra_info'),
                                                # CallbackQueryHandler(show_paisvasco_info, pattern='paisvasco_info'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            HELP: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -886,133 +952,194 @@ def main():
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_andalucia_increment, pattern='andalucia_increment'),
-                                               CallbackQueryHandler(show_andalucia_cumulative, pattern='andalucia_cumulative'),
-                                               CallbackQueryHandler(show_andalucia_death, pattern='andalucia_death'),
-                                               CallbackQueryHandler(show_andalucia_hospital, pattern='andalucia_hospital'),
-                                               CallbackQueryHandler(show_andalucia_all, pattern='andalucia_all'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_andalucia_increment,
+                                                                    pattern='andalucia_increment'),
+                                               CallbackQueryHandler(show_andalucia_cumulative,
+                                                                    pattern='andalucia_cumulative'),
+                                               CallbackQueryHandler(show_andalucia_death,
+                                                                    pattern='andalucia_death'),
+                                               CallbackQueryHandler(show_andalucia_hospital,
+                                                                    pattern='andalucia_hospital'),
+                                               CallbackQueryHandler(show_andalucia_all,
+                                                                    pattern='andalucia_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ANDALUCIA_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_andalucia_cumulative, pattern='andalucia_cumulative'),
-                                               CallbackQueryHandler(show_andalucia_death, pattern='andalucia_death'),
-                                               CallbackQueryHandler(show_andalucia_hospital, pattern='andalucia_hospital'),
-                                               CallbackQueryHandler(show_andalucia_all, pattern='andalucia_all'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_andalucia_cumulative,
+                                                                    pattern='andalucia_cumulative'),
+                                               CallbackQueryHandler(show_andalucia_death,
+                                                                    pattern='andalucia_death'),
+                                               CallbackQueryHandler(show_andalucia_hospital,
+                                                                    pattern='andalucia_hospital'),
+                                               CallbackQueryHandler(show_andalucia_all,
+                                                                    pattern='andalucia_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ANDALUCIA_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_andalucia_increment,pattern='andalucia_increment'),
-                                               CallbackQueryHandler(show_andalucia_death, pattern='andalucia_death'),
-                                               CallbackQueryHandler(show_andalucia_hospital, pattern='andalucia_hospital'),
-                                               CallbackQueryHandler(show_andalucia_all, pattern='andalucia_all'),
-                                               CallbackQueryHandler(show_not_implemented,  pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_andalucia_increment,
+                                                                    pattern='andalucia_increment'),
+                                               CallbackQueryHandler(show_andalucia_death,
+                                                                    pattern='andalucia_death'),
+                                               CallbackQueryHandler(show_andalucia_hospital,
+                                                                    pattern='andalucia_hospital'),
+                                               CallbackQueryHandler(show_andalucia_all,
+                                                                    pattern='andalucia_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ANDALUCIA_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_andalucia_increment, pattern='andalucia_increment'),
-                                               CallbackQueryHandler(show_andalucia_cumulative, pattern='andalucia_cumulative'),
-                                               CallbackQueryHandler(show_andalucia_hospital, pattern='andalucia_hospital'),
-                                               CallbackQueryHandler(show_andalucia_all, pattern='andalucia_all'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_andalucia_increment,
+                                                                    pattern='andalucia_increment'),
+                                               CallbackQueryHandler(show_andalucia_cumulative,
+                                                                    pattern='andalucia_cumulative'),
+                                               CallbackQueryHandler(show_andalucia_hospital,
+                                                                    pattern='andalucia_hospital'),
+                                               CallbackQueryHandler(show_andalucia_all,
+                                                                    pattern='andalucia_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ANDALUCIA_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_andalucia_increment, pattern='andalucia_increment'),
-                                               CallbackQueryHandler(show_andalucia_cumulative, pattern='andalucia_cumulative'),
-                                               CallbackQueryHandler(show_andalucia_death, pattern='andalucia_death'),
-                                               CallbackQueryHandler(show_andalucia_all, pattern='andalucia_all'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_andalucia_increment,
+                                                                    pattern='andalucia_increment'),
+                                               CallbackQueryHandler(show_andalucia_cumulative,
+                                                                    pattern='andalucia_cumulative'),
+                                               CallbackQueryHandler(show_andalucia_death,
+                                                                    pattern='andalucia_death'),
+                                               CallbackQueryHandler(show_andalucia_all,
+                                                                    pattern='andalucia_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ANDALUCIA_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_andalucia_increment, pattern='andalucia_increment'),
-                                               CallbackQueryHandler(show_andalucia_cumulative, pattern='andalucia_cumulative'),
-                                               CallbackQueryHandler(show_andalucia_death, pattern='andalucia_death'),
-                                               CallbackQueryHandler(show_andalucia_hospital, pattern='andalucia_hospital'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_andalucia_increment,
+                                                                    pattern='andalucia_increment'),
+                                               CallbackQueryHandler(show_andalucia_cumulative,
+                                                                    pattern='andalucia_cumulative'),
+                                               CallbackQueryHandler(show_andalucia_death,
+                                                                    pattern='andalucia_death'),
+                                               CallbackQueryHandler(show_andalucia_hospital,
+                                                                    pattern='andalucia_hospital'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ARAGON: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_aragon_increment, pattern='aragon_increment'),
-                                               CallbackQueryHandler(show_aragon_cumulative, pattern='aragon_cumulative'),
-                                               CallbackQueryHandler(show_aragon_death, pattern='aragon_death'),
-                                               CallbackQueryHandler(show_aragon_hospital, pattern='aragon_hospital'),
-                                               CallbackQueryHandler(show_aragon_all, pattern='aragon_all'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_aragon_increment,
+                                                                    pattern='aragon_increment'),
+                                               CallbackQueryHandler(show_aragon_cumulative,
+                                                                    pattern='aragon_cumulative'),
+                                               CallbackQueryHandler(show_aragon_death,
+                                                                    pattern='aragon_death'),
+                                               CallbackQueryHandler(show_aragon_hospital,
+                                                                    pattern='aragon_hospital'),
+                                               CallbackQueryHandler(show_aragon_all,
+                                                                    pattern='aragon_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ARAGON_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_aragon_cumulative, pattern='aragon_cumulative'),
-                                               CallbackQueryHandler(show_aragon_death, pattern='aragon_death'),
-                                               CallbackQueryHandler(show_aragon_hospital, pattern='aragon_hospital'),
-                                               CallbackQueryHandler(show_aragon_all, pattern='aragon_all'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_aragon_cumulative,
+                                                                    pattern='aragon_cumulative'),
+                                               CallbackQueryHandler(show_aragon_death,
+                                                                    pattern='aragon_death'),
+                                               CallbackQueryHandler(show_aragon_hospital,
+                                                                    pattern='aragon_hospital'),
+                                               CallbackQueryHandler(show_aragon_all,
+                                                                    pattern='aragon_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ARAGON_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_aragon_increment, pattern='aragon_increment'),
-                                               CallbackQueryHandler(show_aragon_death, pattern='aragon_death'),
-                                               CallbackQueryHandler(show_aragon_hospital, pattern='aragon_hospital'),
-                                               CallbackQueryHandler(show_aragon_all, pattern='aragon_all'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_aragon_increment,
+                                                                    pattern='aragon_increment'),
+                                               CallbackQueryHandler(show_aragon_death,
+                                                                    pattern='aragon_death'),
+                                               CallbackQueryHandler(show_aragon_hospital,
+                                                                    pattern='aragon_hospital'),
+                                               CallbackQueryHandler(show_aragon_all,
+                                                                    pattern='aragon_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ARAGON_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_aragon_increment, pattern='aragon_increment'),
-                                               CallbackQueryHandler(show_aragon_cumulative, pattern='aragon_cumulative'),
-                                               CallbackQueryHandler(show_aragon_hospital, pattern='aragon_hospital'),
-                                               CallbackQueryHandler(show_aragon_all, pattern='aragon_all'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_aragon_increment,
+                                                                    pattern='aragon_increment'),
+                                               CallbackQueryHandler(show_aragon_cumulative,
+                                                                    pattern='aragon_cumulative'),
+                                               CallbackQueryHandler(show_aragon_hospital,
+                                                                    pattern='aragon_hospital'),
+                                               CallbackQueryHandler(show_aragon_all,
+                                                                    pattern='aragon_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ARAGON_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_aragon_increment, pattern='aragon_increment'),
-                                               CallbackQueryHandler(show_aragon_cumulative, pattern='aragon_cumulative'),
-                                               CallbackQueryHandler(show_aragon_death, pattern='aragon_death'),
-                                               CallbackQueryHandler(show_aragon_all, pattern='aragon_all'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_aragon_increment,
+                                                                    pattern='aragon_increment'),
+                                               CallbackQueryHandler(show_aragon_cumulative,
+                                                                    pattern='aragon_cumulative'),
+                                               CallbackQueryHandler(show_aragon_death,
+                                                                    pattern='aragon_death'),
+                                               CallbackQueryHandler(show_aragon_all,
+                                                                    pattern='aragon_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ARAGON_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_aragon_increment, pattern='aragon_increment'),
-                                               CallbackQueryHandler(show_aragon_cumulative, pattern='aragon_cumulative'),
-                                               CallbackQueryHandler(show_aragon_death, pattern='aragon_death'),
-                                               CallbackQueryHandler(show_aragon_hospital, pattern='aragon_hospital'),
+                                               CallbackQueryHandler(show_aragon_increment,
+                                                                    pattern='aragon_increment'),
+                                               CallbackQueryHandler(show_aragon_cumulative,
+                                                                    pattern='aragon_cumulative'),
+                                               CallbackQueryHandler(show_aragon_death,
+                                                                    pattern='aragon_death'),
+                                               CallbackQueryHandler(show_aragon_hospital,
+                                                                    pattern='aragon_hospital'),
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
@@ -1021,78 +1148,114 @@ def main():
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_asturias_increment, pattern='asturias_increment'),
-                                               CallbackQueryHandler(show_asturias_cumulative, pattern='asturias_cumulative'),
-                                               CallbackQueryHandler(show_asturias_death, pattern='asturias_death'),
-                                               CallbackQueryHandler(show_asturias_hospital, pattern='asturias_hospital'),
-                                               CallbackQueryHandler(show_asturias_all, pattern='asturias_all'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_asturias_increment,
+                                                                    pattern='asturias_increment'),
+                                               CallbackQueryHandler(show_asturias_cumulative,
+                                                                    pattern='asturias_cumulative'),
+                                               CallbackQueryHandler(show_asturias_death,
+                                                                    pattern='asturias_death'),
+                                               CallbackQueryHandler(show_asturias_hospital,
+                                                                    pattern='asturias_hospital'),
+                                               CallbackQueryHandler(show_asturias_all,
+                                                                    pattern='asturias_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ASTURIAS_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_asturias_cumulative, pattern='asturias_cumulative'),
-                                               CallbackQueryHandler(show_asturias_death, pattern='asturias_death'),
-                                               CallbackQueryHandler(show_asturias_hospital, pattern='asturias_hospital'),
-                                               CallbackQueryHandler(show_asturias_all, pattern='asturias_all'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_asturias_cumulative,
+                                                                    pattern='asturias_cumulative'),
+                                               CallbackQueryHandler(show_asturias_death,
+                                                                    pattern='asturias_death'),
+                                               CallbackQueryHandler(show_asturias_hospital,
+                                                                    pattern='asturias_hospital'),
+                                               CallbackQueryHandler(show_asturias_all,
+                                                                    pattern='asturias_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ASTURIAS_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_asturias_increment, pattern='asturias_increment'),
-                                               CallbackQueryHandler(show_asturias_death, pattern='asturias_death'),
-                                               CallbackQueryHandler(show_asturias_hospital, pattern='asturias_hospital'),
-                                               CallbackQueryHandler(show_asturias_all, pattern='asturias_all'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_asturias_increment,
+                                                                    pattern='asturias_increment'),
+                                               CallbackQueryHandler(show_asturias_death,
+                                                                    pattern='asturias_death'),
+                                               CallbackQueryHandler(show_asturias_hospital,
+                                                                    pattern='asturias_hospital'),
+                                               CallbackQueryHandler(show_asturias_all,
+                                                                    pattern='asturias_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ASTURIAS_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_asturias_increment, pattern='asturias_increment'),
-                                               CallbackQueryHandler(show_asturias_cumulative, pattern='asturias_cumulative'),
-                                               CallbackQueryHandler(show_asturias_hospital, pattern='asturias_hospital'),
-                                               CallbackQueryHandler(show_asturias_all, pattern='asturias_all'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_asturias_increment,
+                                                                    pattern='asturias_increment'),
+                                               CallbackQueryHandler(show_asturias_cumulative,
+                                                                    pattern='asturias_cumulative'),
+                                               CallbackQueryHandler(show_asturias_hospital,
+                                                                    pattern='asturias_hospital'),
+                                               CallbackQueryHandler(show_asturias_all,
+                                                                    pattern='asturias_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ASTURIAS_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_asturias_increment, pattern='asturias_increment'),
-                                               CallbackQueryHandler(show_asturias_cumulative, pattern='asturias_cumulative'),
-                                               CallbackQueryHandler(show_asturias_death, pattern='asturias_death'),
-                                               CallbackQueryHandler(show_asturias_all, pattern='asturias_all'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_asturias_increment,
+                                                                    pattern='asturias_increment'),
+                                               CallbackQueryHandler(show_asturias_cumulative,
+                                                                    pattern='asturias_cumulative'),
+                                               CallbackQueryHandler(show_asturias_death,
+                                                                    pattern='asturias_death'),
+                                               CallbackQueryHandler(show_asturias_all,
+                                                                    pattern='asturias_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ASTURIAS_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_asturias_increment, pattern='asturias_increment'),
-                                               CallbackQueryHandler(show_asturias_cumulative, pattern='asturias_cumulative'),
-                                               CallbackQueryHandler(show_asturias_death, pattern='asturias_death'),
-                                               CallbackQueryHandler(show_asturias_hospital, pattern='asturias_hospital'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_asturias_increment,
+                                                                    pattern='asturias_increment'),
+                                               CallbackQueryHandler(show_asturias_cumulative,
+                                                                    pattern='asturias_cumulative'),
+                                               CallbackQueryHandler(show_asturias_death,
+                                                                    pattern='asturias_death'),
+                                               CallbackQueryHandler(show_asturias_hospital,
+                                                                    pattern='asturias_hospital'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CVALENCIANA: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_cvalenciana_increment, pattern='cvalenciana_increment'),
-                                               CallbackQueryHandler(show_cvalenciana_cumulative, pattern='cvalenciana_cumulative'),
-                                               CallbackQueryHandler(show_cvalenciana_death, pattern='cvalenciana_death'),
-                                               CallbackQueryHandler(show_cvalenciana_hospital, pattern='cvalenciana_hospital'),
-                                               CallbackQueryHandler(show_cvalenciana_all, pattern='cvalenciana_all'),
+                                               CallbackQueryHandler(show_cvalenciana_increment,
+                                                                    pattern='cvalenciana_increment'),
+                                               CallbackQueryHandler(show_cvalenciana_cumulative,
+                                                                    pattern='cvalenciana_cumulative'),
+                                               CallbackQueryHandler(show_cvalenciana_death,
+                                                                    pattern='cvalenciana_death'),
+                                               CallbackQueryHandler(show_cvalenciana_hospital,
+                                                                    pattern='cvalenciana_hospital'),
+                                               CallbackQueryHandler(show_cvalenciana_all,
+                                                                    pattern='cvalenciana_all'),
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
@@ -1101,161 +1264,366 @@ def main():
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_cvalenciana_cumulative, pattern='cvalenciana_cumulative'),
-                                               CallbackQueryHandler(show_cvalenciana_death, pattern='cvalenciana_death'),
-                                               CallbackQueryHandler(show_cvalenciana_hospital, pattern='cvalenciana_hospital'),
-                                               CallbackQueryHandler(show_cvalenciana_all, pattern='cvalenciana_all'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_cvalenciana_cumulative,
+                                                                    pattern='cvalenciana_cumulative'),
+                                               CallbackQueryHandler(show_cvalenciana_death,
+                                                                    pattern='cvalenciana_death'),
+                                               CallbackQueryHandler(show_cvalenciana_hospital,
+                                                                    pattern='cvalenciana_hospital'),
+                                               CallbackQueryHandler(show_cvalenciana_all,
+                                                                    pattern='cvalenciana_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CVALENCIANA_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_cvalenciana_increment, pattern='cvalenciana_increment'),
-                                               CallbackQueryHandler(show_cvalenciana_death, pattern='cvalenciana_death'),
-                                               CallbackQueryHandler(show_cvalenciana_hospital, pattern='cvalenciana_hospital'),
-                                               CallbackQueryHandler(show_cvalenciana_all, pattern='cvalenciana_all'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_cvalenciana_increment,
+                                                                    pattern='cvalenciana_increment'),
+                                               CallbackQueryHandler(show_cvalenciana_death,
+                                                                    pattern='cvalenciana_death'),
+                                               CallbackQueryHandler(show_cvalenciana_hospital,
+                                                                    pattern='cvalenciana_hospital'),
+                                               CallbackQueryHandler(show_cvalenciana_all,
+                                                                    pattern='cvalenciana_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CVALENCIANA_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_cvalenciana_increment, pattern='cvalenciana_increment'),
-                                               CallbackQueryHandler(show_cvalenciana_cumulative, pattern='cvalenciana_cumulative'),
-                                               CallbackQueryHandler(show_cvalenciana_hospital, pattern='cvalenciana_hospital'),
-                                               CallbackQueryHandler(show_cvalenciana_all, pattern='cvalenciana_all'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_cvalenciana_increment,
+                                                                    pattern='cvalenciana_increment'),
+                                               CallbackQueryHandler(show_cvalenciana_cumulative,
+                                                                    pattern='cvalenciana_cumulative'),
+                                               CallbackQueryHandler(show_cvalenciana_hospital,
+                                                                    pattern='cvalenciana_hospital'),
+                                               CallbackQueryHandler(show_cvalenciana_all,
+                                                                    pattern='cvalenciana_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CVALENCIANA_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_cvalenciana_increment, pattern='cvalenciana_increment'),
-                                               CallbackQueryHandler(show_cvalenciana_cumulative, pattern='cvalenciana_cumulative'),
-                                               CallbackQueryHandler(show_cvalenciana_death, pattern='cvalenciana_death'),
-                                               CallbackQueryHandler(show_cvalenciana_all, pattern='cvalenciana_all'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_cvalenciana_increment,
+                                                                    pattern='cvalenciana_increment'),
+                                               CallbackQueryHandler(show_cvalenciana_cumulative,
+                                                                    pattern='cvalenciana_cumulative'),
+                                               CallbackQueryHandler(show_cvalenciana_death,
+                                                                    pattern='cvalenciana_death'),
+                                               CallbackQueryHandler(show_cvalenciana_all,
+                                                                    pattern='cvalenciana_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CVALENCIANA_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_cvalenciana_increment, pattern='cvalenciana_increment'),
-                                               CallbackQueryHandler(show_cvalenciana_cumulative, pattern='cvalenciana_cumulative'),
-                                               CallbackQueryHandler(show_cvalenciana_death, pattern='cvalenciana_death'),
-                                               CallbackQueryHandler(show_cvalenciana_hospital, pattern='cvalenciana_hospital'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_cvalenciana_increment,
+                                                                    pattern='cvalenciana_increment'),
+                                               CallbackQueryHandler(show_cvalenciana_cumulative,
+                                                                    pattern='cvalenciana_cumulative'),
+                                               CallbackQueryHandler(show_cvalenciana_death,
+                                                                    pattern='cvalenciana_death'),
+                                               CallbackQueryHandler(show_cvalenciana_hospital,
+                                                                    pattern='cvalenciana_hospital'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CANARIAS: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_canarias_increment, pattern='canarias_increment'),
-                                               CallbackQueryHandler(show_canarias_cumulative, pattern='canarias_cumulative'),
-                                               CallbackQueryHandler(show_canarias_death, pattern='canarias_death'),
-                                               CallbackQueryHandler(show_canarias_hospital, pattern='canarias_hospital'),
-                                               CallbackQueryHandler(show_canarias_all, pattern='canarias_all'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_canarias_increment,
+                                                                    pattern='canarias_increment'),
+                                               CallbackQueryHandler(show_canarias_cumulative,
+                                                                    pattern='canarias_cumulative'),
+                                               CallbackQueryHandler(show_canarias_death,
+                                                                    pattern='canarias_death'),
+                                               CallbackQueryHandler(show_canarias_hospital,
+                                                                    pattern='canarias_hospital'),
+                                               CallbackQueryHandler(show_canarias_all,
+                                                                    pattern='canarias_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CANARIAS_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_canarias_cumulative, pattern='canarias_cumulative'),
-                                               CallbackQueryHandler(show_canarias_death, pattern='canarias_death'),
-                                               CallbackQueryHandler(show_canarias_hospital, pattern='canarias_hospital'),
-                                               CallbackQueryHandler(show_canarias_all, pattern='canarias_all'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_canarias_cumulative,
+                                                                    pattern='canarias_cumulative'),
+                                               CallbackQueryHandler(show_canarias_death,
+                                                                    pattern='canarias_death'),
+                                               CallbackQueryHandler(show_canarias_hospital,
+                                                                    pattern='canarias_hospital'),
+                                               CallbackQueryHandler(show_canarias_all,
+                                                                    pattern='canarias_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CANARIAS_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_canarias_increment, pattern='canarias_increment'),
-                                               CallbackQueryHandler(show_canarias_death, pattern='canarias_death'),
-                                               CallbackQueryHandler(show_canarias_hospital, pattern='canarias_hospital'),
-                                               CallbackQueryHandler(show_canarias_all, pattern='canarias_all'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_canarias_increment,
+                                                                    pattern='canarias_increment'),
+                                               CallbackQueryHandler(show_canarias_death,
+                                                                    pattern='canarias_death'),
+                                               CallbackQueryHandler(show_canarias_hospital,
+                                                                    pattern='canarias_hospital'),
+                                               CallbackQueryHandler(show_canarias_all,
+                                                                    pattern='canarias_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CANARIAS_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_canarias_increment, pattern='canarias_increment'),
-                                               CallbackQueryHandler(show_canarias_cumulative, pattern='canarias_cumulative'),
-                                               CallbackQueryHandler(show_canarias_hospital, pattern='canarias_hospital'),
-                                               CallbackQueryHandler(show_canarias_all, pattern='canarias_all'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_canarias_increment,
+                                                                    pattern='canarias_increment'),
+                                               CallbackQueryHandler(show_canarias_cumulative,
+                                                                    pattern='canarias_cumulative'),
+                                               CallbackQueryHandler(show_canarias_hospital,
+                                                                    pattern='canarias_hospital'),
+                                               CallbackQueryHandler(show_canarias_all,
+                                                                    pattern='canarias_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CANARIAS_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_canarias_increment, pattern='canarias_increment'),
-                                               CallbackQueryHandler(show_canarias_cumulative, pattern='canarias_cumulative'),
-                                               CallbackQueryHandler(show_canarias_death, pattern='canarias_death'),
-                                               CallbackQueryHandler(show_canarias_all, pattern='canarias_all'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_canarias_increment,
+                                                                    pattern='canarias_increment'),
+                                               CallbackQueryHandler(show_canarias_cumulative,
+                                                                    pattern='canarias_cumulative'),
+                                               CallbackQueryHandler(show_canarias_death,
+                                                                    pattern='canarias_death'),
+                                               CallbackQueryHandler(show_canarias_all,
+                                                                    pattern='canarias_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CANARIAS_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_canarias_increment, pattern='canarias_increment'),
-                                               CallbackQueryHandler(show_canarias_cumulative, pattern='canarias_cumulative'),
-                                               CallbackQueryHandler(show_canarias_death, pattern='canarias_death'),
-                                               CallbackQueryHandler(show_canarias_hospital, pattern='canarias_hospital'),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_canarias_increment,
+                                                                    pattern='canarias_increment'),
+                                               CallbackQueryHandler(show_canarias_cumulative,
+                                                                    pattern='canarias_cumulative'),
+                                               CallbackQueryHandler(show_canarias_death,
+                                                                    pattern='canarias_death'),
+                                               CallbackQueryHandler(show_canarias_hospital,
+                                                                    pattern='canarias_hospital'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CANTABRIA: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_cantabria_increment,
+                                                                    pattern='cantabria_increment'),
+                                               CallbackQueryHandler(show_cantabria_cumulative,
+                                                                    pattern='cantabria_cumulative'),
+                                               CallbackQueryHandler(show_cantabria_death,
+                                                                    pattern='cantabria_death'),
+                                               CallbackQueryHandler(show_cantabria_hospital,
+                                                                    pattern='cantabria_hospital'),
+                                               CallbackQueryHandler(show_cantabria_all,
+                                                                    pattern='cantabria_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CANTABRIA_INCREMENT: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_cantabria_cumulative,
+                                                                    pattern='cantabria_cumulative'),
+                                               CallbackQueryHandler(show_cantabria_death,
+                                                                    pattern='cantabria_death'),
+                                               CallbackQueryHandler(show_cantabria_hospital,
+                                                                    pattern='cantabria_hospital'),
+                                               CallbackQueryHandler(show_cantabria_all,
+                                                                    pattern='cantabria_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CANTABRIA_CUMULATIVE: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_cantabria_increment,
+                                                                    pattern='cantabria_increment'),
+                                               CallbackQueryHandler(show_cantabria_death,
+                                                                    pattern='cantabria_death'),
+                                               CallbackQueryHandler(show_cantabria_hospital,
+                                                                    pattern='cantabria_hospital'),
+                                               CallbackQueryHandler(show_cantabria_all,
+                                                                    pattern='cantabria_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CANTABRIA_DEATH: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_cantabria_increment,
+                                                                    pattern='cantabria_increment'),
+                                               CallbackQueryHandler(show_cantabria_cumulative,
+                                                                    pattern='cantabria_cumulative'),
+                                               CallbackQueryHandler(show_cantabria_hospital,
+                                                                    pattern='cantabria_hospital'),
+                                               CallbackQueryHandler(show_cantabria_all,
+                                                                    pattern='cantabria_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CANTABRIA_HOSPITAL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_cantabria_increment,
+                                                                    pattern='cantabria_increment'),
+                                               CallbackQueryHandler(show_cantabria_cumulative,
+                                                                    pattern='cantabria_cumulative'),
+                                               CallbackQueryHandler(show_cantabria_death,
+                                                                    pattern='cantabria_death'),
+                                               CallbackQueryHandler(show_cantabria_all,
+                                                                    pattern='cantabria_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CANTABRIA_ALL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_cantabria_increment,
+                                                                    pattern='cantabria_increment'),
+                                               CallbackQueryHandler(show_cantabria_cumulative,
+                                                                    pattern='cantabria_cumulative'),
+                                               CallbackQueryHandler(show_cantabria_death,
+                                                                    pattern='cantabria_death'),
+                                               CallbackQueryHandler(show_cantabria_hospital,
+                                                                    pattern='cantabria_hospital'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            NOT_IMPLEMENTED: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_inicio, pattern='start_menu')
+                                               CallbackQueryHandler(show_inicio,
+                                                                    pattern='start_menu')
                                            ]
                                        },
                                        fallbacks=[
                                            CommandHandler('start', start_handler),
                                            CommandHandler('help', help_handler),
                                            CommandHandler('info', show_info),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='start_menu'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='andalucia_info'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='andalucia_increment'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='andalucia_cumulative'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='andalucia_death'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='andalucia_hospital'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='andalucia_all'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='aragon_info'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='aragon_increment'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='aragon_cumulative'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='aragon_death'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='aragon_hospital'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='aragon_all'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='asturias_info'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='asturias_increment'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='asturias_cumulative'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='asturias_death'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='asturias_hospital'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='asturias_all'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='cvalenciana_info'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,pattern='cvalenciana_increment'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,pattern='cvalenciana_cumulative'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='cvalenciana_death'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,pattern='cvalenciana_hospital'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='cvalencianas_all'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='show_not_implemented'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='start_menu'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='andalucia_info'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='andalucia_increment'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='andalucia_cumulative'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='andalucia_death'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='andalucia_hospital'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='andalucia_all'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='aragon_info'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='aragon_increment'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='aragon_cumulative'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='aragon_death'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='aragon_hospital'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='aragon_all'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='asturias_info'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='asturias_increment'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='asturias_cumulative'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='asturias_death'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='asturias_hospital'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='asturias_all'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='cvalenciana_info'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='cvalenciana_increment'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='cvalenciana_cumulative'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='cvalenciana_death'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='cvalenciana_hospital'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='cvalenciana_all'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='canarias_info'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='canarias_increment'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='canarias_cumulative'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='canarias_death'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='canarias_hospital'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='canarias_all'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='cantabria_info'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='cantabria_increment'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='cantabria_cumulative'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='cantabria_death'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='cantabria_hospital'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='cantabria_all'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='show_not_implemented'),
                                        ])
 
     updater.dispatcher.add_handler(conv_handler)
@@ -1264,15 +1632,17 @@ def main():
 
 
 ########################  FUNCIONALIDAD BBDD  ########################
-def format_date(date):
-    return datetime.strptime(date, "%Y-%m-%d").strftime("%d-%m-%Y")
+def format_date(fecha):
+    return datetime.strptime(fecha, "%Y-%m-%d").strftime("%d-%m-%Y")
+
 
 def casos_acumulados(provincia):
     return str(df_ccaa_casos.groupby(['ccaa'])['num_casos'].sum()[provincia])
 
 
 def incremento_ultimo_dia(provincia):
-    df_loc = df_ccaa_casos.loc[(df_ccaa_casos['fecha'] == fecha_actualizacion(provincia)) & (df_ccaa_casos['ccaa'] == provincia)]
+    df_loc = df_ccaa_casos.loc[(df_ccaa_casos['fecha'] == fecha_actualizacion(provincia)) &
+                               (df_ccaa_casos['ccaa'] == provincia)]
     return str(df_loc['num_casos'].values[0])
 
 
@@ -1285,7 +1655,8 @@ def media_casos_semana(provincia):
         fecha2 = fecha - timedelta(days=i)
         fecha_semana_antes = fecha2.strftime("%Y-%m-%d")
 
-        df_loc = df_ccaa_casos.loc[(df_ccaa_casos['fecha'] == fecha_semana_antes) & (df_ccaa_casos['ccaa'] == provincia)]
+        df_loc = df_ccaa_casos.loc[(df_ccaa_casos['fecha'] == fecha_semana_antes) &
+                                   (df_ccaa_casos['ccaa'] == provincia)]
         total += int(df_loc['num_casos'].values[0])
 
     return str(round(total/7, 1))
@@ -1298,16 +1669,18 @@ def fecha_actualizacion(provincia):
 
     # La primera fecha de la que se tiene datos
     while df_ccaa_casos.loc[df_ccaa_casos['fecha'] == str(actual_day-day_before)].empty:
-        dias_antes+=1
+        dias_antes += 1
         day_before = timedelta(days=dias_antes)
 
     # Los ultimos datos de la provincia
-    df_loc = df_ccaa_casos.loc[(df_ccaa_casos['fecha'] == str(actual_day-day_before)) & (df_ccaa_casos['ccaa'] == provincia)]
+    df_loc = df_ccaa_casos.loc[(df_ccaa_casos['fecha'] == str(actual_day-day_before)) &
+                               (df_ccaa_casos['ccaa'] == provincia)]
 
     while df_loc['num_casos'].values[0] == 0:
         dias_antes += 1
         day_before = timedelta(days=dias_antes)
-        df_loc = df_ccaa_casos.loc[(df_ccaa_casos['fecha'] == str(actual_day-day_before)) & (df_ccaa_casos['ccaa'] == provincia)]
+        df_loc = df_ccaa_casos.loc[(df_ccaa_casos['fecha'] == str(actual_day-day_before)) &
+                                   (df_ccaa_casos['ccaa'] == provincia)]
 
     return str(actual_day-day_before)
 
@@ -1317,12 +1690,13 @@ def muertes_totales(provincia):
 
 
 def muertes_ultimo_dia(provincia):
-    df_loc = df_ccaa_muertes.loc[(df_ccaa_muertes['Fecha'] == fecha_actualizacion_muertes(provincia)) & (df_ccaa_muertes['CCAA'] == provincia)]
+    df_loc = df_ccaa_muertes.loc[(df_ccaa_muertes['Fecha'] == fecha_actualizacion_muertes()) &
+                                 (df_ccaa_muertes['CCAA'] == provincia)]
     return str(df_loc['Fallecidos'].values[0])
 
 
 def media_muertes_semana(provincia):
-    ultima_fecha = fecha_actualizacion_muertes(provincia)
+    ultima_fecha = fecha_actualizacion_muertes()
     fecha = datetime.strptime(ultima_fecha, "%Y-%m-%d")
 
     total = 0
@@ -1330,17 +1704,18 @@ def media_muertes_semana(provincia):
         fecha2 = fecha - timedelta(days=i)
         fecha_semana_antes = fecha2.strftime("%Y-%m-%d")
 
-        df_loc = df_ccaa_muertes.loc[(df_ccaa_muertes['Fecha'] == fecha_semana_antes) & (df_ccaa_muertes['CCAA'] == provincia)]
+        df_loc = df_ccaa_muertes.loc[(df_ccaa_muertes['Fecha'] == fecha_semana_antes) &
+                                     (df_ccaa_muertes['CCAA'] == provincia)]
         total += int(df_loc['Fallecidos'].values[0])
 
     return str(round(total/7, 1))
 
 
 def tasa_letalidad(provincia):
-    return str(round(int(muertes_totales(provincia))*100/int(casos_acumulados(provincia)),2))
+    return str(round(int(muertes_totales(provincia))*100/int(casos_acumulados(provincia)), 2))
 
 
-def fecha_actualizacion_muertes(provincia):
+def fecha_actualizacion_muertes():
     actual_day = date.today()
     dias_antes = 0
     day_before = timedelta(days=dias_antes)
@@ -1350,39 +1725,42 @@ def fecha_actualizacion_muertes(provincia):
         dias_antes += 1
         day_before = timedelta(days=dias_antes)
 
-    # Los ultimos datos de la provincia
-    df_loc = df_ccaa_muertes.loc[(df_ccaa_muertes['Fecha'] == str(actual_day-day_before)) & (df_ccaa_muertes['CCAA'] == provincia)]
-
     return str(actual_day-day_before)
 
 
 def pacientes_ingresados(provincia):
-    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(provincia)) & (df_ccaa_hospital['CCAA'] == provincia)]
+    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(provincia)) &
+                                  (df_ccaa_hospital['CCAA'] == provincia)]
     return str(int(df_loc['Total Pacientes COVID ingresados']))
 
 
 def porcentaje_camas_ocupadas(provincia):
-    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(provincia)) & (df_ccaa_hospital['CCAA'] == provincia)]
+    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(provincia)) &
+                                  (df_ccaa_hospital['CCAA'] == provincia)]
     return str(df_loc['% Camas Ocupadas COVID'].values[0])
 
 
 def pacientes_ingresados_uci(provincia):
-    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(provincia)) & (df_ccaa_hospital['CCAA'] == provincia)]
+    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(provincia)) &
+                                  (df_ccaa_hospital['CCAA'] == provincia)]
     return str(int(df_loc['Total pacientes COVID en UCI']))
 
 
 def porcentaje_camas_uci_ocupadas(provincia):
-    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(provincia)) & (df_ccaa_hospital['CCAA'] == provincia)]
+    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(provincia)) &
+                                  (df_ccaa_hospital['CCAA'] == provincia)]
     return str(df_loc['% Camas Ocupadas UCI COVID'].values[0])
 
 
 def ingresados_ultimo_dia(provincia):
-    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(provincia)) & (df_ccaa_hospital['CCAA'] == provincia)]
+    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(provincia)) &
+                                  (df_ccaa_hospital['CCAA'] == provincia)]
     return str(int(df_loc['Ingresos COVID últimas 24 h']))
 
 
 def altas_ultimo_dia(provincia):
-    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(provincia)) & (df_ccaa_hospital['CCAA'] == provincia)]
+    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(provincia)) &
+                                  (df_ccaa_hospital['CCAA'] == provincia)]
     return str(int(df_loc['Altas COVID últimas 24 h']))
 
 
@@ -1393,16 +1771,18 @@ def fecha_actualizacion_hospital(provincia):
 
     # La primera fecha de la que se tiene datos
     while df_ccaa_hospital.loc[df_ccaa_hospital['Fecha'] == str(actual_day-day_before)].empty:
-        dias_antes+=1
+        dias_antes += 1
         day_before = timedelta(days=dias_antes)
 
     # Los ultimos datos de la provincia
-    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == str(actual_day-day_before)) & (df_ccaa_hospital['CCAA'] == provincia)]
+    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == str(actual_day-day_before)) &
+                                  (df_ccaa_hospital['CCAA'] == provincia)]
 
     while df_loc['Total Pacientes COVID ingresados'].values[0] == 0:
         dias_antes += 1
         day_before = timedelta(days=dias_antes)
-        df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == str(actual_day-day_before)) & (df_ccaa_hospital['CCAA'] == provincia)]
+        df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == str(actual_day-day_before)) &
+                                      (df_ccaa_hospital['CCAA'] == provincia)]
 
     return str(actual_day-day_before)
 

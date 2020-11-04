@@ -29,7 +29,8 @@ INFO_EXTREMADURA_DEATH, INFO_EXTREMADURA_HOSPITAL, INFO_EXTREMADURA_ALL, INFO_GA
 INFO_GALICIA_CUMULATIVE, INFO_GALICIA_DEATH, INFO_GALICIA_HOSPITAL, INFO_GALICIA_ALL, INFO_BALEARES, \
 INFO_BALEARES_INCREMENT, INFO_BALEARES_CUMULATIVE, INFO_BALEARES_DEATH, INFO_BALEARES_HOSPITAL, INFO_BALEARES_ALL,  \
 INFO_LARIOJA, INFO_LARIOJA_INCREMENT, INFO_LARIOJA_CUMULATIVE, INFO_LARIOJA_DEATH, INFO_LARIOJA_HOSPITAL, \
-INFO_LARIOJA_ALL = range(90)
+INFO_LARIOJA_ALL, INFO_MADRID, INFO_MADRID_INCREMENT, INFO_MADRID_CUMULATIVE, INFO_MADRID_DEATH, INFO_MADRID_HOSPITAL, \
+INFO_MADRID_ALL = range(96)
 
 
 # Getting mode, so we could define run function for local and Heroku setup
@@ -623,6 +624,37 @@ def show_larioja_info(update, context):
     current_state = "INFO_LARIOJA"
     current_autonomy = "La Rioja"
     return INFO_LARIOJA
+
+
+def show_madrid_info(update, context):
+    global current_state, current_autonomy
+
+    username = update.callback_query.message.chat.username
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='madrid_increment'),
+         InlineKeyboardButton("Casos acumulados", callback_data='madrid_cumulative'),
+         InlineKeyboardButton("Fallecimientos", callback_data='madrid_death')],
+
+        [InlineKeyboardButton("Hospitalizaciones", callback_data='madrid_hospital'),
+         InlineKeyboardButton("Ver todo", callback_data='madrid_all'),
+         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    message.reply_photo(
+        photo=open('./img/mapa_madrid.png', 'rb')
+    )
+
+    message.reply_text(
+        text="{} elige los datos que quieres consultar.".format(username),
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_MADRID"
+    current_autonomy = "Madrid"
+    return INFO_MADRID
 
 
 def show_increment(update, context):
@@ -1329,6 +1361,37 @@ def show_larioja_all(update, context):
     return INFO_LARIOJA_ALL
 
 
+# MADRID
+def show_madrid_increment(update, context):
+    show_increment(update, context)
+
+    return INFO_MADRID_INCREMENT
+
+
+def show_madrid_cumulative(update, context):
+    show_cumulative(update, context)
+
+    return INFO_MADRID_CUMULATIVE
+
+
+def show_madrid_death(update, context):
+    show_death(update, context)
+
+    return INFO_MADRID_DEATH
+
+
+def show_madrid_hospital(update, context):
+    show_hospital(update, context)
+
+    return INFO_MADRID_HOSPITAL
+
+
+def show_madrid_all(update, context):
+    show_all_info(update, context)
+
+    return INFO_MADRID_ALL
+
+
 def show_info(update, context):
     global current_state
 
@@ -1431,7 +1494,7 @@ def main():
                                                CallbackQueryHandler(show_galicia_info, pattern='galicia_info'),
                                                CallbackQueryHandler(show_baleares_info, pattern='baleares_info'),
                                                CallbackQueryHandler(show_larioja_info, pattern='larioja_info'),
-                                               # CallbackQueryHandler(show_madrid_info, pattern='madrid_info'),
+                                               CallbackQueryHandler(show_madrid_info, pattern='madrid_info'),
                                                # CallbackQueryHandler(show_melilla_info, pattern='melilla_info'),
                                                # CallbackQueryHandler(show_murcia_info, pattern='murcia_info'),
                                                # CallbackQueryHandler(show_navarra_info, pattern='navarra_info'),
@@ -2825,6 +2888,104 @@ def main():
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
+                                           INFO_MADRID: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_madrid_increment,
+                                                                    pattern='madrid_increment'),
+                                               CallbackQueryHandler(show_madrid_cumulative,
+                                                                    pattern='madrid_cumulative'),
+                                               CallbackQueryHandler(show_madrid_death,
+                                                                    pattern='madrid_death'),
+                                               CallbackQueryHandler(show_madrid_hospital,
+                                                                    pattern='madrid_hospital'),
+                                               CallbackQueryHandler(show_madrid_all,
+                                                                    pattern='madrid_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_MADRID_INCREMENT: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_madrid_cumulative,
+                                                                    pattern='madrid_cumulative'),
+                                               CallbackQueryHandler(show_madrid_death,
+                                                                    pattern='madrid_death'),
+                                               CallbackQueryHandler(show_madrid_hospital,
+                                                                    pattern='madrid_hospital'),
+                                               CallbackQueryHandler(show_madrid_all,
+                                                                    pattern='madrid_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_MADRID_CUMULATIVE: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_madrid_increment,
+                                                                    pattern='madrid_increment'),
+                                               CallbackQueryHandler(show_madrid_death,
+                                                                    pattern='madrid_death'),
+                                               CallbackQueryHandler(show_madrid_hospital,
+                                                                    pattern='madrid_hospital'),
+                                               CallbackQueryHandler(show_madrid_all,
+                                                                    pattern='madrid_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_MADRID_DEATH: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_madrid_increment,
+                                                                    pattern='madrid_increment'),
+                                               CallbackQueryHandler(show_madrid_cumulative,
+                                                                    pattern='madrid_cumulative'),
+                                               CallbackQueryHandler(show_madrid_hospital,
+                                                                    pattern='madrid_hospital'),
+                                               CallbackQueryHandler(show_madrid_all,
+                                                                    pattern='madrid_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_MADRID_HOSPITAL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_madrid_increment,
+                                                                    pattern='madrid_increment'),
+                                               CallbackQueryHandler(show_madrid_cumulative,
+                                                                    pattern='madrid_cumulative'),
+                                               CallbackQueryHandler(show_madrid_death,
+                                                                    pattern='madrid_death'),
+                                               CallbackQueryHandler(show_madrid_all,
+                                                                    pattern='madrid_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_MADRID_ALL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_madrid_increment,
+                                                                    pattern='madrid_increment'),
+                                               CallbackQueryHandler(show_madrid_cumulative,
+                                                                    pattern='madrid_cumulative'),
+                                               CallbackQueryHandler(show_madrid_death,
+                                                                    pattern='madrid_death'),
+                                               CallbackQueryHandler(show_madrid_hospital,
+                                                                    pattern='madrid_hospital'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
                                            NOT_IMPLEMENTED: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
@@ -3008,6 +3169,18 @@ def main():
                                                                 pattern='larioja_hospital'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='larioja_all'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='madrid_info'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='madrid_increment'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='madrid_cumulative'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='madrid_death'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='madrid_hospital'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='madrid_all'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='show_not_implemented'),
                                        ])

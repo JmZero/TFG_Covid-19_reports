@@ -1,7 +1,9 @@
 import logging
 import os
 import sys
-
+import pandas as pd
+import unicodedata
+from datetime import date, timedelta, datetime
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Updater, CommandHandler, ConversationHandler, MessageHandler, Filters, CallbackQueryHandler
 
@@ -10,13 +12,29 @@ logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger()
 
-WELCOME, INICIO, HELP, STATUS_INFO, WELCOME_BAD, NOT_IMPLEMENTED = range(6)
+WELCOME, INICIO, HELP, STATUS_INFO, WELCOME_BAD, NOT_IMPLEMENTED,\
+INFO_ANDALUCIA, INFO_ANDALUCIA_INCREMENT, INFO_ANDALUCIA_CUMULATIVE, INFO_ANDALUCIA_DEATH, INFO_ANDALUCIA_HOSPITAL,\
+INFO_ANDALUCIA_ALL, INFO_ARAGON, INFO_ARAGON_INCREMENT, INFO_ARAGON_CUMULATIVE, INFO_ARAGON_DEATH, INFO_ARAGON_HOSPITAL,\
+INFO_ARAGON_ALL = range(18)
 
 # Getting mode, so we could define run function for local and Heroku setup
 mode = os.getenv("MODE")
 TOKEN = os.getenv("TOKEN")
 
-global current_state, conv_handler
+# Database used in proyect
+url = 'https://raw.githubusercontent.com/datadista/datasets/master/COVID%2019/ccaa_covid19_datos_isciii_nueva_serie.csv'
+util_cols = ['fecha', 'ccaa', 'num_casos']
+df_ccaa_casos = pd.read_csv(url, sep=',', usecols=util_cols)
+
+url = 'https://raw.githubusercontent.com/datadista/datasets/master/COVID%2019/ccaa_covid19_fallecidos_por_fecha_defuncion_nueva_serie_original.csv'
+df_ccaa_muertes = pd.read_csv(url, sep=',')
+
+url = 'https://raw.githubusercontent.com/datadista/datasets/master/COVID%2019/ccaa_ingresos_camas_convencionales_uci.csv'
+util_cols = ['Fecha', 'CCAA', 'Total Pacientes COVID ingresados', '% Camas Ocupadas COVID', 'Total pacientes COVID en UCI',
+             '% Camas Ocupadas UCI COVID', 'Ingresos COVID últimas 24 h', 'Altas COVID últimas 24 h']
+df_ccaa_hospital = pd.read_csv(url, sep=',', usecols=util_cols)
+
+global current_state, conv_handler, current_autonomy
 
 if mode == "dev":
     def run(updater):
@@ -116,31 +134,31 @@ def show_inicio(update, context):
         message = update.message
 
     keyboard = [
-        [InlineKeyboardButton("Andalucía", callback_data='show_not_implemented'),
-         InlineKeyboardButton("Aragón", callback_data='show_not_implemented'),
-         InlineKeyboardButton("Asturias", callback_data='show_not_implemented')],
+        [InlineKeyboardButton("Andalucía", callback_data='andalucia_info'),
+         InlineKeyboardButton("Aragón", callback_data='aragon_info'),
+         InlineKeyboardButton("Asturias", callback_data='asturias_info')],
 
-        [InlineKeyboardButton("C. Valenciana", callback_data='show_not_implemented'),
-         InlineKeyboardButton("Canarias", callback_data='show_not_implemented'),
-         InlineKeyboardButton("Cantabria", callback_data='show_not_implemented')],
+        [InlineKeyboardButton("C. Valenciana", callback_data='c.valenciana_info'),
+         InlineKeyboardButton("Canarias", callback_data='canarias_info'),
+         InlineKeyboardButton("Cantabria", callback_data='cantabria_info')],
 
-        [InlineKeyboardButton("Castilla La Mancha", callback_data='show_not_implemented'),
-         InlineKeyboardButton("Castilla y León", callback_data='show_not_implemented'),
-         InlineKeyboardButton("Cataluña", callback_data='show_not_implemented')],
+        [InlineKeyboardButton("Castilla La Mancha", callback_data='castillalamancha_info'),
+         InlineKeyboardButton("Castilla y León", callback_data='castillayleon_info'),
+         InlineKeyboardButton("Cataluña", callback_data='cataluña_info')],
 
-        [InlineKeyboardButton("Ceuta", callback_data='show_not_implemented'),
-         InlineKeyboardButton("Extremadura", callback_data='show_not_implemented'),
-         InlineKeyboardButton("Galicia", callback_data='show_not_implemented')],
+        [InlineKeyboardButton("Ceuta", callback_data='ceuta_info'),
+         InlineKeyboardButton("Extremadura", callback_data='extremadura_info'),
+         InlineKeyboardButton("Galicia", callback_data='galicia_info')],
 
-        [InlineKeyboardButton("Islas Baleares", callback_data='show_not_implemented'),
-         InlineKeyboardButton("La Rioja", callback_data='show_not_implemented'),
-         InlineKeyboardButton("Madrid", callback_data='show_not_implemented')],
+        [InlineKeyboardButton("Islas Baleares", callback_data='baleares_info'),
+         InlineKeyboardButton("La Rioja", callback_data='larioja_info'),
+         InlineKeyboardButton("Madrid", callback_data='madrid_info')],
 
-        [InlineKeyboardButton("Melilla", callback_data='show_not_implemented'),
-         InlineKeyboardButton("Murcia", callback_data='show_not_implemented'),
-         InlineKeyboardButton("Navarra", callback_data='show_not_implemented')],
+        [InlineKeyboardButton("Melilla", callback_data='melilla_info'),
+         InlineKeyboardButton("Murcia", callback_data='murcia_info'),
+         InlineKeyboardButton("Navarra", callback_data='navarra_info')],
 
-        [InlineKeyboardButton("País Vasco", callback_data='show_not_implemented'),
+        [InlineKeyboardButton("País Vasco", callback_data='paisvasco_info'),
          InlineKeyboardButton("Toda España", callback_data='show_not_implemented')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -156,6 +174,397 @@ def show_inicio(update, context):
 
     current_state = "INICIO"
     return INICIO
+
+
+def show_andalucia_info(update, context):
+    global current_state, current_autonomy
+
+    username = update.callback_query.message.chat.username
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='andalucia_increment'),
+         InlineKeyboardButton("Casos acumulados", callback_data='andalucia_cumulative'),
+         InlineKeyboardButton("Fallecimientos", callback_data='andalucia_death')],
+
+        [InlineKeyboardButton("Hospitalizaciones", callback_data='andalucia_hospital'),
+         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented'),
+         InlineKeyboardButton("Ver todo", callback_data='andalucia_all')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    message.reply_photo(
+        photo=open('./img/mapa_andalucia.png', 'rb')
+    )
+
+    message.reply_text(
+        text="{} elige los datos que quieres consultar.".format(username),
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_ANDALUCIA"
+    current_autonomy = "Andalucía"
+    return INFO_ANDALUCIA
+
+
+def show_aragon_info(update, context):
+    global current_state, current_autonomy
+
+    username = update.callback_query.message.chat.username
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='aragon_increment'),
+         InlineKeyboardButton("Casos acumulados", callback_data='aragon_cumulative'),
+         InlineKeyboardButton("Fallecimientos", callback_data='aragon_death')],
+
+        [InlineKeyboardButton("Hospitalizaciones", callback_data='aragon_hospital'),
+         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented'),
+         InlineKeyboardButton("Ver todo", callback_data='aragon_all')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    message.reply_photo(
+        photo=open('./img/mapa_aragon.png', 'rb')
+    )
+
+    message.reply_text(
+        text="{} elige los datos que quieres consultar.".format(username),
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_ARAGON"
+    current_autonomy = "Aragón"
+    return INFO_ARAGON
+
+
+def show_increment(update, context):
+    global current_state, current_autonomy
+
+    message = update.callback_query.message
+
+    autonomy_lower = normalize(current_autonomy).lower()
+    autonomy_upper = normalize(current_autonomy).upper()
+
+    keyboard = [
+        [InlineKeyboardButton("Casos acumulados", callback_data='{}_cumulative'.format(autonomy_lower)),
+         InlineKeyboardButton("Fallecimientos", callback_data='{}_death'.format(autonomy_lower)),
+         InlineKeyboardButton("Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower))],
+
+        [InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented'),
+         InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower))],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # message.reply_photo(
+    #     photo=open('./img/mapa_andalucia.png', 'rb')
+    # )
+
+    message.reply_text(
+        text = "Incremento de casos en {}\n\n"
+               "\t - Casos acumulados: <b>{}</b>.\n"
+               "\t - Incremento de casos últimas 24h: <b>{}</b>.\n"
+               "\t - Media del incremento de casos semanal: <b>{}</b>.\n\n"
+               "Información actualizada a {}.\n"
+               "<b>Los datos pueden tardar unos días en consolidarse y "
+               "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
+                                                                           casos_acumulados(current_autonomy),
+                                                                           incremento_ultimo_dia(current_autonomy),
+                                                                           media_casos_semana(current_autonomy),
+                                                                           format_date(fecha_actualizacion(current_autonomy))),
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_{}_INCREMENT".format(autonomy_upper)
+
+
+def show_cumulative(update, context):
+    global current_state, current_autonomy
+
+    message = update.callback_query.message
+
+    autonomy_lower = normalize(current_autonomy).lower()
+    autonomy_upper = normalize(current_autonomy).upper()
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='{}_increment'.format(autonomy_lower)),
+         InlineKeyboardButton("Fallecimientos", callback_data='{}_death'.format(autonomy_lower)),
+         InlineKeyboardButton("Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower))],
+
+        [InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented'),
+         InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower))],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # message.reply_photo(
+    #     photo=open('./img/mapa_andalucia.png', 'rb')
+    # )
+
+    message.reply_text(
+        text = "Incremento de casos en {}\n\n"
+               "\t - Casos acumulados: <b>{}</b>.\n\n"
+               "Información actualizada a {}.\n"
+               "<b>Los datos pueden tardar unos días en consolidarse y "
+               "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
+                                                                           casos_acumulados(current_autonomy),
+                                                                           format_date(fecha_actualizacion(current_autonomy))),
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_{}_CUMULATIVE".format(autonomy_upper)
+
+
+def show_death(update, context):
+    global current_state, current_autonomy
+
+    message = update.callback_query.message
+
+    autonomy_lower = normalize(current_autonomy).lower()
+    autonomy_upper = normalize(current_autonomy).upper()
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='{}_increment'.format(autonomy_lower)),
+         InlineKeyboardButton("Casos acumulados", callback_data='{}_cumulative'.format(autonomy_lower)),
+         InlineKeyboardButton("Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower))],
+
+        [InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented'),
+         InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower))],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # message.reply_photo(
+    #     photo=open('./img/mapa_andalucia.png', 'rb')
+    # )
+
+    message.reply_text(
+        text = "Evolución de fallecimientos en {}\n\n"
+               "\t - Fallecimientos totales: <b>{}</b>.\n"
+               "\t - Fallecidos últimas 24h: <b>{}</b>.\n"
+               "\t - Media fallecimientos semanal: <b>{}</b>.\n"
+               "\t - Tasa de letalidad: <b>{}</b>.\n\n"
+               "Información actualizada a {}.\n"
+               "<b>Los datos pueden tardar unos días en consolidarse y "
+               "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
+                                                                           muertes_totales(current_autonomy),
+                                                                           muertes_ultimo_dia(current_autonomy),
+                                                                           media_muertes_semana(current_autonomy),
+                                                                           tasa_letalidad(current_autonomy),
+                                                                           format_date(fecha_actualizacion(current_autonomy))),
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_{}_DEATH".format(autonomy_upper)
+
+
+def show_hospital(update, context):
+    global current_state, current_autonomy
+
+    message = update.callback_query.message
+
+    autonomy_lower = normalize(current_autonomy).lower()
+    autonomy_upper = normalize(current_autonomy).upper()
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='{}_increment'.format(autonomy_lower)),
+         InlineKeyboardButton("Casos acumulados", callback_data='{}_cumulative'.format(autonomy_lower)),
+         InlineKeyboardButton("Fallecimientos", callback_data='{}_death'.format(autonomy_lower))],
+
+        [InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented'),
+         InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower))],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # message.reply_photo(
+    #     photo=open('./img/mapa_andalucia.png', 'rb')
+    # )
+
+    message.reply_text(
+        text = "Datos de hospitalización por COVID en {}\n\n"
+               "\t - Pacientes ingresados actualmente: <b>{}</b>.\n"
+               "\t - Camas ocupadas actualmente (%): <b>{}</b>.\n"
+               "\t - Pacientes ingresados en UCI actualmente: <b>{}</b>.\n"
+               "\t - Camas ocupadas en UCI actualmente (%): <b>{}</b>.\n"
+               "\t - Pacientes ingresados últimas 24h: <b>{}</b>.\n"
+               "\t - Pacientes dados de alta últimas 24h: <b>{}</b>.\n\n"
+               "Información actualizada a {}.\n"
+               "<b>Los datos pueden tardar unos días en consolidarse y "
+               "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
+                                                                           pacientes_ingresados(current_autonomy),
+                                                                           porcentaje_camas_ocupadas(current_autonomy),
+                                                                           pacientes_ingresados_uci(current_autonomy),
+                                                                           porcentaje_camas_uci_ocupadas(current_autonomy),
+                                                                           ingresados_ultimo_dia(current_autonomy),
+                                                                           altas_ultimo_dia(current_autonomy),
+                                                                           format_date(fecha_actualizacion_hospital(current_autonomy))),
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_{}_HOSPITAL".format(autonomy_upper)
+
+
+def show_all_info(update, context):
+    global current_state, current_autonomy
+
+    message = update.callback_query.message
+
+    autonomy_lower = normalize(current_autonomy).lower()
+    autonomy_upper = normalize(current_autonomy).upper()
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='{}_increment'.format(autonomy_lower)),
+         InlineKeyboardButton("Casos acumulados", callback_data='{}_cumulative'.format(autonomy_lower)),
+         InlineKeyboardButton("Fallecimientos", callback_data='{}_death'.format(autonomy_lower))],
+
+        [InlineKeyboardButton("Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower)),
+         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # message.reply_photo(
+    #     photo=open('./img/mapa_andalucia.png', 'rb')
+    # )
+
+    message.reply_text(
+        text="Incremento de casos en {}\n\n"
+             "\t - Casos acumulados: <b>{}</b>.\n"
+             "\t - Incremento de casos últimas 24h: <b>{}</b>.\n"
+             "\t - Media del incremento de casos semanal: <b>{}</b>.\n\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
+                                                                         casos_acumulados(current_autonomy),
+                                                                         incremento_ultimo_dia(current_autonomy),
+                                                                         media_casos_semana(current_autonomy),
+                                                                         format_date(
+                                                                             fecha_actualizacion(current_autonomy))),
+        parse_mode='HTML',
+    )
+
+    # message.reply_photo(
+    #     photo=open('./img/mapa_andalucia.png', 'rb')
+    # )
+
+    message.reply_text(
+        text="Incremento de casos en {}\n\n"
+             "\t - Casos acumulados: <b>{}</b>.\n\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
+                                                                         casos_acumulados(current_autonomy),
+                                                                         format_date(fecha_actualizacion(current_autonomy))),
+        parse_mode='HTML',
+    )
+
+    # message.reply_photo(
+    #     photo=open('./img/mapa_andalucia.png', 'rb')
+    # )
+
+    message.reply_text(
+        text="Evolución de fallecimientos en {}\n\n"
+             "\t - Fallecimientos totales: <b>{}</b>.\n"
+             "\t - Fallecidos últimas 24h: <b>{}</b>.\n"
+             "\t - Media fallecimientos semanal: <b>{}</b>.\n"
+             "\t - Tasa de letalidad: <b>{}</b>.\n\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
+                                                                         muertes_totales(current_autonomy),
+                                                                         muertes_ultimo_dia(current_autonomy),
+                                                                         media_muertes_semana(current_autonomy),
+                                                                         tasa_letalidad(current_autonomy),
+                                                                         format_date(fecha_actualizacion(current_autonomy))),
+        parse_mode='HTML',
+    )
+
+    # message.reply_photo(
+    #     photo=open('./img/mapa_andalucia.png', 'rb')
+    # )
+
+    message.reply_text(
+        text="Datos de hospitalización por COVID en {}\n\n"
+             "\t - Pacientes ingresados actualmente: <b>{}</b>.\n"
+             "\t - Camas ocupadas actualmente (%): <b>{}</b>.\n"
+             "\t - Pacientes ingresados en UCI actualmente: <b>{}</b>.\n"
+             "\t - Camas ocupadas en UCI actualmente (%): <b>{}</b>.\n"
+             "\t - Pacientes ingresados últimas 24h: <b>{}</b>.\n"
+             "\t - Pacientes dados de alta últimas 24h: <b>{}</b>.\n\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
+                                                                         pacientes_ingresados(current_autonomy),
+                                                                         porcentaje_camas_ocupadas(current_autonomy),
+                                                                         pacientes_ingresados_uci(current_autonomy),
+                                                                         porcentaje_camas_uci_ocupadas(current_autonomy),
+                                                                         ingresados_ultimo_dia(current_autonomy),
+                                                                         altas_ultimo_dia(current_autonomy),
+                                                                         format_date(fecha_actualizacion_hospital(current_autonomy))),
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_{}_ALL".format(autonomy_upper)
+
+def show_andalucia_increment(update, context):
+    show_increment(update, context)
+
+    return INFO_ANDALUCIA_INCREMENT
+
+
+def show_andalucia_cumulative(update, context):
+    show_cumulative(update, context)
+
+    return INFO_ANDALUCIA_CUMULATIVE
+
+
+def show_andalucia_death(update, context):
+    show_death(update, context)
+
+    return INFO_ANDALUCIA_DEATH
+
+
+def show_andalucia_hospital(update, context):
+    show_hospital(update, context)
+
+    return INFO_ANDALUCIA_HOSPITAL
+
+
+def show_andalucia_all(update, context):
+    show_all_info(update, context)
+
+    return INFO_ANDALUCIA_ALL
+
+def show_aragon_increment(update, context):
+    show_increment(update, context)
+
+    return INFO_ARAGON_INCREMENT
+
+
+def show_aragon_cumulative(update, context):
+    show_cumulative(update, context)
+
+    return INFO_ARAGON_CUMULATIVE
+
+
+def show_aragon_death(update, context):
+    show_death(update, context)
+
+    return INFO_ARAGON_DEATH
+
+
+def show_aragon_hospital(update, context):
+    show_hospital(update, context)
+
+    return INFO_ARAGON_HOSPITAL
+
+
+def show_aragon_all(update, context):
+    show_all_info(update, context)
+
+    return INFO_ARAGON_ALL
 
 
 def show_info(update, context):
@@ -203,6 +612,31 @@ def show_not_implemented(update, context):
     return NOT_IMPLEMENTED
 
 
+def normalize(s):
+    replacements = (
+        ("á", "a"),
+        ("é", "e"),
+        ("í", "i"),
+        ("ó", "o"),
+        ("ú", "u"),
+    )
+    for a, b in replacements:
+        s = s.replace(a, b).replace(a.upper(), b.upper())
+    return s
+
+
+def normalise_upper_autonomy():
+    normal = unicodedata.normalize('NFKD', current_autonomy).encode('ASCII', 'ignore')
+
+    return normal.upper()
+
+
+def normalise_lower_autonomy():
+    normal = unicodedata.normalize('NFKD', current_autonomy).encode('ASCII', 'ignore')
+
+    return normal.lower()
+
+
 def main():
     global conv_handler
 
@@ -231,6 +665,25 @@ def main():
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_andalucia_info, pattern='andalucia_info'),
+                                               CallbackQueryHandler(show_aragon_info, pattern='aragon_info'),
+                                               # CallbackQueryHandler(show_asturias_info, pattern='asturias_info'),
+                                               # CallbackQueryHandler(show_c.valenciana_info, pattern='c.valenciana_info'),
+                                               # CallbackQueryHandler(show_canarias_info, pattern='canarias_info'),
+                                               # CallbackQueryHandler(show_cantabria_info, pattern='cantabria_info'),
+                                               # CallbackQueryHandler(show_castillalamancha_info, pattern='castillalamancha_info'),
+                                               # CallbackQueryHandler(show_castillayleon_info, pattern='castillayleon_info'),
+                                               # CallbackQueryHandler(show_cataluña_info, pattern='cataluña_info'),
+                                               # CallbackQueryHandler(show_ceuta_info, pattern='ceuta_info'),
+                                               # CallbackQueryHandler(show_extremadura_info, pattern='extremadura_info'),
+                                               # CallbackQueryHandler(show_galicia_info, pattern='galicia_info'),
+                                               # CallbackQueryHandler(show_baleares_info, pattern='baleares_info'),
+                                               # CallbackQueryHandler(show_larioja_info, pattern='larioja_info'),
+                                               # CallbackQueryHandler(show_madrid_info, pattern='madrid_info'),
+                                               # CallbackQueryHandler(show_melilla_info, pattern='melilla_info'),
+                                               # CallbackQueryHandler(show_murcia_info, pattern='murcia_info'),
+                                               # CallbackQueryHandler(show_navarra_info, pattern='navarra_info'),
+                                               # CallbackQueryHandler(show_paisvasco_info, pattern='paisvasco_info'),
                                                CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
                                            ],
                                            HELP: [
@@ -238,8 +691,7 @@ def main():
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
+                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
                                            ],
                                            STATUS_INFO: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -247,6 +699,141 @@ def main():
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
                                                CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                           ],
+                                           INFO_ANDALUCIA: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_andalucia_increment, pattern='andalucia_increment'),
+                                               CallbackQueryHandler(show_andalucia_cumulative, pattern='andalucia_cumulative'),
+                                               CallbackQueryHandler(show_andalucia_death, pattern='andalucia_death'),
+                                               CallbackQueryHandler(show_andalucia_hospital, pattern='andalucia_hospital'),
+                                               CallbackQueryHandler(show_andalucia_all, pattern='andalucia_all'),
+                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                           ],
+                                           INFO_ANDALUCIA_INCREMENT: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_andalucia_cumulative, pattern='andalucia_cumulative'),
+                                               CallbackQueryHandler(show_andalucia_death, pattern='andalucia_death'),
+                                               CallbackQueryHandler(show_andalucia_hospital, pattern='andalucia_hospital'),
+                                               CallbackQueryHandler(show_andalucia_all, pattern='andalucia_all'),
+                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                           ],
+                                           INFO_ANDALUCIA_CUMULATIVE: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_andalucia_increment,pattern='andalucia_increment'),
+                                               CallbackQueryHandler(show_andalucia_death, pattern='andalucia_death'),
+                                               CallbackQueryHandler(show_andalucia_hospital, pattern='andalucia_hospital'),
+                                               CallbackQueryHandler(show_andalucia_all, pattern='andalucia_all'),
+                                               CallbackQueryHandler(show_not_implemented,  pattern='show_not_implemented')
+                                           ],
+                                           INFO_ANDALUCIA_DEATH: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_andalucia_increment, pattern='andalucia_increment'),
+                                               CallbackQueryHandler(show_andalucia_cumulative, pattern='andalucia_cumulative'),
+                                               CallbackQueryHandler(show_andalucia_hospital, pattern='andalucia_hospital'),
+                                               CallbackQueryHandler(show_andalucia_all, pattern='andalucia_all'),
+                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                           ],
+                                           INFO_ANDALUCIA_HOSPITAL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_andalucia_increment, pattern='andalucia_increment'),
+                                               CallbackQueryHandler(show_andalucia_cumulative, pattern='andalucia_cumulative'),
+                                               CallbackQueryHandler(show_andalucia_death, pattern='andalucia_death'),
+                                               CallbackQueryHandler(show_andalucia_all, pattern='andalucia_all'),
+                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                           ],
+                                           INFO_ANDALUCIA_ALL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_andalucia_increment, pattern='andalucia_increment'),
+                                               CallbackQueryHandler(show_andalucia_cumulative, pattern='andalucia_cumulative'),
+                                               CallbackQueryHandler(show_andalucia_death, pattern='andalucia_death'),
+                                               CallbackQueryHandler(show_andalucia_hospital, pattern='andalucia_hospital'),
+                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                           ],
+                                           INFO_ARAGON: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_aragon_increment, pattern='aragon_increment'),
+                                               CallbackQueryHandler(show_aragon_cumulative, pattern='aragon_cumulative'),
+                                               CallbackQueryHandler(show_aragon_death, pattern='aragon_death'),
+                                               CallbackQueryHandler(show_aragon_hospital, pattern='aragon_hospital'),
+                                               CallbackQueryHandler(show_aragon_all, pattern='aragon_all'),
+                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                           ],
+                                           INFO_ARAGON_INCREMENT: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_aragon_cumulative, pattern='aragon_cumulative'),
+                                               CallbackQueryHandler(show_aragon_death, pattern='aragon_death'),
+                                               CallbackQueryHandler(show_aragon_hospital, pattern='aragon_hospital'),
+                                               CallbackQueryHandler(show_aragon_all, pattern='aragon_all'),
+                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                           ],
+                                           INFO_ARAGON_CUMULATIVE: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_aragon_increment, pattern='aragon_increment'),
+                                               CallbackQueryHandler(show_aragon_death, pattern='aragon_death'),
+                                               CallbackQueryHandler(show_aragon_hospital, pattern='aragon_hospital'),
+                                               CallbackQueryHandler(show_aragon_all, pattern='aragon_all'),
+                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                           ],
+                                           INFO_ARAGON_DEATH: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_aragon_increment, pattern='aragon_increment'),
+                                               CallbackQueryHandler(show_aragon_cumulative, pattern='aragon_cumulative'),
+                                               CallbackQueryHandler(show_aragon_hospital, pattern='aragon_hospital'),
+                                               CallbackQueryHandler(show_aragon_all, pattern='aragon_all'),
+                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                           ],
+                                           INFO_ARAGON_HOSPITAL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_aragon_increment, pattern='aragon_increment'),
+                                               CallbackQueryHandler(show_aragon_cumulative, pattern='aragon_cumulative'),
+                                               CallbackQueryHandler(show_aragon_death, pattern='aragon_death'),
+                                               CallbackQueryHandler(show_aragon_all, pattern='aragon_all'),
+                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                           ],
+                                           INFO_ARAGON_ALL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_aragon_increment, pattern='aragon_increment'),
+                                               CallbackQueryHandler(show_aragon_cumulative, pattern='aragon_cumulative'),
+                                               CallbackQueryHandler(show_aragon_death, pattern='aragon_death'),
+                                               CallbackQueryHandler(show_aragon_hospital, pattern='aragon_hospital'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
                                            ],
                                            NOT_IMPLEMENTED: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -261,12 +848,152 @@ def main():
                                            CommandHandler('help', help_handler),
                                            CommandHandler('info', show_info),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='start_menu'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='andalucia_info'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='andalucia_increment'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='andalucia_cumulative'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='andalucia_death'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='andalucia_hospital'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='andalucia_all'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='aragon_info'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='aragon_increment'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='aragon_cumulative'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='aragon_death'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='aragon_hospital'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='aragon_all'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='show_not_implemented'),
                                        ])
 
     updater.dispatcher.add_handler(conv_handler)
 
     run(updater)
+
+
+########################  FUNCIONALIDAD BBDD  ########################
+def format_date(date):
+    return datetime.strptime(date, "%Y-%m-%d").strftime("%d-%m-%Y")
+
+def casos_acumulados(provincia):
+    return str(df_ccaa_casos.groupby(['ccaa'])['num_casos'].sum()[provincia])
+
+
+def incremento_ultimo_dia(provincia):
+    df_loc = df_ccaa_casos.loc[(df_ccaa_casos['fecha'] == fecha_actualizacion(provincia)) & (df_ccaa_casos['ccaa'] == provincia)]
+    return str(df_loc['num_casos'].values[0])
+
+
+def media_casos_semana(provincia):
+    ultima_fecha = fecha_actualizacion(provincia)
+    fecha = datetime.strptime(ultima_fecha, "%Y-%m-%d")
+
+    total = 0
+    for i in range(7):
+        fecha2 = fecha - timedelta(days=i)
+        fecha_semana_antes = fecha2.strftime("%Y-%m-%d")
+
+        df_loc = df_ccaa_casos.loc[(df_ccaa_casos['fecha'] == fecha_semana_antes) & (df_ccaa_casos['ccaa'] == provincia)]
+        total += int(df_loc['num_casos'].values[0])
+
+    return str(round(total/7, 1))
+
+
+def fecha_actualizacion(provincia):
+    actual_day = date.today()
+    dias_antes = 0
+    day_before = timedelta(days=dias_antes)
+
+    # La primera fecha de la que se tiene datos
+    while df_ccaa_casos.loc[df_ccaa_casos['fecha'] == str(actual_day-day_before)].empty:
+        dias_antes+=1
+        day_before = timedelta(days=dias_antes)
+
+    # Los ultimos datos de la provincia
+    df_loc = df_ccaa_casos.loc[(df_ccaa_casos['fecha'] == str(actual_day-day_before)) & (df_ccaa_casos['ccaa'] == provincia)]
+
+    while df_loc['num_casos'].values[0] == 0:
+        dias_antes += 1
+        day_before = timedelta(days=dias_antes)
+        df_loc = df_ccaa_casos.loc[(df_ccaa_casos['fecha'] == str(actual_day-day_before)) & (df_ccaa_casos['ccaa'] == provincia)]
+
+    return str(actual_day-day_before)
+
+
+def muertes_totales(provincia):
+    return str(df_ccaa_muertes.groupby(['CCAA'])['Fallecidos'].sum()[provincia])
+
+
+def muertes_ultimo_dia(provincia):
+    df_loc = df_ccaa_muertes.loc[(df_ccaa_muertes['Fecha'] == fecha_actualizacion(provincia)) & (df_ccaa_muertes['CCAA'] == provincia)]
+    return str(df_loc['Fallecidos'].values[0])
+
+
+def media_muertes_semana(provincia):
+    ultima_fecha = fecha_actualizacion(provincia)
+    fecha = datetime.strptime(ultima_fecha, "%Y-%m-%d")
+
+    total = 0
+    for i in range(7):
+        fecha2 = fecha - timedelta(days=i)
+        fecha_semana_antes = fecha2.strftime("%Y-%m-%d")
+
+        df_loc = df_ccaa_muertes.loc[(df_ccaa_muertes['Fecha'] == fecha_semana_antes) & (df_ccaa_muertes['CCAA'] == provincia)]
+        total += int(df_loc['Fallecidos'].values[0])
+
+    return str(round(total/7, 1))
+
+
+def tasa_letalidad(provincia):
+    return str(round(int(muertes_totales(provincia))*100/int(casos_acumulados(provincia)),2))
+
+
+def pacientes_ingresados(provincia):
+    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(provincia)) & (df_ccaa_hospital['CCAA'] == provincia)]
+    return str(int(df_loc['Total Pacientes COVID ingresados']))
+
+
+def porcentaje_camas_ocupadas(provincia):
+    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(provincia)) & (df_ccaa_hospital['CCAA'] == provincia)]
+    return str(df_loc['% Camas Ocupadas COVID'].values[0])
+
+
+def pacientes_ingresados_uci(provincia):
+    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(provincia)) & (df_ccaa_hospital['CCAA'] == provincia)]
+    return str(int(df_loc['Total pacientes COVID en UCI']))
+
+
+def porcentaje_camas_uci_ocupadas(provincia):
+    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(provincia)) & (df_ccaa_hospital['CCAA'] == provincia)]
+    return str(df_loc['% Camas Ocupadas UCI COVID'].values[0])
+
+
+def ingresados_ultimo_dia(provincia):
+    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(provincia)) & (df_ccaa_hospital['CCAA'] == provincia)]
+    return str(int(df_loc['Ingresos COVID últimas 24 h']))
+
+
+def altas_ultimo_dia(provincia):
+    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(provincia)) & (df_ccaa_hospital['CCAA'] == provincia)]
+    return str(int(df_loc['Altas COVID últimas 24 h']))
+
+
+def fecha_actualizacion_hospital(provincia):
+    actual_day = date.today()
+    dias_antes = 0
+    day_before = timedelta(days=dias_antes)
+
+    # La primera fecha de la que se tiene datos
+    while df_ccaa_hospital.loc[df_ccaa_hospital['Fecha'] == str(actual_day-day_before)].empty:
+        dias_antes+=1
+        day_before = timedelta(days=dias_antes)
+
+    # Los ultimos datos de la provincia
+    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == str(actual_day-day_before)) & (df_ccaa_hospital['CCAA'] == provincia)]
+
+    while df_loc['Total Pacientes COVID ingresados'].values[0] == 0:
+        dias_antes += 1
+        day_before = timedelta(days=dias_antes)
+        df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == str(actual_day-day_before)) & (df_ccaa_hospital['CCAA'] == provincia)]
+
+    return str(actual_day-day_before)
 
 
 if __name__ == '__main__':

@@ -22,7 +22,8 @@ INFO_CANTABRIA, INFO_CANTABRIA_INCREMENT, INFO_CANTABRIA_CUMULATIVE, INFO_CANTAB
 INFO_CANTABRIA_ALL, INFO_CASTILLALAMANCHA, INFO_CASTILLALAMANCHA_INCREMENT, INFO_CASTILLALAMANCHA_CUMULATIVE, \
 INFO_CASTILLALAMANCHA_DEATH, INFO_CASTILLALAMANCHA_HOSPITAL, INFO_CASTILLALAMANCHA_ALL, INFO_CASTILLAYLEON, \
 INFO_CASTILLAYLEON_INCREMENT, INFO_CASTILLAYLEON_CUMULATIVE, INFO_CASTILLAYLEON_DEATH, INFO_CASTILLAYLEON_HOSPITAL, \
-INFO_CASTILLAYLEON_ALL= range(54)
+INFO_CASTILLAYLEON_ALL, INFO_CATALUÑA, INFO_CATALUÑA_INCREMENT, INFO_CATALUÑA_CUMULATIVE, INFO_CATALUÑA_DEATH, \
+INFO_CATALUÑA_HOSPITAL, INFO_CATALUÑA_ALL = range(60)
 
 
 # Getting mode, so we could define run function for local and Heroku setup
@@ -430,6 +431,37 @@ def show_castillayleon_info(update, context):
     current_state = "INFO_CASTILLAYLEON"
     current_autonomy = "Castilla y León"
     return INFO_CASTILLAYLEON
+
+
+def show_cataluña_info(update, context):
+    global current_state, current_autonomy
+
+    username = update.callback_query.message.chat.username
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='cataluña_increment'),
+         InlineKeyboardButton("Casos acumulados", callback_data='cataluña_cumulative'),
+         InlineKeyboardButton("Fallecimientos", callback_data='cataluña_death')],
+
+        [InlineKeyboardButton("Hospitalizaciones", callback_data='cataluña_hospital'),
+         InlineKeyboardButton("Ver todo", callback_data='cataluña_all'),
+         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    message.reply_photo(
+        photo=open('./img/mapa_cataluña.png', 'rb')
+    )
+
+    message.reply_text(
+        text="{} elige los datos que quieres consultar.".format(username),
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_CATALUÑA"
+    current_autonomy = "Cataluña"
+    return INFO_CATALUÑA
 
 
 def show_increment(update, context):
@@ -950,6 +982,37 @@ def show_castillayleon_all(update, context):
     return INFO_CASTILLAYLEON_ALL
 
 
+# CATALUÑA
+def show_cataluña_increment(update, context):
+    show_increment(update, context)
+
+    return INFO_CATALUÑA_INCREMENT
+
+
+def show_cataluña_cumulative(update, context):
+    show_cumulative(update, context)
+
+    return INFO_CATALUÑA_CUMULATIVE
+
+
+def show_cataluña_death(update, context):
+    show_death(update, context)
+
+    return INFO_CATALUÑA_DEATH
+
+
+def show_cataluña_hospital(update, context):
+    show_hospital(update, context)
+
+    return INFO_CATALUÑA_HOSPITAL
+
+
+def show_cataluña_all(update, context):
+    show_all_info(update, context)
+
+    return INFO_CATALUÑA_ALL
+
+
 def show_info(update, context):
     global current_state
 
@@ -1046,7 +1109,7 @@ def main():
                                                CallbackQueryHandler(show_cantabria_info, pattern='cantabria_info'),
                                                CallbackQueryHandler(show_castillalamancha_info, pattern='castillalamancha_info'),
                                                CallbackQueryHandler(show_castillayleon_info, pattern='castillayleon_info'),
-                                               # CallbackQueryHandler(show_cataluña_info, pattern='cataluña_info'),
+                                               CallbackQueryHandler(show_cataluña_info, pattern='cataluña_info'),
                                                # CallbackQueryHandler(show_ceuta_info, pattern='ceuta_info'),
                                                # CallbackQueryHandler(show_extremadura_info, pattern='extremadura_info'),
                                                # CallbackQueryHandler(show_galicia_info, pattern='galicia_info'),
@@ -1858,6 +1921,104 @@ def main():
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
+                                           INFO_CATALUÑA: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_cataluña_increment,
+                                                                    pattern='cataluña_increment'),
+                                               CallbackQueryHandler(show_cataluña_cumulative,
+                                                                    pattern='cataluña_cumulative'),
+                                               CallbackQueryHandler(show_cataluña_death,
+                                                                    pattern='cataluña_death'),
+                                               CallbackQueryHandler(show_cataluña_hospital,
+                                                                    pattern='cataluña_hospital'),
+                                               CallbackQueryHandler(show_cataluña_all,
+                                                                    pattern='cataluña_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CATALUÑA_INCREMENT: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_cataluña_cumulative,
+                                                                    pattern='cataluña_cumulative'),
+                                               CallbackQueryHandler(show_cataluña_death,
+                                                                    pattern='cataluña_death'),
+                                               CallbackQueryHandler(show_cataluña_hospital,
+                                                                    pattern='cataluña_hospital'),
+                                               CallbackQueryHandler(show_cataluña_all,
+                                                                    pattern='cataluña_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CATALUÑA_CUMULATIVE: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_cataluña_increment,
+                                                                    pattern='cataluña_increment'),
+                                               CallbackQueryHandler(show_cataluña_death,
+                                                                    pattern='cataluña_death'),
+                                               CallbackQueryHandler(show_cataluña_hospital,
+                                                                    pattern='cataluña_hospital'),
+                                               CallbackQueryHandler(show_cataluña_all,
+                                                                    pattern='cataluña_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CATALUÑA_DEATH: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_cataluña_increment,
+                                                                    pattern='cataluña_increment'),
+                                               CallbackQueryHandler(show_cataluña_cumulative,
+                                                                    pattern='cataluña_cumulative'),
+                                               CallbackQueryHandler(show_cataluña_hospital,
+                                                                    pattern='cataluña_hospital'),
+                                               CallbackQueryHandler(show_cataluña_all,
+                                                                    pattern='cataluña_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CATALUÑA_HOSPITAL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_cataluña_increment,
+                                                                    pattern='cataluña_increment'),
+                                               CallbackQueryHandler(show_cataluña_cumulative,
+                                                                    pattern='cataluña_cumulative'),
+                                               CallbackQueryHandler(show_cataluña_death,
+                                                                    pattern='cataluña_death'),
+                                               CallbackQueryHandler(show_cataluña_all,
+                                                                    pattern='cataluña_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CATALUÑA_ALL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_cataluña_increment,
+                                                                    pattern='cataluña_increment'),
+                                               CallbackQueryHandler(show_cataluña_cumulative,
+                                                                    pattern='cataluña_cumulative'),
+                                               CallbackQueryHandler(show_cataluña_death,
+                                                                    pattern='cataluña_death'),
+                                               CallbackQueryHandler(show_cataluña_hospital,
+                                                                    pattern='cataluña_hospital'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
                                            NOT_IMPLEMENTED: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
@@ -1969,6 +2130,18 @@ def main():
                                                                 pattern='castillayleon_hospital'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='castillayleon_all'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='cataluña_info'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='cataluña_increment'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='cataluña_cumulative'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='cataluña_death'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='cataluña_hospital'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='cataluña_all'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='show_not_implemented'),
                                        ])

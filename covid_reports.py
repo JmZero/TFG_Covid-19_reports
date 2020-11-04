@@ -20,7 +20,9 @@ INFO_CVALENCIANA_CUMULATIVE, INFO_CVALENCIANA_DEATH, INFO_CVALENCIANA_HOSPITAL, 
 INFO_CANARIAS_INCREMENT, INFO_CANARIAS_CUMULATIVE, INFO_CANARIAS_DEATH, INFO_CANARIAS_HOSPITAL, INFO_CANARIAS_ALL, \
 INFO_CANTABRIA, INFO_CANTABRIA_INCREMENT, INFO_CANTABRIA_CUMULATIVE, INFO_CANTABRIA_DEATH, INFO_CANTABRIA_HOSPITAL, \
 INFO_CANTABRIA_ALL, INFO_CASTILLALAMANCHA, INFO_CASTILLALAMANCHA_INCREMENT, INFO_CASTILLALAMANCHA_CUMULATIVE, \
-INFO_CASTILLALAMANCHA_DEATH, INFO_CASTILLALAMANCHA_HOSPITAL, INFO_CASTILLALAMANCHA_ALL = range(48)
+INFO_CASTILLALAMANCHA_DEATH, INFO_CASTILLALAMANCHA_HOSPITAL, INFO_CASTILLALAMANCHA_ALL, INFO_CASTILLAYLEON, \
+INFO_CASTILLAYLEON_INCREMENT, INFO_CASTILLAYLEON_CUMULATIVE, INFO_CASTILLAYLEON_DEATH, INFO_CASTILLAYLEON_HOSPITAL, \
+INFO_CASTILLAYLEON_ALL= range(54)
 
 
 # Getting mode, so we could define run function for local and Heroku setup
@@ -397,6 +399,37 @@ def show_castillalamancha_info(update, context):
     current_state = "INFO_CASTILLALAMANCHA"
     current_autonomy = "Castilla La Mancha"
     return INFO_CASTILLALAMANCHA
+
+
+def show_castillayleon_info(update, context):
+    global current_state, current_autonomy
+
+    username = update.callback_query.message.chat.username
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='castillayleon_increment'),
+         InlineKeyboardButton("Casos acumulados", callback_data='castillayleon_cumulative'),
+         InlineKeyboardButton("Fallecimientos", callback_data='castillayleon_death')],
+
+        [InlineKeyboardButton("Hospitalizaciones", callback_data='castillayleon_hospital'),
+         InlineKeyboardButton("Ver todo", callback_data='castillayleon_all'),
+         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    message.reply_photo(
+        photo=open('./img/mapa_castillayleon.png', 'rb')
+    )
+
+    message.reply_text(
+        text="{} elige los datos que quieres consultar.".format(username),
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_CASTILLAYLEON"
+    current_autonomy = "Castilla y León"
+    return INFO_CASTILLAYLEON
 
 
 def show_increment(update, context):
@@ -886,6 +919,37 @@ def show_castillalamancha_all(update, context):
     return INFO_CASTILLALAMANCHA_ALL
 
 
+# CASTILLA Y LEON
+def show_castillayleon_increment(update, context):
+    show_increment(update, context)
+
+    return INFO_CASTILLAYLEON_INCREMENT
+
+
+def show_castillayleon_cumulative(update, context):
+    show_cumulative(update, context)
+
+    return INFO_CASTILLAYLEON_CUMULATIVE
+
+
+def show_castillayleon_death(update, context):
+    show_death(update, context)
+
+    return INFO_CASTILLAYLEON_DEATH
+
+
+def show_castillayleon_hospital(update, context):
+    show_hospital(update, context)
+
+    return INFO_CASTILLAYLEON_HOSPITAL
+
+
+def show_castillayleon_all(update, context):
+    show_all_info(update, context)
+
+    return INFO_CASTILLAYLEON_ALL
+
+
 def show_info(update, context):
     global current_state
 
@@ -981,7 +1045,7 @@ def main():
                                                CallbackQueryHandler(show_canarias_info, pattern='canarias_info'),
                                                CallbackQueryHandler(show_cantabria_info, pattern='cantabria_info'),
                                                CallbackQueryHandler(show_castillalamancha_info, pattern='castillalamancha_info'),
-                                               # CallbackQueryHandler(show_castillayleon_info, pattern='castillayleon_info'),
+                                               CallbackQueryHandler(show_castillayleon_info, pattern='castillayleon_info'),
                                                # CallbackQueryHandler(show_cataluña_info, pattern='cataluña_info'),
                                                # CallbackQueryHandler(show_ceuta_info, pattern='ceuta_info'),
                                                # CallbackQueryHandler(show_extremadura_info, pattern='extremadura_info'),
@@ -1696,6 +1760,104 @@ def main():
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
+                                           INFO_CASTILLAYLEON: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_castillayleon_increment,
+                                                                    pattern='castillayleon_increment'),
+                                               CallbackQueryHandler(show_castillayleon_cumulative,
+                                                                    pattern='castillayleon_cumulative'),
+                                               CallbackQueryHandler(show_castillayleon_death,
+                                                                    pattern='castillayleon_death'),
+                                               CallbackQueryHandler(show_castillayleon_hospital,
+                                                                    pattern='castillayleon_hospital'),
+                                               CallbackQueryHandler(show_castillayleon_all,
+                                                                    pattern='castillayleon_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CASTILLAYLEON_INCREMENT: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_castillayleon_cumulative,
+                                                                    pattern='castillayleon_cumulative'),
+                                               CallbackQueryHandler(show_castillayleon_death,
+                                                                    pattern='castillayleon_death'),
+                                               CallbackQueryHandler(show_castillayleon_hospital,
+                                                                    pattern='castillayleon_hospital'),
+                                               CallbackQueryHandler(show_castillayleon_all,
+                                                                    pattern='castillayleon_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CASTILLAYLEON_CUMULATIVE: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_castillayleon_increment,
+                                                                    pattern='castillayleon_increment'),
+                                               CallbackQueryHandler(show_castillayleon_death,
+                                                                    pattern='castillayleon_death'),
+                                               CallbackQueryHandler(show_castillayleon_hospital,
+                                                                    pattern='castillayleon_hospital'),
+                                               CallbackQueryHandler(show_castillayleon_all,
+                                                                    pattern='castillayleon_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CASTILLAYLEON_DEATH: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_castillayleon_increment,
+                                                                    pattern='castillayleon_increment'),
+                                               CallbackQueryHandler(show_castillayleon_cumulative,
+                                                                    pattern='castillayleon_cumulative'),
+                                               CallbackQueryHandler(show_castillayleon_hospital,
+                                                                    pattern='castillayleon_hospital'),
+                                               CallbackQueryHandler(show_castillayleon_all,
+                                                                    pattern='castillayleon_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CASTILLAYLEON_HOSPITAL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_castillayleon_increment,
+                                                                    pattern='castillayleon_increment'),
+                                               CallbackQueryHandler(show_castillayleon_cumulative,
+                                                                    pattern='castillayleon_cumulative'),
+                                               CallbackQueryHandler(show_castillayleon_death,
+                                                                    pattern='castillayleon_death'),
+                                               CallbackQueryHandler(show_castillayleon_all,
+                                                                    pattern='castillayleon_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CASTILLAYLEON_ALL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_castillayleon_increment,
+                                                                    pattern='castillayleon_increment'),
+                                               CallbackQueryHandler(show_castillayleon_cumulative,
+                                                                    pattern='castillayleon_cumulative'),
+                                               CallbackQueryHandler(show_castillayleon_death,
+                                                                    pattern='castillayleon_death'),
+                                               CallbackQueryHandler(show_castillayleon_hospital,
+                                                                    pattern='castillayleon_hospital'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
                                            NOT_IMPLEMENTED: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
@@ -1795,6 +1957,18 @@ def main():
                                                                 pattern='castillalamancha_hospital'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='castillalamancha_all'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='castillayleon_info'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='castillayleon_increment'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='castillayleon_cumulative'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='castillayleon_death'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='castillayleon_hospital'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='castillayleon_all'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='show_not_implemented'),
                                        ])

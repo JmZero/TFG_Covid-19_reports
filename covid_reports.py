@@ -15,7 +15,8 @@ logger = logging.getLogger()
 WELCOME, INICIO, HELP, STATUS_INFO, WELCOME_BAD, NOT_IMPLEMENTED,\
 INFO_ANDALUCIA, INFO_ANDALUCIA_INCREMENT, INFO_ANDALUCIA_CUMULATIVE, INFO_ANDALUCIA_DEATH, INFO_ANDALUCIA_HOSPITAL,\
 INFO_ANDALUCIA_ALL, INFO_ARAGON, INFO_ARAGON_INCREMENT, INFO_ARAGON_CUMULATIVE, INFO_ARAGON_DEATH, INFO_ARAGON_HOSPITAL,\
-INFO_ARAGON_ALL = range(18)
+INFO_ARAGON_ALL, INFO_ASTURIAS, INFO_ASTURIAS_INCREMENT, INFO_ASTURIAS_CUMULATIVE, INFO_ASTURIAS_DEATH,\
+INFO_ASTURIAS_HOSPITAL, INFO_ASTURIAS_ALL = range(24)
 
 # Getting mode, so we could define run function for local and Heroku setup
 mode = os.getenv("MODE")
@@ -188,8 +189,8 @@ def show_andalucia_info(update, context):
          InlineKeyboardButton("Fallecimientos", callback_data='andalucia_death')],
 
         [InlineKeyboardButton("Hospitalizaciones", callback_data='andalucia_hospital'),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented'),
-         InlineKeyboardButton("Ver todo", callback_data='andalucia_all')],
+         InlineKeyboardButton("Ver todo", callback_data='andalucia_all'),
+         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -219,8 +220,8 @@ def show_aragon_info(update, context):
          InlineKeyboardButton("Fallecimientos", callback_data='aragon_death')],
 
         [InlineKeyboardButton("Hospitalizaciones", callback_data='aragon_hospital'),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented'),
-         InlineKeyboardButton("Ver todo", callback_data='aragon_all')],
+         InlineKeyboardButton("Ver todo", callback_data='aragon_all'),
+         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -238,6 +239,37 @@ def show_aragon_info(update, context):
     return INFO_ARAGON
 
 
+def show_asturias_info(update, context):
+    global current_state, current_autonomy
+
+    username = update.callback_query.message.chat.username
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='asturias_increment'),
+         InlineKeyboardButton("Casos acumulados", callback_data='asturias_cumulative'),
+         InlineKeyboardButton("Fallecimientos", callback_data='asturias_death')],
+
+        [InlineKeyboardButton("Hospitalizaciones", callback_data='asturias_hospital'),
+         InlineKeyboardButton("Ver todo", callback_data='asturias_all'),
+         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    message.reply_photo(
+        photo=open('./img/mapa_asturias.png', 'rb')
+    )
+
+    message.reply_text(
+        text="{} elige los datos que quieres consultar.".format(username),
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_ASTURIAS"
+    current_autonomy = "Asturias"
+    return INFO_ASTURIAS
+
+
 def show_increment(update, context):
     global current_state, current_autonomy
 
@@ -251,8 +283,8 @@ def show_increment(update, context):
          InlineKeyboardButton("Fallecimientos", callback_data='{}_death'.format(autonomy_lower)),
          InlineKeyboardButton("Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower))],
 
-        [InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented'),
-         InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower))],
+        [InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower)),
+         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -292,8 +324,8 @@ def show_cumulative(update, context):
          InlineKeyboardButton("Fallecimientos", callback_data='{}_death'.format(autonomy_lower)),
          InlineKeyboardButton("Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower))],
 
-        [InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented'),
-         InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower))],
+        [InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower)),
+         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -329,8 +361,8 @@ def show_death(update, context):
          InlineKeyboardButton("Casos acumulados", callback_data='{}_cumulative'.format(autonomy_lower)),
          InlineKeyboardButton("Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower))],
 
-        [InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented'),
-         InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower))],
+        [InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower)),
+         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -351,7 +383,7 @@ def show_death(update, context):
                                                                            muertes_ultimo_dia(current_autonomy),
                                                                            media_muertes_semana(current_autonomy),
                                                                            tasa_letalidad(current_autonomy),
-                                                                           format_date(fecha_actualizacion(current_autonomy))),
+                                                                           format_date(fecha_actualizacion_muertes(current_autonomy))),
         parse_mode='HTML',
         reply_markup=reply_markup
     )
@@ -372,8 +404,8 @@ def show_hospital(update, context):
          InlineKeyboardButton("Casos acumulados", callback_data='{}_cumulative'.format(autonomy_lower)),
          InlineKeyboardButton("Fallecimientos", callback_data='{}_death'.format(autonomy_lower))],
 
-        [InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented'),
-         InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower))],
+        [InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower)),
+         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -439,8 +471,7 @@ def show_all_info(update, context):
                                                                          casos_acumulados(current_autonomy),
                                                                          incremento_ultimo_dia(current_autonomy),
                                                                          media_casos_semana(current_autonomy),
-                                                                         format_date(
-                                                                             fecha_actualizacion(current_autonomy))),
+                                                                         format_date(fecha_actualizacion(current_autonomy))),
         parse_mode='HTML',
     )
 
@@ -476,7 +507,7 @@ def show_all_info(update, context):
                                                                          muertes_ultimo_dia(current_autonomy),
                                                                          media_muertes_semana(current_autonomy),
                                                                          tasa_letalidad(current_autonomy),
-                                                                         format_date(fecha_actualizacion(current_autonomy))),
+                                                                         format_date(fecha_actualizacion_muertes(current_autonomy))),
         parse_mode='HTML',
     )
 
@@ -508,6 +539,10 @@ def show_all_info(update, context):
 
     current_state = "INFO_{}_ALL".format(autonomy_upper)
 
+
+# ANDALUCÍA
+
+
 def show_andalucia_increment(update, context):
     show_increment(update, context)
 
@@ -537,6 +572,10 @@ def show_andalucia_all(update, context):
 
     return INFO_ANDALUCIA_ALL
 
+
+# ARAGÓN
+
+
 def show_aragon_increment(update, context):
     show_increment(update, context)
 
@@ -565,6 +604,39 @@ def show_aragon_all(update, context):
     show_all_info(update, context)
 
     return INFO_ARAGON_ALL
+
+
+# ASTURIAS
+
+
+def show_asturias_increment(update, context):
+    show_increment(update, context)
+
+    return INFO_ASTURIAS_INCREMENT
+
+
+def show_asturias_cumulative(update, context):
+    show_cumulative(update, context)
+
+    return INFO_ASTURIAS_CUMULATIVE
+
+
+def show_asturias_death(update, context):
+    show_death(update, context)
+
+    return INFO_ASTURIAS_DEATH
+
+
+def show_asturias_hospital(update, context):
+    show_hospital(update, context)
+
+    return INFO_ASTURIAS_HOSPITAL
+
+
+def show_asturias_all(update, context):
+    show_all_info(update, context)
+
+    return INFO_ASTURIAS_ALL
 
 
 def show_info(update, context):
@@ -667,7 +739,7 @@ def main():
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
                                                CallbackQueryHandler(show_andalucia_info, pattern='andalucia_info'),
                                                CallbackQueryHandler(show_aragon_info, pattern='aragon_info'),
-                                               # CallbackQueryHandler(show_asturias_info, pattern='asturias_info'),
+                                               CallbackQueryHandler(show_asturias_info, pattern='asturias_info'),
                                                # CallbackQueryHandler(show_c.valenciana_info, pattern='c.valenciana_info'),
                                                # CallbackQueryHandler(show_canarias_info, pattern='canarias_info'),
                                                # CallbackQueryHandler(show_cantabria_info, pattern='cantabria_info'),
@@ -835,6 +907,73 @@ def main():
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
+                                           INFO_ASTURIAS: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_asturias_increment, pattern='asturias_increment'),
+                                               CallbackQueryHandler(show_asturias_cumulative, pattern='asturias_cumulative'),
+                                               CallbackQueryHandler(show_asturias_death, pattern='asturias_death'),
+                                               CallbackQueryHandler(show_asturias_hospital, pattern='asturias_hospital'),
+                                               CallbackQueryHandler(show_asturias_all, pattern='asturias_all'),
+                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                           ],
+                                           INFO_ASTURIAS_INCREMENT: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_asturias_cumulative, pattern='asturias_cumulative'),
+                                               CallbackQueryHandler(show_asturias_death, pattern='asturias_death'),
+                                               CallbackQueryHandler(show_asturias_hospital, pattern='asturias_hospital'),
+                                               CallbackQueryHandler(show_asturias_all, pattern='asturias_all'),
+                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                           ],
+                                           INFO_ASTURIAS_CUMULATIVE: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_asturias_increment, pattern='asturias_increment'),
+                                               CallbackQueryHandler(show_asturias_death, pattern='asturias_death'),
+                                               CallbackQueryHandler(show_asturias_hospital, pattern='asturias_hospital'),
+                                               CallbackQueryHandler(show_asturias_all, pattern='asturias_all'),
+                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                           ],
+                                           INFO_ASTURIAS_DEATH: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_asturias_increment, pattern='asturias_increment'),
+                                               CallbackQueryHandler(show_asturias_cumulative, pattern='asturias_cumulative'),
+                                               CallbackQueryHandler(show_asturias_hospital, pattern='asturias_hospital'),
+                                               CallbackQueryHandler(show_asturias_all, pattern='asturias_all'),
+                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                           ],
+                                           INFO_ASTURIAS_HOSPITAL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_asturias_increment, pattern='asturias_increment'),
+                                               CallbackQueryHandler(show_asturias_cumulative, pattern='asturias_cumulative'),
+                                               CallbackQueryHandler(show_asturias_death, pattern='asturias_death'),
+                                               CallbackQueryHandler(show_asturias_all, pattern='asturias_all'),
+                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                           ],
+                                           INFO_ASTURIAS_ALL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_asturias_increment, pattern='asturias_increment'),
+                                               CallbackQueryHandler(show_asturias_cumulative, pattern='asturias_cumulative'),
+                                               CallbackQueryHandler(show_asturias_death, pattern='asturias_death'),
+                                               CallbackQueryHandler(show_asturias_hospital, pattern='asturias_hospital'),
+                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
+                                           ],
                                            NOT_IMPLEMENTED: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
@@ -860,6 +999,12 @@ def main():
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='aragon_death'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='aragon_hospital'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='aragon_all'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='aragon_info'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='asturias_increment'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='asturias_cumulative'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='asturias_death'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='asturias_hospital'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='asturias_all'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior, pattern='show_not_implemented'),
                                        ])
 
@@ -922,12 +1067,12 @@ def muertes_totales(provincia):
 
 
 def muertes_ultimo_dia(provincia):
-    df_loc = df_ccaa_muertes.loc[(df_ccaa_muertes['Fecha'] == fecha_actualizacion(provincia)) & (df_ccaa_muertes['CCAA'] == provincia)]
+    df_loc = df_ccaa_muertes.loc[(df_ccaa_muertes['Fecha'] == fecha_actualizacion_muertes(provincia)) & (df_ccaa_muertes['CCAA'] == provincia)]
     return str(df_loc['Fallecidos'].values[0])
 
 
 def media_muertes_semana(provincia):
-    ultima_fecha = fecha_actualizacion(provincia)
+    ultima_fecha = fecha_actualizacion_muertes(provincia)
     fecha = datetime.strptime(ultima_fecha, "%Y-%m-%d")
 
     total = 0
@@ -943,6 +1088,22 @@ def media_muertes_semana(provincia):
 
 def tasa_letalidad(provincia):
     return str(round(int(muertes_totales(provincia))*100/int(casos_acumulados(provincia)),2))
+
+
+def fecha_actualizacion_muertes(provincia):
+    actual_day = date.today()
+    dias_antes = 0
+    day_before = timedelta(days=dias_antes)
+
+    # La primera fecha de la que se tiene datos
+    while df_ccaa_muertes.loc[df_ccaa_muertes['Fecha'] == str(actual_day - day_before)].empty:
+        dias_antes += 1
+        day_before = timedelta(days=dias_antes)
+
+    # Los ultimos datos de la provincia
+    df_loc = df_ccaa_muertes.loc[(df_ccaa_muertes['Fecha'] == str(actual_day-day_before)) & (df_ccaa_muertes['CCAA'] == provincia)]
+
+    return str(actual_day-day_before)
 
 
 def pacientes_ingresados(provincia):

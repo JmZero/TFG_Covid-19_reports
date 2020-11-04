@@ -23,7 +23,8 @@ INFO_CANTABRIA_ALL, INFO_CASTILLALAMANCHA, INFO_CASTILLALAMANCHA_INCREMENT, INFO
 INFO_CASTILLALAMANCHA_DEATH, INFO_CASTILLALAMANCHA_HOSPITAL, INFO_CASTILLALAMANCHA_ALL, INFO_CASTILLAYLEON, \
 INFO_CASTILLAYLEON_INCREMENT, INFO_CASTILLAYLEON_CUMULATIVE, INFO_CASTILLAYLEON_DEATH, INFO_CASTILLAYLEON_HOSPITAL, \
 INFO_CASTILLAYLEON_ALL, INFO_CATALUÑA, INFO_CATALUÑA_INCREMENT, INFO_CATALUÑA_CUMULATIVE, INFO_CATALUÑA_DEATH, \
-INFO_CATALUÑA_HOSPITAL, INFO_CATALUÑA_ALL = range(60)
+INFO_CATALUÑA_HOSPITAL, INFO_CATALUÑA_ALL, INFO_CEUTA, INFO_CEUTA_INCREMENT, INFO_CEUTA_CUMULATIVE, INFO_CEUTA_DEATH, \
+INFO_CEUTA_HOSPITAL, INFO_CEUTA_ALL= range(66)
 
 
 # Getting mode, so we could define run function for local and Heroku setup
@@ -462,6 +463,37 @@ def show_cataluña_info(update, context):
     current_state = "INFO_CATALUÑA"
     current_autonomy = "Cataluña"
     return INFO_CATALUÑA
+
+
+def show_ceuta_info(update, context):
+    global current_state, current_autonomy
+
+    username = update.callback_query.message.chat.username
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='ceuta_increment'),
+         InlineKeyboardButton("Casos acumulados", callback_data='ceuta_cumulative'),
+         InlineKeyboardButton("Fallecimientos", callback_data='ceuta_death')],
+
+        [InlineKeyboardButton("Hospitalizaciones", callback_data='ceuta_hospital'),
+         InlineKeyboardButton("Ver todo", callback_data='ceuta_all'),
+         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    message.reply_photo(
+        photo=open('./img/mapa_ceuta.png', 'rb')
+    )
+
+    message.reply_text(
+        text="{} elige los datos que quieres consultar.".format(username),
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_CEUTA"
+    current_autonomy = "Ceuta"
+    return INFO_CEUTA
 
 
 def show_increment(update, context):
@@ -1013,6 +1045,37 @@ def show_cataluña_all(update, context):
     return INFO_CATALUÑA_ALL
 
 
+# CEUTA
+def show_ceuta_increment(update, context):
+    show_increment(update, context)
+
+    return INFO_CEUTA_INCREMENT
+
+
+def show_ceuta_cumulative(update, context):
+    show_cumulative(update, context)
+
+    return INFO_CEUTA_CUMULATIVE
+
+
+def show_ceuta_death(update, context):
+    show_death(update, context)
+
+    return INFO_CEUTA_DEATH
+
+
+def show_ceuta_hospital(update, context):
+    show_hospital(update, context)
+
+    return INFO_CEUTA_HOSPITAL
+
+
+def show_ceuta_all(update, context):
+    show_all_info(update, context)
+
+    return INFO_CEUTA_ALL
+
+
 def show_info(update, context):
     global current_state
 
@@ -1110,7 +1173,7 @@ def main():
                                                CallbackQueryHandler(show_castillalamancha_info, pattern='castillalamancha_info'),
                                                CallbackQueryHandler(show_castillayleon_info, pattern='castillayleon_info'),
                                                CallbackQueryHandler(show_cataluña_info, pattern='cataluña_info'),
-                                               # CallbackQueryHandler(show_ceuta_info, pattern='ceuta_info'),
+                                               CallbackQueryHandler(show_ceuta_info, pattern='ceuta_info'),
                                                # CallbackQueryHandler(show_extremadura_info, pattern='extremadura_info'),
                                                # CallbackQueryHandler(show_galicia_info, pattern='galicia_info'),
                                                # CallbackQueryHandler(show_baleares_info, pattern='baleares_info'),
@@ -2019,6 +2082,104 @@ def main():
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
+                                           INFO_CEUTA: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_ceuta_increment,
+                                                                    pattern='ceuta_increment'),
+                                               CallbackQueryHandler(show_ceuta_cumulative,
+                                                                    pattern='ceuta_cumulative'),
+                                               CallbackQueryHandler(show_ceuta_death,
+                                                                    pattern='ceuta_death'),
+                                               CallbackQueryHandler(show_ceuta_hospital,
+                                                                    pattern='ceuta_hospital'),
+                                               CallbackQueryHandler(show_ceuta_all,
+                                                                    pattern='ceuta_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CEUTA_INCREMENT: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_ceuta_cumulative,
+                                                                    pattern='ceuta_cumulative'),
+                                               CallbackQueryHandler(show_ceuta_death,
+                                                                    pattern='ceuta_death'),
+                                               CallbackQueryHandler(show_ceuta_hospital,
+                                                                    pattern='ceuta_hospital'),
+                                               CallbackQueryHandler(show_ceuta_all,
+                                                                    pattern='ceuta_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CEUTA_CUMULATIVE: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_ceuta_increment,
+                                                                    pattern='ceuta_increment'),
+                                               CallbackQueryHandler(show_ceuta_death,
+                                                                    pattern='ceuta_death'),
+                                               CallbackQueryHandler(show_ceuta_hospital,
+                                                                    pattern='ceuta_hospital'),
+                                               CallbackQueryHandler(show_ceuta_all,
+                                                                    pattern='ceuta_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CEUTA_DEATH: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_ceuta_increment,
+                                                                    pattern='ceuta_increment'),
+                                               CallbackQueryHandler(show_ceuta_cumulative,
+                                                                    pattern='ceuta_cumulative'),
+                                               CallbackQueryHandler(show_ceuta_hospital,
+                                                                    pattern='ceuta_hospital'),
+                                               CallbackQueryHandler(show_ceuta_all,
+                                                                    pattern='ceuta_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CEUTA_HOSPITAL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_ceuta_increment,
+                                                                    pattern='ceuta_increment'),
+                                               CallbackQueryHandler(show_ceuta_cumulative,
+                                                                    pattern='ceuta_cumulative'),
+                                               CallbackQueryHandler(show_ceuta_death,
+                                                                    pattern='ceuta_death'),
+                                               CallbackQueryHandler(show_ceuta_all,
+                                                                    pattern='ceuta_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_CEUTA_ALL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_ceuta_increment,
+                                                                    pattern='ceuta_increment'),
+                                               CallbackQueryHandler(show_ceuta_cumulative,
+                                                                    pattern='ceuta_cumulative'),
+                                               CallbackQueryHandler(show_ceuta_death,
+                                                                    pattern='ceuta_death'),
+                                               CallbackQueryHandler(show_ceuta_hospital,
+                                                                    pattern='ceuta_hospital'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
                                            NOT_IMPLEMENTED: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
@@ -2142,6 +2303,18 @@ def main():
                                                                 pattern='cataluña_hospital'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='cataluña_all'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='ceuta_info'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='ceuta_increment'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='ceuta_cumulative'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='ceuta_death'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='ceuta_hospital'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='ceuta_all'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='show_not_implemented'),
                                        ])

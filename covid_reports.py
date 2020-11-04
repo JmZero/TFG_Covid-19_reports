@@ -24,7 +24,8 @@ INFO_CASTILLALAMANCHA_DEATH, INFO_CASTILLALAMANCHA_HOSPITAL, INFO_CASTILLALAMANC
 INFO_CASTILLAYLEON_INCREMENT, INFO_CASTILLAYLEON_CUMULATIVE, INFO_CASTILLAYLEON_DEATH, INFO_CASTILLAYLEON_HOSPITAL, \
 INFO_CASTILLAYLEON_ALL, INFO_CATALUÑA, INFO_CATALUÑA_INCREMENT, INFO_CATALUÑA_CUMULATIVE, INFO_CATALUÑA_DEATH, \
 INFO_CATALUÑA_HOSPITAL, INFO_CATALUÑA_ALL, INFO_CEUTA, INFO_CEUTA_INCREMENT, INFO_CEUTA_CUMULATIVE, INFO_CEUTA_DEATH, \
-INFO_CEUTA_HOSPITAL, INFO_CEUTA_ALL= range(66)
+INFO_CEUTA_HOSPITAL, INFO_CEUTA_ALL, INFO_EXTREMADURA, INFO_EXTREMADURA_INCREMENT, INFO_EXTREMADURA_CUMULATIVE, \
+INFO_EXTREMADURA_DEATH, INFO_EXTREMADURA_HOSPITAL, INFO_EXTREMADURA_ALL = range(72)
 
 
 # Getting mode, so we could define run function for local and Heroku setup
@@ -494,6 +495,37 @@ def show_ceuta_info(update, context):
     current_state = "INFO_CEUTA"
     current_autonomy = "Ceuta"
     return INFO_CEUTA
+
+
+def show_extremadura_info(update, context):
+    global current_state, current_autonomy
+
+    username = update.callback_query.message.chat.username
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='extremadura_increment'),
+         InlineKeyboardButton("Casos acumulados", callback_data='extremadura_cumulative'),
+         InlineKeyboardButton("Fallecimientos", callback_data='extremadura_death')],
+
+        [InlineKeyboardButton("Hospitalizaciones", callback_data='extremadura_hospital'),
+         InlineKeyboardButton("Ver todo", callback_data='extremadura_all'),
+         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    message.reply_photo(
+        photo=open('./img/mapa_extremadura.png', 'rb')
+    )
+
+    message.reply_text(
+        text="{} elige los datos que quieres consultar.".format(username),
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_EXTREMADURA"
+    current_autonomy = "Extremadura"
+    return INFO_EXTREMADURA
 
 
 def show_increment(update, context):
@@ -1076,6 +1108,37 @@ def show_ceuta_all(update, context):
     return INFO_CEUTA_ALL
 
 
+# EXTREMADURA
+def show_extremadura_increment(update, context):
+    show_increment(update, context)
+
+    return INFO_EXTREMADURA_INCREMENT
+
+
+def show_extremadura_cumulative(update, context):
+    show_cumulative(update, context)
+
+    return INFO_EXTREMADURA_CUMULATIVE
+
+
+def show_extremadura_death(update, context):
+    show_death(update, context)
+
+    return INFO_EXTREMADURA_DEATH
+
+
+def show_extremadura_hospital(update, context):
+    show_hospital(update, context)
+
+    return INFO_EXTREMADURA_HOSPITAL
+
+
+def show_extremadura_all(update, context):
+    show_all_info(update, context)
+
+    return INFO_EXTREMADURA_ALL
+
+
 def show_info(update, context):
     global current_state
 
@@ -1174,7 +1237,7 @@ def main():
                                                CallbackQueryHandler(show_castillayleon_info, pattern='castillayleon_info'),
                                                CallbackQueryHandler(show_cataluña_info, pattern='cataluña_info'),
                                                CallbackQueryHandler(show_ceuta_info, pattern='ceuta_info'),
-                                               # CallbackQueryHandler(show_extremadura_info, pattern='extremadura_info'),
+                                               CallbackQueryHandler(show_extremadura_info, pattern='extremadura_info'),
                                                # CallbackQueryHandler(show_galicia_info, pattern='galicia_info'),
                                                # CallbackQueryHandler(show_baleares_info, pattern='baleares_info'),
                                                # CallbackQueryHandler(show_larioja_info, pattern='larioja_info'),
@@ -2180,6 +2243,104 @@ def main():
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
+                                           INFO_EXTREMADURA: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_extremadura_increment,
+                                                                    pattern='extremadura_increment'),
+                                               CallbackQueryHandler(show_extremadura_cumulative,
+                                                                    pattern='extremadura_cumulative'),
+                                               CallbackQueryHandler(show_extremadura_death,
+                                                                    pattern='extremadura_death'),
+                                               CallbackQueryHandler(show_extremadura_hospital,
+                                                                    pattern='extremadura_hospital'),
+                                               CallbackQueryHandler(show_extremadura_all,
+                                                                    pattern='extremadura_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_EXTREMADURA_INCREMENT: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_extremadura_cumulative,
+                                                                    pattern='extremadura_cumulative'),
+                                               CallbackQueryHandler(show_extremadura_death,
+                                                                    pattern='extremadura_death'),
+                                               CallbackQueryHandler(show_extremadura_hospital,
+                                                                    pattern='extremadura_hospital'),
+                                               CallbackQueryHandler(show_extremadura_all,
+                                                                    pattern='extremadura_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_EXTREMADURA_CUMULATIVE: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_extremadura_increment,
+                                                                    pattern='extremadura_increment'),
+                                               CallbackQueryHandler(show_extremadura_death,
+                                                                    pattern='extremadura_death'),
+                                               CallbackQueryHandler(show_extremadura_hospital,
+                                                                    pattern='extremadura_hospital'),
+                                               CallbackQueryHandler(show_extremadura_all,
+                                                                    pattern='extremadura_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_EXTREMADURA_DEATH: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_extremadura_increment,
+                                                                    pattern='extremadura_increment'),
+                                               CallbackQueryHandler(show_extremadura_cumulative,
+                                                                    pattern='extremadura_cumulative'),
+                                               CallbackQueryHandler(show_extremadura_hospital,
+                                                                    pattern='extremadura_hospital'),
+                                               CallbackQueryHandler(show_extremadura_all,
+                                                                    pattern='extremadura_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_EXTREMADURA_HOSPITAL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_extremadura_increment,
+                                                                    pattern='extremadura_increment'),
+                                               CallbackQueryHandler(show_extremadura_cumulative,
+                                                                    pattern='extremadura_cumulative'),
+                                               CallbackQueryHandler(show_extremadura_death,
+                                                                    pattern='extremadura_death'),
+                                               CallbackQueryHandler(show_extremadura_all,
+                                                                    pattern='extremadura_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_EXTREMADURA_ALL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_extremadura_increment,
+                                                                    pattern='extremadura_increment'),
+                                               CallbackQueryHandler(show_extremadura_cumulative,
+                                                                    pattern='extremadura_cumulative'),
+                                               CallbackQueryHandler(show_extremadura_death,
+                                                                    pattern='extremadura_death'),
+                                               CallbackQueryHandler(show_extremadura_hospital,
+                                                                    pattern='extremadura_hospital'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
                                            NOT_IMPLEMENTED: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
@@ -2315,6 +2476,18 @@ def main():
                                                                 pattern='ceuta_hospital'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='ceuta_all'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='extremadura_info'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='extremadura_increment'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='extremadura_cumulative'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='extremadura_death'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='extremadura_hospital'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='extremadura_all'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='show_not_implemented'),
                                        ])

@@ -26,7 +26,9 @@ INFO_CASTILLAYLEON_ALL, INFO_CATALUÑA, INFO_CATALUÑA_INCREMENT, INFO_CATALUÑA
 INFO_CATALUÑA_HOSPITAL, INFO_CATALUÑA_ALL, INFO_CEUTA, INFO_CEUTA_INCREMENT, INFO_CEUTA_CUMULATIVE, INFO_CEUTA_DEATH, \
 INFO_CEUTA_HOSPITAL, INFO_CEUTA_ALL, INFO_EXTREMADURA, INFO_EXTREMADURA_INCREMENT, INFO_EXTREMADURA_CUMULATIVE, \
 INFO_EXTREMADURA_DEATH, INFO_EXTREMADURA_HOSPITAL, INFO_EXTREMADURA_ALL, INFO_GALICIA, INFO_GALICIA_INCREMENT, \
-INFO_GALICIA_CUMULATIVE, INFO_GALICIA_DEATH, INFO_GALICIA_HOSPITAL, INFO_GALICIA_ALL = range(78)
+INFO_GALICIA_CUMULATIVE, INFO_GALICIA_DEATH, INFO_GALICIA_HOSPITAL, INFO_GALICIA_ALL, INFO_BALEARES, \
+INFO_BALEARES_INCREMENT, INFO_BALEARES_CUMULATIVE, INFO_BALEARES_DEATH, INFO_BALEARES_HOSPITAL, \
+INFO_BALEARES_ALL = range(84)
 
 
 # Getting mode, so we could define run function for local and Heroku setup
@@ -558,6 +560,37 @@ def show_galicia_info(update, context):
     current_state = "INFO_GALICIA"
     current_autonomy = "Galicia"
     return INFO_GALICIA
+
+
+def show_baleares_info(update, context):
+    global current_state, current_autonomy
+
+    username = update.callback_query.message.chat.username
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='baleares_increment'),
+         InlineKeyboardButton("Casos acumulados", callback_data='baleares_cumulative'),
+         InlineKeyboardButton("Fallecimientos", callback_data='baleares_death')],
+
+        [InlineKeyboardButton("Hospitalizaciones", callback_data='baleares_hospital'),
+         InlineKeyboardButton("Ver todo", callback_data='baleares_all'),
+         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    message.reply_photo(
+        photo=open('./img/mapa_baleares.png', 'rb')
+    )
+
+    message.reply_text(
+        text="{} elige los datos que quieres consultar.".format(username),
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_BALEARES"
+    current_autonomy = "Baleares"
+    return INFO_BALEARES
 
 
 def show_increment(update, context):
@@ -1202,6 +1235,37 @@ def show_galicia_all(update, context):
     return INFO_GALICIA_ALL
 
 
+# BALEARES
+def show_baleares_increment(update, context):
+    show_increment(update, context)
+
+    return INFO_BALEARES_INCREMENT
+
+
+def show_baleares_cumulative(update, context):
+    show_cumulative(update, context)
+
+    return INFO_BALEARES_CUMULATIVE
+
+
+def show_baleares_death(update, context):
+    show_death(update, context)
+
+    return INFO_BALEARES_DEATH
+
+
+def show_baleares_hospital(update, context):
+    show_hospital(update, context)
+
+    return INFO_BALEARES_HOSPITAL
+
+
+def show_baleares_all(update, context):
+    show_all_info(update, context)
+
+    return INFO_BALEARES_ALL
+
+
 def show_info(update, context):
     global current_state
 
@@ -1302,7 +1366,7 @@ def main():
                                                CallbackQueryHandler(show_ceuta_info, pattern='ceuta_info'),
                                                CallbackQueryHandler(show_extremadura_info, pattern='extremadura_info'),
                                                CallbackQueryHandler(show_galicia_info, pattern='galicia_info'),
-                                               # CallbackQueryHandler(show_baleares_info, pattern='baleares_info'),
+                                               CallbackQueryHandler(show_baleares_info, pattern='baleares_info'),
                                                # CallbackQueryHandler(show_larioja_info, pattern='larioja_info'),
                                                # CallbackQueryHandler(show_madrid_info, pattern='madrid_info'),
                                                # CallbackQueryHandler(show_melilla_info, pattern='melilla_info'),
@@ -2502,6 +2566,104 @@ def main():
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
+                                           INFO_BALEARES: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_baleares_increment,
+                                                                    pattern='baleares_increment'),
+                                               CallbackQueryHandler(show_baleares_cumulative,
+                                                                    pattern='baleares_cumulative'),
+                                               CallbackQueryHandler(show_baleares_death,
+                                                                    pattern='baleares_death'),
+                                               CallbackQueryHandler(show_baleares_hospital,
+                                                                    pattern='baleares_hospital'),
+                                               CallbackQueryHandler(show_baleares_all,
+                                                                    pattern='baleares_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_BALEARES_INCREMENT: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_baleares_cumulative,
+                                                                    pattern='baleares_cumulative'),
+                                               CallbackQueryHandler(show_baleares_death,
+                                                                    pattern='baleares_death'),
+                                               CallbackQueryHandler(show_baleares_hospital,
+                                                                    pattern='baleares_hospital'),
+                                               CallbackQueryHandler(show_baleares_all,
+                                                                    pattern='baleares_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_BALEARES_CUMULATIVE: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_baleares_increment,
+                                                                    pattern='baleares_increment'),
+                                               CallbackQueryHandler(show_baleares_death,
+                                                                    pattern='baleares_death'),
+                                               CallbackQueryHandler(show_baleares_hospital,
+                                                                    pattern='baleares_hospital'),
+                                               CallbackQueryHandler(show_baleares_all,
+                                                                    pattern='baleares_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_BALEARES_DEATH: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_baleares_increment,
+                                                                    pattern='baleares_increment'),
+                                               CallbackQueryHandler(show_baleares_cumulative,
+                                                                    pattern='baleares_cumulative'),
+                                               CallbackQueryHandler(show_baleares_hospital,
+                                                                    pattern='baleares_hospital'),
+                                               CallbackQueryHandler(show_baleares_all,
+                                                                    pattern='baleares_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_BALEARES_HOSPITAL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_baleares_increment,
+                                                                    pattern='baleares_increment'),
+                                               CallbackQueryHandler(show_baleares_cumulative,
+                                                                    pattern='baleares_cumulative'),
+                                               CallbackQueryHandler(show_baleares_death,
+                                                                    pattern='baleares_death'),
+                                               CallbackQueryHandler(show_baleares_all,
+                                                                    pattern='baleares_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_BALEARES_ALL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_baleares_increment,
+                                                                    pattern='baleares_increment'),
+                                               CallbackQueryHandler(show_baleares_cumulative,
+                                                                    pattern='baleares_cumulative'),
+                                               CallbackQueryHandler(show_baleares_death,
+                                                                    pattern='baleares_death'),
+                                               CallbackQueryHandler(show_baleares_hospital,
+                                                                    pattern='baleares_hospital'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
                                            NOT_IMPLEMENTED: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
@@ -2661,6 +2823,18 @@ def main():
                                                                 pattern='galicia_hospital'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='galicia_all'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='baleares_info'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='baleares_increment'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='baleares_cumulative'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='baleares_death'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='baleares_hospital'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='baleares_all'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='show_not_implemented'),
                                        ])

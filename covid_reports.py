@@ -27,8 +27,9 @@ INFO_CATALUÑA_HOSPITAL, INFO_CATALUÑA_ALL, INFO_CEUTA, INFO_CEUTA_INCREMENT, I
 INFO_CEUTA_HOSPITAL, INFO_CEUTA_ALL, INFO_EXTREMADURA, INFO_EXTREMADURA_INCREMENT, INFO_EXTREMADURA_CUMULATIVE, \
 INFO_EXTREMADURA_DEATH, INFO_EXTREMADURA_HOSPITAL, INFO_EXTREMADURA_ALL, INFO_GALICIA, INFO_GALICIA_INCREMENT, \
 INFO_GALICIA_CUMULATIVE, INFO_GALICIA_DEATH, INFO_GALICIA_HOSPITAL, INFO_GALICIA_ALL, INFO_BALEARES, \
-INFO_BALEARES_INCREMENT, INFO_BALEARES_CUMULATIVE, INFO_BALEARES_DEATH, INFO_BALEARES_HOSPITAL, \
-INFO_BALEARES_ALL = range(84)
+INFO_BALEARES_INCREMENT, INFO_BALEARES_CUMULATIVE, INFO_BALEARES_DEATH, INFO_BALEARES_HOSPITAL, INFO_BALEARES_ALL,  \
+INFO_LARIOJA, INFO_LARIOJA_INCREMENT, INFO_LARIOJA_CUMULATIVE, INFO_LARIOJA_DEATH, INFO_LARIOJA_HOSPITAL, \
+INFO_LARIOJA_ALL = range(90)
 
 
 # Getting mode, so we could define run function for local and Heroku setup
@@ -591,6 +592,37 @@ def show_baleares_info(update, context):
     current_state = "INFO_BALEARES"
     current_autonomy = "Baleares"
     return INFO_BALEARES
+
+
+def show_larioja_info(update, context):
+    global current_state, current_autonomy
+
+    username = update.callback_query.message.chat.username
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='larioja_increment'),
+         InlineKeyboardButton("Casos acumulados", callback_data='larioja_cumulative'),
+         InlineKeyboardButton("Fallecimientos", callback_data='larioja_death')],
+
+        [InlineKeyboardButton("Hospitalizaciones", callback_data='larioja_hospital'),
+         InlineKeyboardButton("Ver todo", callback_data='larioja_all'),
+         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    message.reply_photo(
+        photo=open('./img/mapa_larioja.png', 'rb')
+    )
+
+    message.reply_text(
+        text="{} elige los datos que quieres consultar.".format(username),
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_LARIOJA"
+    current_autonomy = "La Rioja"
+    return INFO_LARIOJA
 
 
 def show_increment(update, context):
@@ -1266,6 +1298,37 @@ def show_baleares_all(update, context):
     return INFO_BALEARES_ALL
 
 
+# LA RIOJA
+def show_larioja_increment(update, context):
+    show_increment(update, context)
+
+    return INFO_LARIOJA_INCREMENT
+
+
+def show_larioja_cumulative(update, context):
+    show_cumulative(update, context)
+
+    return INFO_LARIOJA_CUMULATIVE
+
+
+def show_larioja_death(update, context):
+    show_death(update, context)
+
+    return INFO_LARIOJA_DEATH
+
+
+def show_larioja_hospital(update, context):
+    show_hospital(update, context)
+
+    return INFO_LARIOJA_HOSPITAL
+
+
+def show_larioja_all(update, context):
+    show_all_info(update, context)
+
+    return INFO_LARIOJA_ALL
+
+
 def show_info(update, context):
     global current_state
 
@@ -1367,7 +1430,7 @@ def main():
                                                CallbackQueryHandler(show_extremadura_info, pattern='extremadura_info'),
                                                CallbackQueryHandler(show_galicia_info, pattern='galicia_info'),
                                                CallbackQueryHandler(show_baleares_info, pattern='baleares_info'),
-                                               # CallbackQueryHandler(show_larioja_info, pattern='larioja_info'),
+                                               CallbackQueryHandler(show_larioja_info, pattern='larioja_info'),
                                                # CallbackQueryHandler(show_madrid_info, pattern='madrid_info'),
                                                # CallbackQueryHandler(show_melilla_info, pattern='melilla_info'),
                                                # CallbackQueryHandler(show_murcia_info, pattern='murcia_info'),
@@ -2664,6 +2727,104 @@ def main():
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
+                                           INFO_LARIOJA: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_larioja_increment,
+                                                                    pattern='larioja_increment'),
+                                               CallbackQueryHandler(show_larioja_cumulative,
+                                                                    pattern='larioja_cumulative'),
+                                               CallbackQueryHandler(show_larioja_death,
+                                                                    pattern='larioja_death'),
+                                               CallbackQueryHandler(show_larioja_hospital,
+                                                                    pattern='larioja_hospital'),
+                                               CallbackQueryHandler(show_larioja_all,
+                                                                    pattern='larioja_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_LARIOJA_INCREMENT: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_larioja_cumulative,
+                                                                    pattern='larioja_cumulative'),
+                                               CallbackQueryHandler(show_larioja_death,
+                                                                    pattern='larioja_death'),
+                                               CallbackQueryHandler(show_larioja_hospital,
+                                                                    pattern='larioja_hospital'),
+                                               CallbackQueryHandler(show_larioja_all,
+                                                                    pattern='larioja_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_LARIOJA_CUMULATIVE: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_larioja_increment,
+                                                                    pattern='larioja_increment'),
+                                               CallbackQueryHandler(show_larioja_death,
+                                                                    pattern='larioja_death'),
+                                               CallbackQueryHandler(show_larioja_hospital,
+                                                                    pattern='larioja_hospital'),
+                                               CallbackQueryHandler(show_larioja_all,
+                                                                    pattern='larioja_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_LARIOJA_DEATH: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_larioja_increment,
+                                                                    pattern='larioja_increment'),
+                                               CallbackQueryHandler(show_larioja_cumulative,
+                                                                    pattern='larioja_cumulative'),
+                                               CallbackQueryHandler(show_larioja_hospital,
+                                                                    pattern='larioja_hospital'),
+                                               CallbackQueryHandler(show_larioja_all,
+                                                                    pattern='larioja_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_LARIOJA_HOSPITAL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_larioja_increment,
+                                                                    pattern='larioja_increment'),
+                                               CallbackQueryHandler(show_larioja_cumulative,
+                                                                    pattern='larioja_cumulative'),
+                                               CallbackQueryHandler(show_larioja_death,
+                                                                    pattern='larioja_death'),
+                                               CallbackQueryHandler(show_larioja_all,
+                                                                    pattern='larioja_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_LARIOJA_ALL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_larioja_increment,
+                                                                    pattern='larioja_increment'),
+                                               CallbackQueryHandler(show_larioja_cumulative,
+                                                                    pattern='larioja_cumulative'),
+                                               CallbackQueryHandler(show_larioja_death,
+                                                                    pattern='larioja_death'),
+                                               CallbackQueryHandler(show_larioja_hospital,
+                                                                    pattern='larioja_hospital'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
                                            NOT_IMPLEMENTED: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
@@ -2835,6 +2996,18 @@ def main():
                                                                 pattern='baleares_hospital'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='baleares_all'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='larioja_info'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='larioja_increment'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='larioja_cumulative'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='larioja_death'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='larioja_hospital'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='larioja_all'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='show_not_implemented'),
                                        ])

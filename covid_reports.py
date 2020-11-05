@@ -33,7 +33,8 @@ INFO_LARIOJA_ALL, INFO_MADRID, INFO_MADRID_INCREMENT, INFO_MADRID_CUMULATIVE, IN
 INFO_MADRID_ALL, INFO_MELILLA, INFO_MELILLA_INCREMENT, INFO_MELILLA_CUMULATIVE, INFO_MELILLA_DEATH, \
 INFO_MELILLA_HOSPITAL, INFO_MELILLA_ALL, INFO_MURCIA, INFO_MURCIA_INCREMENT, INFO_MURCIA_CUMULATIVE, INFO_MURCIA_DEATH, \
 INFO_MURCIA_HOSPITAL, INFO_MURCIA_ALL, INFO_NAVARRA, INFO_NAVARRA_INCREMENT, INFO_NAVARRA_CUMULATIVE, \
-INFO_NAVARRA_DEATH, INFO_NAVARRA_HOSPITAL, INFO_NAVARRA_ALL = range(114)
+INFO_NAVARRA_DEATH, INFO_NAVARRA_HOSPITAL, INFO_NAVARRA_ALL, INFO_PAISVASCO, INFO_PAISVASCO_INCREMENT, \
+INFO_PAISVASCO_CUMULATIVE, INFO_PAISVASCO_DEATH, INFO_PAISVASCO_HOSPITAL, INFO_PAISVASCO_ALL = range(120)
 
 
 # Getting mode, so we could define run function for local and Heroku setup
@@ -751,6 +752,37 @@ def show_navarra_info(update, context):
     current_state = "INFO_NAVARRA"
     current_autonomy = "Navarra"
     return INFO_NAVARRA
+
+
+def show_paisvasco_info(update, context):
+    global current_state, current_autonomy
+
+    username = update.callback_query.message.chat.username
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='paisvasco_increment'),
+         InlineKeyboardButton("Casos acumulados", callback_data='paisvasco_cumulative'),
+         InlineKeyboardButton("Fallecimientos", callback_data='paisvasco_death')],
+
+        [InlineKeyboardButton("Hospitalizaciones", callback_data='paisvasco_hospital'),
+         InlineKeyboardButton("Ver todo", callback_data='paisvasco_all'),
+         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    message.reply_photo(
+        photo=open('./img/mapa_paisvasco.png', 'rb')
+    )
+
+    message.reply_text(
+        text="{} elige los datos que quieres consultar.".format(username),
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_PAISVASCO"
+    current_autonomy = "País Vasco"
+    return INFO_PAISVASCO
 
 
 def show_increment(update, context):
@@ -1581,6 +1613,37 @@ def show_navarra_all(update, context):
     return INFO_NAVARRA_ALL
 
 
+# PAÍS VASCO
+def show_paisvasco_increment(update, context):
+    show_increment(update, context)
+
+    return INFO_PAISVASCO_INCREMENT
+
+
+def show_paisvasco_cumulative(update, context):
+    show_cumulative(update, context)
+
+    return INFO_PAISVASCO_CUMULATIVE
+
+
+def show_paisvasco_death(update, context):
+    show_death(update, context)
+
+    return INFO_PAISVASCO_DEATH
+
+
+def show_paisvasco_hospital(update, context):
+    show_hospital(update, context)
+
+    return INFO_PAISVASCO_HOSPITAL
+
+
+def show_paisvasco_all(update, context):
+    show_all_info(update, context)
+
+    return INFO_PAISVASCO_ALL
+
+
 def show_info(update, context):
     global current_state
 
@@ -1687,7 +1750,7 @@ def main():
                                                CallbackQueryHandler(show_melilla_info, pattern='melilla_info'),
                                                CallbackQueryHandler(show_murcia_info, pattern='murcia_info'),
                                                CallbackQueryHandler(show_navarra_info, pattern='navarra_info'),
-                                               # CallbackQueryHandler(show_paisvasco_info, pattern='paisvasco_info'),
+                                               CallbackQueryHandler(show_paisvasco_info, pattern='paisvasco_info'),
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
@@ -3469,6 +3532,104 @@ def main():
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
+                                           INFO_PAISVASCO: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_paisvasco_increment,
+                                                                    pattern='paisvasco_increment'),
+                                               CallbackQueryHandler(show_paisvasco_cumulative,
+                                                                    pattern='paisvasco_cumulative'),
+                                               CallbackQueryHandler(show_paisvasco_death,
+                                                                    pattern='paisvasco_death'),
+                                               CallbackQueryHandler(show_paisvasco_hospital,
+                                                                    pattern='paisvasco_hospital'),
+                                               CallbackQueryHandler(show_paisvasco_all,
+                                                                    pattern='paisvasco_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_PAISVASCO_INCREMENT: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_paisvasco_cumulative,
+                                                                    pattern='paisvasco_cumulative'),
+                                               CallbackQueryHandler(show_paisvasco_death,
+                                                                    pattern='paisvasco_death'),
+                                               CallbackQueryHandler(show_paisvasco_hospital,
+                                                                    pattern='paisvasco_hospital'),
+                                               CallbackQueryHandler(show_paisvasco_all,
+                                                                    pattern='paisvasco_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_PAISVASCO_CUMULATIVE: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_paisvasco_increment,
+                                                                    pattern='paisvasco_increment'),
+                                               CallbackQueryHandler(show_paisvasco_death,
+                                                                    pattern='paisvasco_death'),
+                                               CallbackQueryHandler(show_paisvasco_hospital,
+                                                                    pattern='paisvasco_hospital'),
+                                               CallbackQueryHandler(show_paisvasco_all,
+                                                                    pattern='paisvasco_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_PAISVASCO_DEATH: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_paisvasco_increment,
+                                                                    pattern='paisvasco_increment'),
+                                               CallbackQueryHandler(show_paisvasco_cumulative,
+                                                                    pattern='paisvasco_cumulative'),
+                                               CallbackQueryHandler(show_paisvasco_hospital,
+                                                                    pattern='paisvasco_hospital'),
+                                               CallbackQueryHandler(show_paisvasco_all,
+                                                                    pattern='paisvasco_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_PAISVASCO_HOSPITAL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_paisvasco_increment,
+                                                                    pattern='paisvasco_increment'),
+                                               CallbackQueryHandler(show_paisvasco_cumulative,
+                                                                    pattern='paisvasco_cumulative'),
+                                               CallbackQueryHandler(show_paisvasco_death,
+                                                                    pattern='paisvasco_death'),
+                                               CallbackQueryHandler(show_paisvasco_all,
+                                                                    pattern='paisvasco_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_PAISVASCO_ALL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_paisvasco_increment,
+                                                                    pattern='paisvasco_increment'),
+                                               CallbackQueryHandler(show_paisvasco_cumulative,
+                                                                    pattern='paisvasco_cumulative'),
+                                               CallbackQueryHandler(show_paisvasco_death,
+                                                                    pattern='paisvasco_death'),
+                                               CallbackQueryHandler(show_paisvasco_hospital,
+                                                                    pattern='paisvasco_hospital'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
                                            NOT_IMPLEMENTED: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
@@ -3700,6 +3861,18 @@ def main():
                                                                 pattern='navarra_hospital'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='navarra_all'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='paisvasco_info'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='paisvasco_increment'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='paisvasco_cumulative'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='paisvasco_death'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='paisvasco_hospital'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='paisvasco_all'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='show_not_implemented'),
                                        ])

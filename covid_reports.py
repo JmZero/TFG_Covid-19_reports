@@ -30,7 +30,8 @@ INFO_GALICIA_CUMULATIVE, INFO_GALICIA_DEATH, INFO_GALICIA_HOSPITAL, INFO_GALICIA
 INFO_BALEARES_INCREMENT, INFO_BALEARES_CUMULATIVE, INFO_BALEARES_DEATH, INFO_BALEARES_HOSPITAL, INFO_BALEARES_ALL,  \
 INFO_LARIOJA, INFO_LARIOJA_INCREMENT, INFO_LARIOJA_CUMULATIVE, INFO_LARIOJA_DEATH, INFO_LARIOJA_HOSPITAL, \
 INFO_LARIOJA_ALL, INFO_MADRID, INFO_MADRID_INCREMENT, INFO_MADRID_CUMULATIVE, INFO_MADRID_DEATH, INFO_MADRID_HOSPITAL, \
-INFO_MADRID_ALL = range(96)
+INFO_MADRID_ALL, INFO_MELILLA, INFO_MELILLA_INCREMENT, INFO_MELILLA_CUMULATIVE, INFO_MELILLA_DEATH, \
+INFO_MELILLA_HOSPITAL, INFO_MELILLA_ALL = range(102)
 
 
 # Getting mode, so we could define run function for local and Heroku setup
@@ -655,6 +656,37 @@ def show_madrid_info(update, context):
     current_state = "INFO_MADRID"
     current_autonomy = "Madrid"
     return INFO_MADRID
+
+
+def show_melilla_info(update, context):
+    global current_state, current_autonomy
+
+    username = update.callback_query.message.chat.username
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='melilla_increment'),
+         InlineKeyboardButton("Casos acumulados", callback_data='melilla_cumulative'),
+         InlineKeyboardButton("Fallecimientos", callback_data='melilla_death')],
+
+        [InlineKeyboardButton("Hospitalizaciones", callback_data='melilla_hospital'),
+         InlineKeyboardButton("Ver todo", callback_data='melilla_all'),
+         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    message.reply_photo(
+        photo=open('./img/mapa_melilla.png', 'rb')
+    )
+
+    message.reply_text(
+        text="{} elige los datos que quieres consultar.".format(username),
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_MELILLA"
+    current_autonomy = "Melilla"
+    return INFO_MELILLA
 
 
 def show_increment(update, context):
@@ -1392,6 +1424,37 @@ def show_madrid_all(update, context):
     return INFO_MADRID_ALL
 
 
+# MELILLA
+def show_melilla_increment(update, context):
+    show_increment(update, context)
+
+    return INFO_MELILLA_INCREMENT
+
+
+def show_melilla_cumulative(update, context):
+    show_cumulative(update, context)
+
+    return INFO_MELILLA_CUMULATIVE
+
+
+def show_melilla_death(update, context):
+    show_death(update, context)
+
+    return INFO_MELILLA_DEATH
+
+
+def show_melilla_hospital(update, context):
+    show_hospital(update, context)
+
+    return INFO_MELILLA_HOSPITAL
+
+
+def show_melilla_all(update, context):
+    show_all_info(update, context)
+
+    return INFO_MELILLA_ALL
+
+
 def show_info(update, context):
     global current_state
 
@@ -1495,7 +1558,7 @@ def main():
                                                CallbackQueryHandler(show_baleares_info, pattern='baleares_info'),
                                                CallbackQueryHandler(show_larioja_info, pattern='larioja_info'),
                                                CallbackQueryHandler(show_madrid_info, pattern='madrid_info'),
-                                               # CallbackQueryHandler(show_melilla_info, pattern='melilla_info'),
+                                               CallbackQueryHandler(show_melilla_info, pattern='melilla_info'),
                                                # CallbackQueryHandler(show_murcia_info, pattern='murcia_info'),
                                                # CallbackQueryHandler(show_navarra_info, pattern='navarra_info'),
                                                # CallbackQueryHandler(show_paisvasco_info, pattern='paisvasco_info'),
@@ -2986,6 +3049,104 @@ def main():
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
+                                           INFO_MELILLA: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_melilla_increment,
+                                                                    pattern='melilla_increment'),
+                                               CallbackQueryHandler(show_melilla_cumulative,
+                                                                    pattern='melilla_cumulative'),
+                                               CallbackQueryHandler(show_melilla_death,
+                                                                    pattern='melilla_death'),
+                                               CallbackQueryHandler(show_melilla_hospital,
+                                                                    pattern='melilla_hospital'),
+                                               CallbackQueryHandler(show_melilla_all,
+                                                                    pattern='melilla_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_MELILLA_INCREMENT: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_melilla_cumulative,
+                                                                    pattern='melilla_cumulative'),
+                                               CallbackQueryHandler(show_melilla_death,
+                                                                    pattern='melilla_death'),
+                                               CallbackQueryHandler(show_melilla_hospital,
+                                                                    pattern='melilla_hospital'),
+                                               CallbackQueryHandler(show_melilla_all,
+                                                                    pattern='melilla_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_MELILLA_CUMULATIVE: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_melilla_increment,
+                                                                    pattern='melilla_increment'),
+                                               CallbackQueryHandler(show_melilla_death,
+                                                                    pattern='melilla_death'),
+                                               CallbackQueryHandler(show_melilla_hospital,
+                                                                    pattern='melilla_hospital'),
+                                               CallbackQueryHandler(show_melilla_all,
+                                                                    pattern='melilla_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_MELILLA_DEATH: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_melilla_increment,
+                                                                    pattern='melilla_increment'),
+                                               CallbackQueryHandler(show_melilla_cumulative,
+                                                                    pattern='melilla_cumulative'),
+                                               CallbackQueryHandler(show_melilla_hospital,
+                                                                    pattern='melilla_hospital'),
+                                               CallbackQueryHandler(show_melilla_all,
+                                                                    pattern='melilla_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_MELILLA_HOSPITAL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_melilla_increment,
+                                                                    pattern='melilla_increment'),
+                                               CallbackQueryHandler(show_melilla_cumulative,
+                                                                    pattern='melilla_cumulative'),
+                                               CallbackQueryHandler(show_melilla_death,
+                                                                    pattern='melilla_death'),
+                                               CallbackQueryHandler(show_melilla_all,
+                                                                    pattern='melilla_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_MELILLA_ALL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_melilla_increment,
+                                                                    pattern='melilla_increment'),
+                                               CallbackQueryHandler(show_melilla_cumulative,
+                                                                    pattern='melilla_cumulative'),
+                                               CallbackQueryHandler(show_melilla_death,
+                                                                    pattern='melilla_death'),
+                                               CallbackQueryHandler(show_melilla_hospital,
+                                                                    pattern='melilla_hospital'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
                                            NOT_IMPLEMENTED: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
@@ -3181,6 +3342,18 @@ def main():
                                                                 pattern='madrid_hospital'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='madrid_all'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='melilla_info'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='melilla_increment'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='melilla_cumulative'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='melilla_death'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='melilla_hospital'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='melilla_all'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='show_not_implemented'),
                                        ])

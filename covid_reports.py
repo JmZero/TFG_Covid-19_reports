@@ -32,7 +32,8 @@ INFO_LARIOJA, INFO_LARIOJA_INCREMENT, INFO_LARIOJA_CUMULATIVE, INFO_LARIOJA_DEAT
 INFO_LARIOJA_ALL, INFO_MADRID, INFO_MADRID_INCREMENT, INFO_MADRID_CUMULATIVE, INFO_MADRID_DEATH, INFO_MADRID_HOSPITAL, \
 INFO_MADRID_ALL, INFO_MELILLA, INFO_MELILLA_INCREMENT, INFO_MELILLA_CUMULATIVE, INFO_MELILLA_DEATH, \
 INFO_MELILLA_HOSPITAL, INFO_MELILLA_ALL, INFO_MURCIA, INFO_MURCIA_INCREMENT, INFO_MURCIA_CUMULATIVE, INFO_MURCIA_DEATH, \
-INFO_MURCIA_HOSPITAL, INFO_MURCIA_ALL = range(108)
+INFO_MURCIA_HOSPITAL, INFO_MURCIA_ALL, INFO_NAVARRA, INFO_NAVARRA_INCREMENT, INFO_NAVARRA_CUMULATIVE, \
+INFO_NAVARRA_DEATH, INFO_NAVARRA_HOSPITAL, INFO_NAVARRA_ALL = range(114)
 
 
 # Getting mode, so we could define run function for local and Heroku setup
@@ -719,6 +720,37 @@ def show_murcia_info(update, context):
     current_state = "INFO_MURCIA"
     current_autonomy = "Murcia"
     return INFO_MURCIA
+
+
+def show_navarra_info(update, context):
+    global current_state, current_autonomy
+
+    username = update.callback_query.message.chat.username
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='navarra_increment'),
+         InlineKeyboardButton("Casos acumulados", callback_data='navarra_cumulative'),
+         InlineKeyboardButton("Fallecimientos", callback_data='navarra_death')],
+
+        [InlineKeyboardButton("Hospitalizaciones", callback_data='navarra_hospital'),
+         InlineKeyboardButton("Ver todo", callback_data='navarra_all'),
+         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    message.reply_photo(
+        photo=open('./img/mapa_navarra.png', 'rb')
+    )
+
+    message.reply_text(
+        text="{} elige los datos que quieres consultar.".format(username),
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_NAVARRA"
+    current_autonomy = "Navarra"
+    return INFO_NAVARRA
 
 
 def show_increment(update, context):
@@ -1518,6 +1550,37 @@ def show_murcia_all(update, context):
     return INFO_MURCIA_ALL
 
 
+# NAVARRA
+def show_navarra_increment(update, context):
+    show_increment(update, context)
+
+    return INFO_NAVARRA_INCREMENT
+
+
+def show_navarra_cumulative(update, context):
+    show_cumulative(update, context)
+
+    return INFO_NAVARRA_CUMULATIVE
+
+
+def show_navarra_death(update, context):
+    show_death(update, context)
+
+    return INFO_NAVARRA_DEATH
+
+
+def show_navarra_hospital(update, context):
+    show_hospital(update, context)
+
+    return INFO_NAVARRA_HOSPITAL
+
+
+def show_navarra_all(update, context):
+    show_all_info(update, context)
+
+    return INFO_NAVARRA_ALL
+
+
 def show_info(update, context):
     global current_state
 
@@ -1623,7 +1686,7 @@ def main():
                                                CallbackQueryHandler(show_madrid_info, pattern='madrid_info'),
                                                CallbackQueryHandler(show_melilla_info, pattern='melilla_info'),
                                                CallbackQueryHandler(show_murcia_info, pattern='murcia_info'),
-                                               # CallbackQueryHandler(show_navarra_info, pattern='navarra_info'),
+                                               CallbackQueryHandler(show_navarra_info, pattern='navarra_info'),
                                                # CallbackQueryHandler(show_paisvasco_info, pattern='paisvasco_info'),
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
@@ -3308,6 +3371,104 @@ def main():
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
+                                           INFO_NAVARRA: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_navarra_increment,
+                                                                    pattern='navarra_increment'),
+                                               CallbackQueryHandler(show_navarra_cumulative,
+                                                                    pattern='navarra_cumulative'),
+                                               CallbackQueryHandler(show_navarra_death,
+                                                                    pattern='navarra_death'),
+                                               CallbackQueryHandler(show_navarra_hospital,
+                                                                    pattern='navarra_hospital'),
+                                               CallbackQueryHandler(show_navarra_all,
+                                                                    pattern='navarra_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_NAVARRA_INCREMENT: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_navarra_cumulative,
+                                                                    pattern='navarra_cumulative'),
+                                               CallbackQueryHandler(show_navarra_death,
+                                                                    pattern='navarra_death'),
+                                               CallbackQueryHandler(show_navarra_hospital,
+                                                                    pattern='navarra_hospital'),
+                                               CallbackQueryHandler(show_navarra_all,
+                                                                    pattern='navarra_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_NAVARRA_CUMULATIVE: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_navarra_increment,
+                                                                    pattern='navarra_increment'),
+                                               CallbackQueryHandler(show_navarra_death,
+                                                                    pattern='navarra_death'),
+                                               CallbackQueryHandler(show_navarra_hospital,
+                                                                    pattern='navarra_hospital'),
+                                               CallbackQueryHandler(show_navarra_all,
+                                                                    pattern='navarra_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_NAVARRA_DEATH: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_navarra_increment,
+                                                                    pattern='navarra_increment'),
+                                               CallbackQueryHandler(show_navarra_cumulative,
+                                                                    pattern='navarra_cumulative'),
+                                               CallbackQueryHandler(show_navarra_hospital,
+                                                                    pattern='navarra_hospital'),
+                                               CallbackQueryHandler(show_navarra_all,
+                                                                    pattern='navarra_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_NAVARRA_HOSPITAL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_navarra_increment,
+                                                                    pattern='navarra_increment'),
+                                               CallbackQueryHandler(show_navarra_cumulative,
+                                                                    pattern='navarra_cumulative'),
+                                               CallbackQueryHandler(show_navarra_death,
+                                                                    pattern='navarra_death'),
+                                               CallbackQueryHandler(show_navarra_all,
+                                                                    pattern='navarra_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_NAVARRA_ALL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_navarra_increment,
+                                                                    pattern='navarra_increment'),
+                                               CallbackQueryHandler(show_navarra_cumulative,
+                                                                    pattern='navarra_cumulative'),
+                                               CallbackQueryHandler(show_navarra_death,
+                                                                    pattern='navarra_death'),
+                                               CallbackQueryHandler(show_navarra_hospital,
+                                                                    pattern='navarra_hospital'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
                                            NOT_IMPLEMENTED: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
@@ -3527,6 +3688,18 @@ def main():
                                                                 pattern='murcia_hospital'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='murcia_all'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='navarra_info'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='navarra_increment'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='navarra_cumulative'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='navarra_death'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='navarra_hospital'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='navarra_all'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='show_not_implemented'),
                                        ])

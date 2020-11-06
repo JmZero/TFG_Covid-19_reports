@@ -22,8 +22,8 @@ INFO_CANTABRIA, INFO_CANTABRIA_INCREMENT, INFO_CANTABRIA_CUMULATIVE, INFO_CANTAB
 INFO_CANTABRIA_ALL, INFO_CASTILLALAMANCHA, INFO_CASTILLALAMANCHA_INCREMENT, INFO_CASTILLALAMANCHA_CUMULATIVE, \
 INFO_CASTILLALAMANCHA_DEATH, INFO_CASTILLALAMANCHA_HOSPITAL, INFO_CASTILLALAMANCHA_ALL, INFO_CASTILLAYLEON, \
 INFO_CASTILLAYLEON_INCREMENT, INFO_CASTILLAYLEON_CUMULATIVE, INFO_CASTILLAYLEON_DEATH, INFO_CASTILLAYLEON_HOSPITAL, \
-INFO_CASTILLAYLEON_ALL, INFO_CATALUÑA, INFO_CATALUÑA_INCREMENT, INFO_CATALUÑA_CUMULATIVE, INFO_CATALUÑA_DEATH, \
-INFO_CATALUÑA_HOSPITAL, INFO_CATALUÑA_ALL, INFO_CEUTA, INFO_CEUTA_INCREMENT, INFO_CEUTA_CUMULATIVE, INFO_CEUTA_DEATH, \
+INFO_CASTILLAYLEON_ALL, INFO_CATALUNA, INFO_CATALUNA_INCREMENT, INFO_CATALUNA_CUMULATIVE, INFO_CATALUNA_DEATH, \
+INFO_CATALUNA_HOSPITAL, INFO_CATALUNA_ALL, INFO_CEUTA, INFO_CEUTA_INCREMENT, INFO_CEUTA_CUMULATIVE, INFO_CEUTA_DEATH, \
 INFO_CEUTA_HOSPITAL, INFO_CEUTA_ALL, INFO_EXTREMADURA, INFO_EXTREMADURA_INCREMENT, INFO_EXTREMADURA_CUMULATIVE, \
 INFO_EXTREMADURA_DEATH, INFO_EXTREMADURA_HOSPITAL, INFO_EXTREMADURA_ALL, INFO_GALICIA, INFO_GALICIA_INCREMENT, \
 INFO_GALICIA_CUMULATIVE, INFO_GALICIA_DEATH, INFO_GALICIA_HOSPITAL, INFO_GALICIA_ALL, INFO_BALEARES, \
@@ -34,7 +34,10 @@ INFO_MADRID_ALL, INFO_MELILLA, INFO_MELILLA_INCREMENT, INFO_MELILLA_CUMULATIVE, 
 INFO_MELILLA_HOSPITAL, INFO_MELILLA_ALL, INFO_MURCIA, INFO_MURCIA_INCREMENT, INFO_MURCIA_CUMULATIVE, INFO_MURCIA_DEATH, \
 INFO_MURCIA_HOSPITAL, INFO_MURCIA_ALL, INFO_NAVARRA, INFO_NAVARRA_INCREMENT, INFO_NAVARRA_CUMULATIVE, \
 INFO_NAVARRA_DEATH, INFO_NAVARRA_HOSPITAL, INFO_NAVARRA_ALL, INFO_PAISVASCO, INFO_PAISVASCO_INCREMENT, \
-INFO_PAISVASCO_CUMULATIVE, INFO_PAISVASCO_DEATH, INFO_PAISVASCO_HOSPITAL, INFO_PAISVASCO_ALL = range(120)
+INFO_PAISVASCO_CUMULATIVE, INFO_PAISVASCO_DEATH, INFO_PAISVASCO_HOSPITAL, INFO_PAISVASCO_ALL, INFO_ESPANA, \
+INFO_ESPANA_INCREMENT, INFO_ESPANA_AGE, INFO_ESPANA_CUMULATIVE, INFO_ESPANA_DEATH, INFO_ESPANA_REGION, \
+INFO_ESPANA_100_CUMULATIVE, INFO_ESPANA_100_CUMULATIVE_MEDIA, INFO_ESPANA_100_DEATH, \
+INFO_ESPANA_100_DEATH_MEDIA, INFO_ESPANA_ALL = range(131)
 
 
 # Getting mode, so we could define run function for local and Heroku setup
@@ -54,6 +57,13 @@ util_cols = ['Fecha', 'CCAA', 'Total Pacientes COVID ingresados', '% Camas Ocupa
              'Total pacientes COVID en UCI', '% Camas Ocupadas UCI COVID', 'Ingresos COVID últimas 24 h',
              'Altas COVID últimas 24 h']
 df_ccaa_hospital = pd.read_csv(url_hospital, sep=',', usecols=util_cols)
+
+url_edad = 'https://raw.githubusercontent.com/datadista/datasets/master/COVID%2019/nacional_covid19_rango_edad.csv'
+util_cols = ['fecha', 'rango_edad', 'sexo', 'casos_confirmados', 'fallecidos']
+df_edad = pd.read_csv(url_edad, sep=',', usecols=util_cols)
+
+df_ccaa_habitantes = pd.read_csv('./data/habitantes_provincia.csv', sep=',')
+
 
 global current_state, conv_handler, current_autonomy
 
@@ -164,7 +174,7 @@ def show_inicio(update, context):
 
         [InlineKeyboardButton("Castilla La Mancha", callback_data='castillalamancha_info'),
          InlineKeyboardButton("Castilla y León", callback_data='castillayleon_info'),
-         InlineKeyboardButton("Cataluña", callback_data='cataluña_info')],
+         InlineKeyboardButton("Cataluña", callback_data='cataluna_info')],
 
         [InlineKeyboardButton("Ceuta", callback_data='ceuta_info'),
          InlineKeyboardButton("Extremadura", callback_data='extremadura_info'),
@@ -179,7 +189,7 @@ def show_inicio(update, context):
          InlineKeyboardButton("Navarra", callback_data='navarra_info')],
 
         [InlineKeyboardButton("País Vasco", callback_data='paisvasco_info'),
-         InlineKeyboardButton("Toda España", callback_data='show_not_implemented')]
+         InlineKeyboardButton("Toda España", callback_data='espana_info')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -196,25 +206,28 @@ def show_inicio(update, context):
     return INICIO
 
 
-def show_andalucia_info(update, context):
+def show_main_info(update, context):
     global current_state, current_autonomy
 
     username = update.callback_query.message.chat.username
     message = update.callback_query.message
 
-    keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='andalucia_increment'),
-         InlineKeyboardButton("Casos acumulados", callback_data='andalucia_cumulative'),
-         InlineKeyboardButton("Fallecimientos", callback_data='andalucia_death')],
+    autonomy_lower = normalize(current_autonomy).lower()
+    autonomy_upper = normalize(current_autonomy).upper()
 
-        [InlineKeyboardButton("Hospitalizaciones", callback_data='andalucia_hospital'),
-         InlineKeyboardButton("Ver todo", callback_data='andalucia_all'),
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='{}_increment'.format(autonomy_lower)),
+         InlineKeyboardButton("Casos acumulados", callback_data='{}_cumulative'.format(autonomy_lower)),
+         InlineKeyboardButton("Fallecimientos", callback_data='{}_death'.format(autonomy_lower))],
+
+        [InlineKeyboardButton("Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower)),
+         InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower)),
          InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     message.reply_photo(
-        photo=open('./img/mapa_andalucia.png', 'rb')
+        photo=open('./img/mapa_{}.png'.format(autonomy_lower), 'rb')
     )
 
     message.reply_text(
@@ -222,557 +235,206 @@ def show_andalucia_info(update, context):
         reply_markup=reply_markup
     )
 
-    current_state = "INFO_ANDALUCIA"
+    current_state = "INFO_{}".format(autonomy_upper)
+
+
+def show_andalucia_info(update, context):
+    global current_state, current_autonomy
     current_autonomy = "Andalucía"
+
+    show_main_info(update, context)
+
     return INFO_ANDALUCIA
 
 
 def show_aragon_info(update, context):
     global current_state, current_autonomy
-
-    username = update.callback_query.message.chat.username
-    message = update.callback_query.message
-
-    keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='aragon_increment'),
-         InlineKeyboardButton("Casos acumulados", callback_data='aragon_cumulative'),
-         InlineKeyboardButton("Fallecimientos", callback_data='aragon_death')],
-
-        [InlineKeyboardButton("Hospitalizaciones", callback_data='aragon_hospital'),
-         InlineKeyboardButton("Ver todo", callback_data='aragon_all'),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    message.reply_photo(
-        photo=open('./img/mapa_aragon.png', 'rb')
-    )
-
-    message.reply_text(
-        text="{} elige los datos que quieres consultar.".format(username),
-        reply_markup=reply_markup
-    )
-
-    current_state = "INFO_ARAGON"
     current_autonomy = "Aragón"
+
+    show_main_info(update, context)
+
     return INFO_ARAGON
 
 
 def show_asturias_info(update, context):
     global current_state, current_autonomy
-
-    username = update.callback_query.message.chat.username
-    message = update.callback_query.message
-
-    keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='asturias_increment'),
-         InlineKeyboardButton("Casos acumulados", callback_data='asturias_cumulative'),
-         InlineKeyboardButton("Fallecimientos", callback_data='asturias_death')],
-
-        [InlineKeyboardButton("Hospitalizaciones", callback_data='asturias_hospital'),
-         InlineKeyboardButton("Ver todo", callback_data='asturias_all'),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    message.reply_photo(
-        photo=open('./img/mapa_asturias.png', 'rb')
-    )
-
-    message.reply_text(
-        text="{} elige los datos que quieres consultar.".format(username),
-        reply_markup=reply_markup
-    )
-
-    current_state = "INFO_ASTURIAS"
     current_autonomy = "Asturias"
+
+    show_main_info(update, context)
+
     return INFO_ASTURIAS
 
 
 def show_cvalenciana_info(update, context):
     global current_state, current_autonomy
-
-    username = update.callback_query.message.chat.username
-    message = update.callback_query.message
-
-    keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='cvalenciana_increment'),
-         InlineKeyboardButton("Casos acumulados", callback_data='cvalenciana_cumulative'),
-         InlineKeyboardButton("Fallecimientos", callback_data='cvalenciana_death')],
-
-        [InlineKeyboardButton("Hospitalizaciones", callback_data='cvalenciana_hospital'),
-         InlineKeyboardButton("Ver todo", callback_data='cvalenciana_all'),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    message.reply_photo(
-        photo=open('./img/mapa_cvalenciana.png', 'rb')
-    )
-
-    message.reply_text(
-        text="{} elige los datos que quieres consultar.".format(username),
-        reply_markup=reply_markup
-    )
-
-    current_state = "INFO_CVALENCIANA"
     current_autonomy = "C. Valenciana"
+
+    show_main_info(update, context)
+
     return INFO_CVALENCIANA
 
 
 def show_canarias_info(update, context):
     global current_state, current_autonomy
-
-    username = update.callback_query.message.chat.username
-    message = update.callback_query.message
-
-    keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='canarias_increment'),
-         InlineKeyboardButton("Casos acumulados", callback_data='canarias_cumulative'),
-         InlineKeyboardButton("Fallecimientos", callback_data='canarias_death')],
-
-        [InlineKeyboardButton("Hospitalizaciones", callback_data='canarias_hospital'),
-         InlineKeyboardButton("Ver todo", callback_data='canarias_all'),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    message.reply_photo(
-        photo=open('./img/mapa_canarias.png', 'rb')
-    )
-
-    message.reply_text(
-        text="{} elige los datos que quieres consultar.".format(username),
-        reply_markup=reply_markup
-    )
-
-    current_state = "INFO_CANARIAS"
     current_autonomy = "Canarias"
+
+    show_main_info(update, context)
+
     return INFO_CANARIAS
 
 
 def show_cantabria_info(update, context):
     global current_state, current_autonomy
-
-    username = update.callback_query.message.chat.username
-    message = update.callback_query.message
-
-    keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='cantabria_increment'),
-         InlineKeyboardButton("Casos acumulados", callback_data='cantabria_cumulative'),
-         InlineKeyboardButton("Fallecimientos", callback_data='cantabria_death')],
-
-        [InlineKeyboardButton("Hospitalizaciones", callback_data='cantabria_hospital'),
-         InlineKeyboardButton("Ver todo", callback_data='cantabria_all'),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    message.reply_photo(
-        photo=open('./img/mapa_cantabria.png', 'rb')
-    )
-
-    message.reply_text(
-        text="{} elige los datos que quieres consultar.".format(username),
-        reply_markup=reply_markup
-    )
-
-    current_state = "INFO_CANTABRIA"
     current_autonomy = "Cantabria"
+
+    show_main_info(update, context)
+
     return INFO_CANTABRIA
 
 
 def show_castillalamancha_info(update, context):
     global current_state, current_autonomy
-
-    username = update.callback_query.message.chat.username
-    message = update.callback_query.message
-
-    keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='castillalamancha_increment'),
-         InlineKeyboardButton("Casos acumulados", callback_data='castillalamancha_cumulative'),
-         InlineKeyboardButton("Fallecimientos", callback_data='castillalamancha_death')],
-
-        [InlineKeyboardButton("Hospitalizaciones", callback_data='castillalamancha_hospital'),
-         InlineKeyboardButton("Ver todo", callback_data='castillalamancha_all'),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    message.reply_photo(
-        photo=open('./img/mapa_castillalamancha.png', 'rb')
-    )
-
-    message.reply_text(
-        text="{} elige los datos que quieres consultar.".format(username),
-        reply_markup=reply_markup
-    )
-
-    current_state = "INFO_CASTILLALAMANCHA"
     current_autonomy = "Castilla La Mancha"
+
+    show_main_info(update, context)
+
     return INFO_CASTILLALAMANCHA
 
 
 def show_castillayleon_info(update, context):
     global current_state, current_autonomy
-
-    username = update.callback_query.message.chat.username
-    message = update.callback_query.message
-
-    keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='castillayleon_increment'),
-         InlineKeyboardButton("Casos acumulados", callback_data='castillayleon_cumulative'),
-         InlineKeyboardButton("Fallecimientos", callback_data='castillayleon_death')],
-
-        [InlineKeyboardButton("Hospitalizaciones", callback_data='castillayleon_hospital'),
-         InlineKeyboardButton("Ver todo", callback_data='castillayleon_all'),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    message.reply_photo(
-        photo=open('./img/mapa_castillayleon.png', 'rb')
-    )
-
-    message.reply_text(
-        text="{} elige los datos que quieres consultar.".format(username),
-        reply_markup=reply_markup
-    )
-
-    current_state = "INFO_CASTILLAYLEON"
     current_autonomy = "Castilla y León"
+
+    show_main_info(update, context)
+
     return INFO_CASTILLAYLEON
 
 
-def show_cataluña_info(update, context):
+def show_cataluna_info(update, context):
     global current_state, current_autonomy
-
-    username = update.callback_query.message.chat.username
-    message = update.callback_query.message
-
-    keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='cataluña_increment'),
-         InlineKeyboardButton("Casos acumulados", callback_data='cataluña_cumulative'),
-         InlineKeyboardButton("Fallecimientos", callback_data='cataluña_death')],
-
-        [InlineKeyboardButton("Hospitalizaciones", callback_data='cataluña_hospital'),
-         InlineKeyboardButton("Ver todo", callback_data='cataluña_all'),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    message.reply_photo(
-        photo=open('./img/mapa_cataluña.png', 'rb')
-    )
-
-    message.reply_text(
-        text="{} elige los datos que quieres consultar.".format(username),
-        reply_markup=reply_markup
-    )
-
-    current_state = "INFO_CATALUÑA"
     current_autonomy = "Cataluña"
-    return INFO_CATALUÑA
+
+    show_main_info(update, context)
+
+    return INFO_CATALUNA
 
 
 def show_ceuta_info(update, context):
     global current_state, current_autonomy
-
-    username = update.callback_query.message.chat.username
-    message = update.callback_query.message
-
-    keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='ceuta_increment'),
-         InlineKeyboardButton("Casos acumulados", callback_data='ceuta_cumulative'),
-         InlineKeyboardButton("Fallecimientos", callback_data='ceuta_death')],
-
-        [InlineKeyboardButton("Hospitalizaciones", callback_data='ceuta_hospital'),
-         InlineKeyboardButton("Ver todo", callback_data='ceuta_all'),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    message.reply_photo(
-        photo=open('./img/mapa_ceuta.png', 'rb')
-    )
-
-    message.reply_text(
-        text="{} elige los datos que quieres consultar.".format(username),
-        reply_markup=reply_markup
-    )
-
-    current_state = "INFO_CEUTA"
     current_autonomy = "Ceuta"
+
+    show_main_info(update, context)
+
     return INFO_CEUTA
 
 
 def show_extremadura_info(update, context):
     global current_state, current_autonomy
-
-    username = update.callback_query.message.chat.username
-    message = update.callback_query.message
-
-    keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='extremadura_increment'),
-         InlineKeyboardButton("Casos acumulados", callback_data='extremadura_cumulative'),
-         InlineKeyboardButton("Fallecimientos", callback_data='extremadura_death')],
-
-        [InlineKeyboardButton("Hospitalizaciones", callback_data='extremadura_hospital'),
-         InlineKeyboardButton("Ver todo", callback_data='extremadura_all'),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    message.reply_photo(
-        photo=open('./img/mapa_extremadura.png', 'rb')
-    )
-
-    message.reply_text(
-        text="{} elige los datos que quieres consultar.".format(username),
-        reply_markup=reply_markup
-    )
-
-    current_state = "INFO_EXTREMADURA"
     current_autonomy = "Extremadura"
+
+    show_main_info(update, context)
+
     return INFO_EXTREMADURA
 
 
 def show_galicia_info(update, context):
     global current_state, current_autonomy
-
-    username = update.callback_query.message.chat.username
-    message = update.callback_query.message
-
-    keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='galicia_increment'),
-         InlineKeyboardButton("Casos acumulados", callback_data='galicia_cumulative'),
-         InlineKeyboardButton("Fallecimientos", callback_data='galicia_death')],
-
-        [InlineKeyboardButton("Hospitalizaciones", callback_data='galicia_hospital'),
-         InlineKeyboardButton("Ver todo", callback_data='galicia_all'),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    message.reply_photo(
-        photo=open('./img/mapa_galicia.png', 'rb')
-    )
-
-    message.reply_text(
-        text="{} elige los datos que quieres consultar.".format(username),
-        reply_markup=reply_markup
-    )
-
-    current_state = "INFO_GALICIA"
     current_autonomy = "Galicia"
+
+    show_main_info(update, context)
+
     return INFO_GALICIA
 
 
 def show_baleares_info(update, context):
     global current_state, current_autonomy
-
-    username = update.callback_query.message.chat.username
-    message = update.callback_query.message
-
-    keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='baleares_increment'),
-         InlineKeyboardButton("Casos acumulados", callback_data='baleares_cumulative'),
-         InlineKeyboardButton("Fallecimientos", callback_data='baleares_death')],
-
-        [InlineKeyboardButton("Hospitalizaciones", callback_data='baleares_hospital'),
-         InlineKeyboardButton("Ver todo", callback_data='baleares_all'),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    message.reply_photo(
-        photo=open('./img/mapa_baleares.png', 'rb')
-    )
-
-    message.reply_text(
-        text="{} elige los datos que quieres consultar.".format(username),
-        reply_markup=reply_markup
-    )
-
-    current_state = "INFO_BALEARES"
     current_autonomy = "Baleares"
+
+    show_main_info(update, context)
+
     return INFO_BALEARES
 
 
 def show_larioja_info(update, context):
     global current_state, current_autonomy
-
-    username = update.callback_query.message.chat.username
-    message = update.callback_query.message
-
-    keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='larioja_increment'),
-         InlineKeyboardButton("Casos acumulados", callback_data='larioja_cumulative'),
-         InlineKeyboardButton("Fallecimientos", callback_data='larioja_death')],
-
-        [InlineKeyboardButton("Hospitalizaciones", callback_data='larioja_hospital'),
-         InlineKeyboardButton("Ver todo", callback_data='larioja_all'),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    message.reply_photo(
-        photo=open('./img/mapa_larioja.png', 'rb')
-    )
-
-    message.reply_text(
-        text="{} elige los datos que quieres consultar.".format(username),
-        reply_markup=reply_markup
-    )
-
-    current_state = "INFO_LARIOJA"
     current_autonomy = "La Rioja"
+
+    show_main_info(update, context)
+
     return INFO_LARIOJA
 
 
 def show_madrid_info(update, context):
     global current_state, current_autonomy
-
-    username = update.callback_query.message.chat.username
-    message = update.callback_query.message
-
-    keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='madrid_increment'),
-         InlineKeyboardButton("Casos acumulados", callback_data='madrid_cumulative'),
-         InlineKeyboardButton("Fallecimientos", callback_data='madrid_death')],
-
-        [InlineKeyboardButton("Hospitalizaciones", callback_data='madrid_hospital'),
-         InlineKeyboardButton("Ver todo", callback_data='madrid_all'),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    message.reply_photo(
-        photo=open('./img/mapa_madrid.png', 'rb')
-    )
-
-    message.reply_text(
-        text="{} elige los datos que quieres consultar.".format(username),
-        reply_markup=reply_markup
-    )
-
-    current_state = "INFO_MADRID"
     current_autonomy = "Madrid"
+
+    show_main_info(update, context)
+
     return INFO_MADRID
 
 
 def show_melilla_info(update, context):
     global current_state, current_autonomy
-
-    username = update.callback_query.message.chat.username
-    message = update.callback_query.message
-
-    keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='melilla_increment'),
-         InlineKeyboardButton("Casos acumulados", callback_data='melilla_cumulative'),
-         InlineKeyboardButton("Fallecimientos", callback_data='melilla_death')],
-
-        [InlineKeyboardButton("Hospitalizaciones", callback_data='melilla_hospital'),
-         InlineKeyboardButton("Ver todo", callback_data='melilla_all'),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    message.reply_photo(
-        photo=open('./img/mapa_melilla.png', 'rb')
-    )
-
-    message.reply_text(
-        text="{} elige los datos que quieres consultar.".format(username),
-        reply_markup=reply_markup
-    )
-
-    current_state = "INFO_MELILLA"
     current_autonomy = "Melilla"
+
+    show_main_info(update, context)
+
     return INFO_MELILLA
 
 
 def show_murcia_info(update, context):
     global current_state, current_autonomy
-
-    username = update.callback_query.message.chat.username
-    message = update.callback_query.message
-
-    keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='murcia_increment'),
-         InlineKeyboardButton("Casos acumulados", callback_data='murcia_cumulative'),
-         InlineKeyboardButton("Fallecimientos", callback_data='murcia_death')],
-
-        [InlineKeyboardButton("Hospitalizaciones", callback_data='murcia_hospital'),
-         InlineKeyboardButton("Ver todo", callback_data='murcia_all'),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    message.reply_photo(
-        photo=open('./img/mapa_murcia.png', 'rb')
-    )
-
-    message.reply_text(
-        text="{} elige los datos que quieres consultar.".format(username),
-        reply_markup=reply_markup
-    )
-
-    current_state = "INFO_MURCIA"
     current_autonomy = "Murcia"
+
+    show_main_info(update, context)
+
     return INFO_MURCIA
 
 
 def show_navarra_info(update, context):
     global current_state, current_autonomy
-
-    username = update.callback_query.message.chat.username
-    message = update.callback_query.message
-
-    keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='navarra_increment'),
-         InlineKeyboardButton("Casos acumulados", callback_data='navarra_cumulative'),
-         InlineKeyboardButton("Fallecimientos", callback_data='navarra_death')],
-
-        [InlineKeyboardButton("Hospitalizaciones", callback_data='navarra_hospital'),
-         InlineKeyboardButton("Ver todo", callback_data='navarra_all'),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    message.reply_photo(
-        photo=open('./img/mapa_navarra.png', 'rb')
-    )
-
-    message.reply_text(
-        text="{} elige los datos que quieres consultar.".format(username),
-        reply_markup=reply_markup
-    )
-
-    current_state = "INFO_NAVARRA"
     current_autonomy = "Navarra"
+
+    show_main_info(update, context)
+
     return INFO_NAVARRA
 
 
 def show_paisvasco_info(update, context):
+    global current_state, current_autonomy
+    current_autonomy = "País Vasco"
+
+    show_main_info(update, context)
+
+    return INFO_PAISVASCO
+
+
+def show_espana_info(update, context):
     global current_state, current_autonomy
 
     username = update.callback_query.message.chat.username
     message = update.callback_query.message
 
     keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='paisvasco_increment'),
-         InlineKeyboardButton("Casos acumulados", callback_data='paisvasco_cumulative'),
-         InlineKeyboardButton("Fallecimientos", callback_data='paisvasco_death')],
+        [InlineKeyboardButton("Incremento", callback_data='espana_increment'),
+         InlineKeyboardButton("Casos por edad", callback_data='espana_age'),
+         InlineKeyboardButton("Casos acumulados", callback_data='espana_cumulative')],
 
-        [InlineKeyboardButton("Hospitalizaciones", callback_data='paisvasco_hospital'),
-         InlineKeyboardButton("Ver todo", callback_data='paisvasco_all'),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
+        [InlineKeyboardButton("Fallecimientos", callback_data='espana_death'),
+         InlineKeyboardButton("Casos por Región", callback_data='espana_region')],
+
+        [InlineKeyboardButton("Casos 100K", callback_data='espana_100_cumulative'),
+         InlineKeyboardButton("Casos 100K semana ", callback_data='espana_100_cumulative_media')],
+
+         [InlineKeyboardButton("Fallecimientos 100K", callback_data='espana_100_death'),
+         InlineKeyboardButton("Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+
+        [InlineKeyboardButton("Ver todo", callback_data='espana_all')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     message.reply_photo(
-        photo=open('./img/mapa_paisvasco.png', 'rb')
+        photo=open('./img/mapa_espana.png', 'rb')
     )
 
     message.reply_text(
@@ -780,9 +442,9 @@ def show_paisvasco_info(update, context):
         reply_markup=reply_markup
     )
 
-    current_state = "INFO_PAISVASCO"
-    current_autonomy = "País Vasco"
-    return INFO_PAISVASCO
+    current_state = "INFO_ESPANA"
+    current_autonomy = "España"
+    return INFO_ESPANA
 
 
 def show_increment(update, context):
@@ -1304,34 +966,34 @@ def show_castillayleon_all(update, context):
 
 
 # CATALUÑA
-def show_cataluña_increment(update, context):
+def show_cataluna_increment(update, context):
     show_increment(update, context)
 
-    return INFO_CATALUÑA_INCREMENT
+    return INFO_CATALUNA_INCREMENT
 
 
-def show_cataluña_cumulative(update, context):
+def show_cataluna_cumulative(update, context):
     show_cumulative(update, context)
 
-    return INFO_CATALUÑA_CUMULATIVE
+    return INFO_CATALUNA_CUMULATIVE
 
 
-def show_cataluña_death(update, context):
+def show_cataluna_death(update, context):
     show_death(update, context)
 
-    return INFO_CATALUÑA_DEATH
+    return INFO_CATALUNA_DEATH
 
 
-def show_cataluña_hospital(update, context):
+def show_cataluna_hospital(update, context):
     show_hospital(update, context)
 
-    return INFO_CATALUÑA_HOSPITAL
+    return INFO_CATALUNA_HOSPITAL
 
 
-def show_cataluña_all(update, context):
+def show_cataluna_all(update, context):
     show_all_info(update, context)
 
-    return INFO_CATALUÑA_ALL
+    return INFO_CATALUNA_ALL
 
 
 # CEUTA
@@ -1644,6 +1306,582 @@ def show_paisvasco_all(update, context):
     return INFO_PAISVASCO_ALL
 
 
+# ESPAÑA
+def show_espana_increment(update, context):
+    global current_state, current_autonomy
+
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Casos por edad", callback_data='espana_age'),
+         InlineKeyboardButton("Casos acumulados", callback_data='espana_cumulative')],
+
+        [InlineKeyboardButton("Fallecimientos", callback_data='espana_death'),
+         InlineKeyboardButton("Casos por Región", callback_data='espana_region')],
+
+        [InlineKeyboardButton("Casos 100K", callback_data='espana_100_cumulative'),
+         InlineKeyboardButton("Casos 100K semana ", callback_data='espana_100_cumulative_media')],
+
+         [InlineKeyboardButton("Fallecimientos 100K", callback_data='espana_100_death'),
+         InlineKeyboardButton("Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+
+        [InlineKeyboardButton("Ver todo", callback_data='espana_all')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # message.reply_photo(
+    #     photo=open('./img/mapa_espana.png', 'rb')
+    # )
+
+    message.reply_text(
+        text="Incremento de casos en {}\n\n"
+             "\t - Casos acumulados: <b>{}</b>.\n"
+             "\t - Incremento de casos últimas 24h: <b>{}</b>.\n"
+             "\t - Media del incremento de casos semanal: <b>{}</b>.\n\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
+                                                                         casos_acumulados_espana(),
+                                                                         incremento_ultimo_dia_espana(),
+                                                                         media_casos_semana_espana(),
+                                                                         format_date(fecha_actualizacion_espana())),
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_ESPANA_INCREMENT"
+    return INFO_ESPANA_INCREMENT
+
+
+def show_espana_age(update, context):
+    global current_state, current_autonomy
+
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='espana_increment'),
+         InlineKeyboardButton("Casos acumulados", callback_data='espana_cumulative')],
+
+        [InlineKeyboardButton("Fallecimientos", callback_data='espana_death'),
+         InlineKeyboardButton("Casos por Región", callback_data='espana_region')],
+
+        [InlineKeyboardButton("Casos 100K", callback_data='espana_100_cumulative'),
+         InlineKeyboardButton("Casos 100K semana ", callback_data='espana_100_cumulative_media')],
+
+         [InlineKeyboardButton("Fallecimientos 100K", callback_data='espana_100_death'),
+         InlineKeyboardButton("Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+
+        [InlineKeyboardButton("Ver todo", callback_data='espana_all')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # message.reply_photo(
+    #     photo=open('./img/mapa_espana.png', 'rb')
+    # )
+
+    message.reply_text(
+        text="Casos (fallecidos) por edad: \n\n"
+             "0-9: <b>{}</b> (<b>{}</b>) Tasa de letalidad: <b>{}</b>%.\n"
+             "10-19: <b>{}</b> (<b>{}</b>) Tasa de letalidad: <b>{}</b>%.\n"
+             "20-29: <b>{}</b> (<b>{}</b>) Tasa de letalidad: <b>{}</b>%.\n"
+             "30-39: <b>{}</b> (<b>{}</b>) Tasa de letalidad: <b>{}</b>%.\n"
+             "40-49: <b>{}</b> (<b>{}</b>) Tasa de letalidad: <b>{}</b>%.\n"
+             "50-59: <b>{}</b> (<b>{}</b>) Tasa de letalidad: <b>{}</b>%.\n"
+             "60-69: <b>{}</b> (<b>{}</b>) Tasa de letalidad: <b>{}</b>%.\n"
+             "70-79: <b>{}</b> (<b>{}</b>) Tasa de letalidad: <b>{}</b>%.\n"
+             "80-89: <b>{}</b> (<b>{}</b>) Tasa de letalidad: <b>{}</b>%.\n"
+             "90 y +: <b>{}</b> (<b>{}</b>) Tasa de letalidad: <b>{}</b>%.\n"
+             "Total: <b>{}</b> (<b>{}</b>) Tasa de letalidad: <b>{}</b>%.\n\n"
+             "Datos obtenidos del análisis sobre los casos notificados con información disponible de edad y sexo.\n\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(casos_edad('0-9'), muertos_edad('0-9'), tasa_edad('0-9'),
+                                                                         casos_edad('10-19'), muertos_edad('10-19'), tasa_edad('10-19'),
+                                                                         casos_edad('20-29'), muertos_edad('20-29'), tasa_edad('20-29'),
+                                                                         casos_edad('30-39'), muertos_edad('30-39'), tasa_edad('30-39'),
+                                                                         casos_edad('40-49'), muertos_edad('40-49'), tasa_edad('40-49'),
+                                                                         casos_edad('50-59'), muertos_edad('50-59'), tasa_edad('50-59'),
+                                                                         casos_edad('60-69'), muertos_edad('60-69'), tasa_edad('60-69'),
+                                                                         casos_edad('70-79'), muertos_edad('70-79'), tasa_edad('70-79'),
+                                                                         casos_edad('80-89'), muertos_edad('80-89'), tasa_edad('80-89'),
+                                                                         casos_edad('90 y +'), muertos_edad('90 y +'), tasa_edad('90 y +'),
+                                                                         total_casos_edad(), total_muertos_edad(), total_tasa_edad(),
+                                                                         format_date(fecha_actualizacion_edad())),
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_ESPANA_AGE"
+    return INFO_ESPANA_AGE
+
+
+def show_espana_cumulative(update, context):
+    global current_state, current_autonomy
+
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='espana_increment'),
+         InlineKeyboardButton("Casos por edad", callback_data='espana_age')],
+
+        [InlineKeyboardButton("Fallecimientos", callback_data='espana_death'),
+         InlineKeyboardButton("Casos por Región", callback_data='espana_region')],
+
+        [InlineKeyboardButton("Casos 100K", callback_data='espana_100_cumulative'),
+         InlineKeyboardButton("Casos 100K semana ", callback_data='espana_100_cumulative_media')],
+
+        [InlineKeyboardButton("Fallecimientos 100K", callback_data='espana_100_death'),
+         InlineKeyboardButton("Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+
+        [InlineKeyboardButton("Ver todo", callback_data='espana_all')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # message.reply_photo(
+    #     photo=open('./img/mapa_espana.png', 'rb')
+    # )
+
+    message.reply_text(
+        text="Incremento de casos en {}\n\n"
+             "\t - Casos acumulados: <b>{}</b>.\n\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
+                                                                         casos_acumulados_espana(),
+                                                                         format_date(fecha_actualizacion_espana())),
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_ESPANA_CUMULATIVE"
+    return INFO_ESPANA_CUMULATIVE
+
+
+def show_espana_death(update, context):
+    global current_state, current_autonomy
+
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='espana_increment'),
+         InlineKeyboardButton("Casos por edad", callback_data='espana_age')],
+
+        [InlineKeyboardButton("Casos acumulados", callback_data='espana_cumulative'),
+         InlineKeyboardButton("Casos por Región", callback_data='espana_region')],
+
+        [InlineKeyboardButton("Casos 100K", callback_data='espana_100_cumulative'),
+         InlineKeyboardButton("Casos 100K semana ", callback_data='espana_100_cumulative_media')],
+
+        [InlineKeyboardButton("Fallecimientos 100K", callback_data='espana_100_death'),
+         InlineKeyboardButton("Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+
+        [InlineKeyboardButton("Ver todo", callback_data='espana_all')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # message.reply_photo(
+    #     photo=open('./img/mapa_espana.png', 'rb')
+    # )
+
+    message.reply_text(
+        text="Evolución de fallecimientos en {}\n\n"
+             "\t - Fallecimientos totales: <b>{}</b>.\n"
+             "\t - Fallecidos últimas 24h: <b>{}</b>.\n"
+             "\t - Media fallecimientos semanal: <b>{}</b>.\n"
+             "\t - Tasa de letalidad: <b>{}</b>.\n\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
+                                                                         muertes_totales_espana(),
+                                                                         muertes_ultimo_dia_espana(),
+                                                                         media_muertes_semana_espana(),
+                                                                         tasa_letalidad_espana(),
+                                                                         format_date(fecha_actualizacion_muertes())),
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_ESPANA_DEATH"
+    return INFO_ESPANA_DEATH
+
+
+def show_espana_region(update, context):
+    global current_state, current_autonomy
+
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='espana_increment'),
+         InlineKeyboardButton("Casos por edad", callback_data='espana_age')],
+
+        [InlineKeyboardButton("Casos acumulados", callback_data='espana_cumulative'),
+         InlineKeyboardButton("Fallecimientos", callback_data='espana_death')],
+
+        [InlineKeyboardButton("Casos 100K", callback_data='espana_100_cumulative'),
+         InlineKeyboardButton("Casos 100K semana ", callback_data='espana_100_cumulative_media')],
+
+        [InlineKeyboardButton("Fallecimientos 100K", callback_data='espana_100_death'),
+         InlineKeyboardButton("Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+
+        [InlineKeyboardButton("Ver todo", callback_data='espana_all')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # message.reply_photo(
+    #     photo=open('./img/mapa_espana.png', 'rb')
+    # )
+
+    message.reply_text(
+        text="Casos por CCAA: \n\n"
+             "{}\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(top_5_casos(),
+                                                                         format_date(fecha_actualizacion_espana())),
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_ESPANA_REGION"
+    return INFO_ESPANA_REGION
+
+
+def show_espana_100_cumulative(update, context):
+    global current_state, current_autonomy
+
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='espana_increment'),
+         InlineKeyboardButton("Casos por edad", callback_data='espana_age')],
+
+        [InlineKeyboardButton("Casos acumulados", callback_data='espana_cumulative'),
+         InlineKeyboardButton("Fallecimientos", callback_data='espana_death')],
+
+        [InlineKeyboardButton("Casos por Región", callback_data='espana_region'),
+         InlineKeyboardButton("Casos 100K semana ", callback_data='espana_100_cumulative_media')],
+
+        [InlineKeyboardButton("Fallecimientos 100K", callback_data='espana_100_death'),
+         InlineKeyboardButton("Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+
+        [InlineKeyboardButton("Ver todo", callback_data='espana_all')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # message.reply_photo(
+    #     photo=open('./img/mapa_espana.png', 'rb')
+    # )
+
+    message.reply_text(
+        text="Casos por cada 100k habitantes: \n\n"
+             "{}\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(top_5_casos_100(),
+                                                                         format_date(fecha_actualizacion_espana())),
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_ESPANA_100_CUMULATIVE"
+    return INFO_ESPANA_100_CUMULATIVE
+
+
+def show_espana_100_cumulative_media(update, context):
+    global current_state, current_autonomy
+
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='espana_increment'),
+         InlineKeyboardButton("Casos por edad", callback_data='espana_age')],
+
+        [InlineKeyboardButton("Casos acumulados", callback_data='espana_cumulative'),
+         InlineKeyboardButton("Fallecimientos", callback_data='espana_death')],
+
+        [InlineKeyboardButton("Casos por Región", callback_data='espana_region'),
+         InlineKeyboardButton("Casos 100K", callback_data='espana_100_cumulative')],
+
+        [InlineKeyboardButton("Fallecimientos 100K", callback_data='espana_100_death'),
+         InlineKeyboardButton("Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+
+        [InlineKeyboardButton("Ver todo", callback_data='espana_all')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # message.reply_photo(
+    #     photo=open('./img/mapa_espana.png', 'rb')
+    # )
+
+    message.reply_text(
+        text="Media semanal por cada 100k habitantes: \n\n"
+             "{}\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(top_5_casos_100_semana(),
+                                                                         format_date(fecha_actualizacion_espana())),
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_ESPANA_100_CUMULATIVE_MEDIA"
+    return INFO_ESPANA_100_CUMULATIVE_MEDIA
+
+
+def show_espana_100_death(update, context):
+    global current_state, current_autonomy
+
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='espana_increment'),
+         InlineKeyboardButton("Casos por edad", callback_data='espana_age')],
+
+        [InlineKeyboardButton("Casos acumulados", callback_data='espana_cumulative'),
+         InlineKeyboardButton("Fallecimientos", callback_data='espana_death')],
+
+        [InlineKeyboardButton("Casos por Región", callback_data='espana_region'),
+         InlineKeyboardButton("Casos 100K", callback_data='espana_100_cumulative')],
+
+        [InlineKeyboardButton("Casos 100K semana ", callback_data='espana_100_cumulative_media'),
+         InlineKeyboardButton("Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+
+        [InlineKeyboardButton("Ver todo", callback_data='espana_all')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # message.reply_photo(
+    #     photo=open('./img/mapa_espana.png', 'rb')
+    # )
+
+    message.reply_text(
+        text="Fallecimientos por cada 100k habitantes: \n\n"
+             "{}\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(top_5_muertes_100(),
+                                                                         format_date(fecha_actualizacion_muertes())),
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_ESPANA_100_DEATH"
+    return INFO_ESPANA_100_DEATH
+
+
+def show_espana_100_death_media(update, context):
+    global current_state, current_autonomy
+
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='espana_increment'),
+         InlineKeyboardButton("Casos por edad", callback_data='espana_age')],
+
+        [InlineKeyboardButton("Casos acumulados", callback_data='espana_cumulative'),
+         InlineKeyboardButton("Fallecimientos", callback_data='espana_death')],
+
+        [InlineKeyboardButton("Casos por Región", callback_data='espana_region'),
+         InlineKeyboardButton("Casos 100K", callback_data='espana_100_cumulative')],
+
+        [InlineKeyboardButton("Casos 100K semana ", callback_data='espana_100_cumulative_media'),
+         InlineKeyboardButton("Fallecimientos 100K", callback_data='espana_100_death')],
+
+        [InlineKeyboardButton("Ver todo", callback_data='espana_all')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # message.reply_photo(
+    #     photo=open('./img/mapa_espana.png', 'rb')
+    # )
+
+    message.reply_text(
+        text="Media fallecimientos semanal por cada 100k habitantes: \n\n"
+             "{}\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(top_5_muertes_100_semana(),
+                                                                         format_date(fecha_actualizacion_muertes())),
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_ESPANA_100_DEATH_MEDIA"
+    return INFO_ESPANA_100_DEATH_MEDIA
+
+
+def show_espana_all(update, context):
+    global current_state, current_autonomy
+
+    message = update.callback_query.message
+
+    keyboard = [
+        [InlineKeyboardButton("Incremento", callback_data='espana_increment'),
+         InlineKeyboardButton("Casos por edad", callback_data='espana_age'),
+         InlineKeyboardButton("Casos acumulados", callback_data='espana_cumulative')],
+
+        [InlineKeyboardButton("Fallecimientos", callback_data='espana_death'),
+         InlineKeyboardButton("Casos por Región", callback_data='espana_region')],
+
+        [InlineKeyboardButton("Casos 100K", callback_data='espana_100_cumulative'),
+         InlineKeyboardButton("Casos 100K semana ", callback_data='espana_100_cumulative_media')],
+
+        [InlineKeyboardButton("Fallecimientos 100K", callback_data='espana_100_death'),
+         InlineKeyboardButton("Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # message.reply_photo(
+    #     photo=open('./img/mapa_espana.png', 'rb')
+    # )
+
+    message.reply_text(
+        text="Incremento de casos en {}\n\n"
+             "\t - Casos acumulados: <b>{}</b>.\n"
+             "\t - Incremento de casos últimas 24h: <b>{}</b>.\n"
+             "\t - Media del incremento de casos semanal: <b>{}</b>.\n\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
+                                                                         casos_acumulados_espana(),
+                                                                         incremento_ultimo_dia_espana(),
+                                                                         media_casos_semana_espana(),
+                                                                         format_date(fecha_actualizacion_espana())),
+        parse_mode='HTML',
+    )
+
+    message.reply_text(
+        text="Casos (fallecidos) por edad: \n\n"
+             "0-9: <b>{}</b> (<b>{}</b>) Tasa de letalidad: <b>{}</b>%.\n"
+             "10-19: <b>{}</b> (<b>{}</b>) Tasa de letalidad: <b>{}</b>%.\n"
+             "20-29: <b>{}</b> (<b>{}</b>) Tasa de letalidad: <b>{}</b>%.\n"
+             "30-39: <b>{}</b> (<b>{}</b>) Tasa de letalidad: <b>{}</b>%.\n"
+             "40-49: <b>{}</b> (<b>{}</b>) Tasa de letalidad: <b>{}</b>%.\n"
+             "50-59: <b>{}</b> (<b>{}</b>) Tasa de letalidad: <b>{}</b>%.\n"
+             "60-69: <b>{}</b> (<b>{}</b>) Tasa de letalidad: <b>{}</b>%.\n"
+             "70-79: <b>{}</b> (<b>{}</b>) Tasa de letalidad: <b>{}</b>%.\n"
+             "80-89: <b>{}</b> (<b>{}</b>) Tasa de letalidad: <b>{}</b>%.\n"
+             "90 y +: <b>{}</b> (<b>{}</b>) Tasa de letalidad: <b>{}</b>%.\n"
+             "Total: <b>{}</b> (<b>{}</b>) Tasa de letalidad: <b>{}</b>%.\n\n"
+             "Datos obtenidos del análisis sobre los casos notificados con información disponible de edad y sexo.\n\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(casos_edad('0-9'), muertos_edad('0-9'),
+                                                                         tasa_edad('0-9'),
+                                                                         casos_edad('10-19'), muertos_edad('10-19'),
+                                                                         tasa_edad('10-19'),
+                                                                         casos_edad('20-29'), muertos_edad('20-29'),
+                                                                         tasa_edad('20-29'),
+                                                                         casos_edad('30-39'), muertos_edad('30-39'),
+                                                                         tasa_edad('30-39'),
+                                                                         casos_edad('40-49'), muertos_edad('40-49'),
+                                                                         tasa_edad('40-49'),
+                                                                         casos_edad('50-59'), muertos_edad('50-59'),
+                                                                         tasa_edad('50-59'),
+                                                                         casos_edad('60-69'), muertos_edad('60-69'),
+                                                                         tasa_edad('60-69'),
+                                                                         casos_edad('70-79'), muertos_edad('70-79'),
+                                                                         tasa_edad('70-79'),
+                                                                         casos_edad('80-89'), muertos_edad('80-89'),
+                                                                         tasa_edad('80-89'),
+                                                                         casos_edad('90 y +'), muertos_edad('90 y +'),
+                                                                         tasa_edad('90 y +'),
+                                                                         total_casos_edad(), total_muertos_edad(),
+                                                                         total_tasa_edad(),
+                                                                         format_date(fecha_actualizacion_edad())),
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
+
+    message.reply_text(
+        text="Incremento de casos en {}\n\n"
+             "\t - Casos acumulados: <b>{}</b>.\n\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
+                                                                         casos_acumulados_espana(),
+                                                                         format_date(fecha_actualizacion_espana())),
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
+
+    message.reply_text(
+        text="Evolución de fallecimientos en {}\n\n"
+             "\t - Fallecimientos totales: <b>{}</b>.\n"
+             "\t - Fallecidos últimas 24h: <b>{}</b>.\n"
+             "\t - Media fallecimientos semanal: <b>{}</b>.\n"
+             "\t - Tasa de letalidad: <b>{}</b>.\n\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
+                                                                         muertes_totales_espana(),
+                                                                         muertes_ultimo_dia_espana(),
+                                                                         media_muertes_semana_espana(),
+                                                                         tasa_letalidad_espana(),
+                                                                         format_date(fecha_actualizacion_muertes())),
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
+
+    message.reply_text(
+        text="Casos por CCAA: \n\n"
+             "{}\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(top_5_casos(),
+                                                                         format_date(fecha_actualizacion_espana())),
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
+
+    message.reply_text(
+        text="Casos por cada 100k habitantes: \n\n"
+             "{}\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(top_5_casos_100(),
+                                                                         format_date(fecha_actualizacion_espana())),
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
+
+    message.reply_text(
+        text="Media semanal por cada 100k habitantes: \n\n"
+             "{}\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(top_5_casos_100_semana(),
+                                                                         format_date(fecha_actualizacion_espana())),
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
+
+    message.reply_text(
+        text="Fallecimientos por cada 100k habitantes: \n\n"
+             "{}\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(top_5_muertes_100(),
+                                                                         format_date(fecha_actualizacion_muertes())),
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
+
+    message.reply_text(
+        text="Media fallecimientos semanal por cada 100k habitantes: \n\n"
+             "{}\n"
+             "Información actualizada a {}.\n"
+             "<b>Los datos pueden tardar unos días en consolidarse y "
+             "pueden no estar actualizados a la fecha actual</b>".format(top_5_muertes_100_semana(),
+                                                                         format_date(fecha_actualizacion_muertes())),
+        parse_mode='HTML',
+        reply_markup=reply_markup
+    )
+
+    current_state = "INFO_ESPANA_ALL"
+    return INFO_ESPANA_ALL
+
+
 def show_info(update, context):
     global current_state
 
@@ -1651,7 +1889,7 @@ def show_info(update, context):
         text="Este proyecto ha sido desarrollado como Trabajo Fin de Grado\n\n"
              "Este proyecto cuenta con una licencia AGPL, por lo que podeis usarlo si os es útil\n\n"
              "<b>Fuentes de datos</b>\n"
-             "Fuentes de datos para España y sus provincias de "
+             "Fuentes de datos para Espana y sus provincias de "
              "<a href='https://github.com/datadista/datasets/'>Datadista</a>\n\n"
              "<b>Contacto</b>\n"
              "Puedes ponerte en contacto con el desarrollador @JmZero\n\n"
@@ -1697,6 +1935,7 @@ def normalize(s):
         ("ú", "u"),
         (" ", ""),
         (".", ""),
+        ("ñ", "n"),
     )
     for a, b in replacements:
         s = s.replace(a, b).replace(a.upper(), b.upper())
@@ -1740,7 +1979,7 @@ def main():
                                                CallbackQueryHandler(show_cantabria_info, pattern='cantabria_info'),
                                                CallbackQueryHandler(show_castillalamancha_info, pattern='castillalamancha_info'),
                                                CallbackQueryHandler(show_castillayleon_info, pattern='castillayleon_info'),
-                                               CallbackQueryHandler(show_cataluña_info, pattern='cataluña_info'),
+                                               CallbackQueryHandler(show_cataluna_info, pattern='cataluna_info'),
                                                CallbackQueryHandler(show_ceuta_info, pattern='ceuta_info'),
                                                CallbackQueryHandler(show_extremadura_info, pattern='extremadura_info'),
                                                CallbackQueryHandler(show_galicia_info, pattern='galicia_info'),
@@ -1751,6 +1990,7 @@ def main():
                                                CallbackQueryHandler(show_murcia_info, pattern='murcia_info'),
                                                CallbackQueryHandler(show_navarra_info, pattern='navarra_info'),
                                                CallbackQueryHandler(show_paisvasco_info, pattern='paisvasco_info'),
+                                               CallbackQueryHandler(show_espana_info, pattern='espana_info'),
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
@@ -2552,101 +2792,101 @@ def main():
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
-                                           INFO_CATALUÑA: [
+                                           INFO_CATALUNA: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_cataluña_increment,
-                                                                    pattern='cataluña_increment'),
-                                               CallbackQueryHandler(show_cataluña_cumulative,
-                                                                    pattern='cataluña_cumulative'),
-                                               CallbackQueryHandler(show_cataluña_death,
-                                                                    pattern='cataluña_death'),
-                                               CallbackQueryHandler(show_cataluña_hospital,
-                                                                    pattern='cataluña_hospital'),
-                                               CallbackQueryHandler(show_cataluña_all,
-                                                                    pattern='cataluña_all'),
+                                               CallbackQueryHandler(show_cataluna_increment,
+                                                                    pattern='cataluna_increment'),
+                                               CallbackQueryHandler(show_cataluna_cumulative,
+                                                                    pattern='cataluna_cumulative'),
+                                               CallbackQueryHandler(show_cataluna_death,
+                                                                    pattern='cataluna_death'),
+                                               CallbackQueryHandler(show_cataluna_hospital,
+                                                                    pattern='cataluna_hospital'),
+                                               CallbackQueryHandler(show_cataluna_all,
+                                                                    pattern='cataluna_all'),
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
-                                           INFO_CATALUÑA_INCREMENT: [
+                                           INFO_CATALUNA_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_cataluña_cumulative,
-                                                                    pattern='cataluña_cumulative'),
-                                               CallbackQueryHandler(show_cataluña_death,
-                                                                    pattern='cataluña_death'),
-                                               CallbackQueryHandler(show_cataluña_hospital,
-                                                                    pattern='cataluña_hospital'),
-                                               CallbackQueryHandler(show_cataluña_all,
-                                                                    pattern='cataluña_all'),
+                                               CallbackQueryHandler(show_cataluna_cumulative,
+                                                                    pattern='cataluna_cumulative'),
+                                               CallbackQueryHandler(show_cataluna_death,
+                                                                    pattern='cataluna_death'),
+                                               CallbackQueryHandler(show_cataluna_hospital,
+                                                                    pattern='cataluna_hospital'),
+                                               CallbackQueryHandler(show_cataluna_all,
+                                                                    pattern='cataluna_all'),
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
-                                           INFO_CATALUÑA_CUMULATIVE: [
+                                           INFO_CATALUNA_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_cataluña_increment,
-                                                                    pattern='cataluña_increment'),
-                                               CallbackQueryHandler(show_cataluña_death,
-                                                                    pattern='cataluña_death'),
-                                               CallbackQueryHandler(show_cataluña_hospital,
-                                                                    pattern='cataluña_hospital'),
-                                               CallbackQueryHandler(show_cataluña_all,
-                                                                    pattern='cataluña_all'),
+                                               CallbackQueryHandler(show_cataluna_increment,
+                                                                    pattern='cataluna_increment'),
+                                               CallbackQueryHandler(show_cataluna_death,
+                                                                    pattern='cataluna_death'),
+                                               CallbackQueryHandler(show_cataluna_hospital,
+                                                                    pattern='cataluna_hospital'),
+                                               CallbackQueryHandler(show_cataluna_all,
+                                                                    pattern='cataluna_all'),
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
-                                           INFO_CATALUÑA_DEATH: [
+                                           INFO_CATALUNA_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_cataluña_increment,
-                                                                    pattern='cataluña_increment'),
-                                               CallbackQueryHandler(show_cataluña_cumulative,
-                                                                    pattern='cataluña_cumulative'),
-                                               CallbackQueryHandler(show_cataluña_hospital,
-                                                                    pattern='cataluña_hospital'),
-                                               CallbackQueryHandler(show_cataluña_all,
-                                                                    pattern='cataluña_all'),
+                                               CallbackQueryHandler(show_cataluna_increment,
+                                                                    pattern='cataluna_increment'),
+                                               CallbackQueryHandler(show_cataluna_cumulative,
+                                                                    pattern='cataluna_cumulative'),
+                                               CallbackQueryHandler(show_cataluna_hospital,
+                                                                    pattern='cataluna_hospital'),
+                                               CallbackQueryHandler(show_cataluna_all,
+                                                                    pattern='cataluna_all'),
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
-                                           INFO_CATALUÑA_HOSPITAL: [
+                                           INFO_CATALUNA_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_cataluña_increment,
-                                                                    pattern='cataluña_increment'),
-                                               CallbackQueryHandler(show_cataluña_cumulative,
-                                                                    pattern='cataluña_cumulative'),
-                                               CallbackQueryHandler(show_cataluña_death,
-                                                                    pattern='cataluña_death'),
-                                               CallbackQueryHandler(show_cataluña_all,
-                                                                    pattern='cataluña_all'),
+                                               CallbackQueryHandler(show_cataluna_increment,
+                                                                    pattern='cataluna_increment'),
+                                               CallbackQueryHandler(show_cataluna_cumulative,
+                                                                    pattern='cataluna_cumulative'),
+                                               CallbackQueryHandler(show_cataluna_death,
+                                                                    pattern='cataluna_death'),
+                                               CallbackQueryHandler(show_cataluna_all,
+                                                                    pattern='cataluna_all'),
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
-                                           INFO_CATALUÑA_ALL: [
+                                           INFO_CATALUNA_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_cataluña_increment,
-                                                                    pattern='cataluña_increment'),
-                                               CallbackQueryHandler(show_cataluña_cumulative,
-                                                                    pattern='cataluña_cumulative'),
-                                               CallbackQueryHandler(show_cataluña_death,
-                                                                    pattern='cataluña_death'),
-                                               CallbackQueryHandler(show_cataluña_hospital,
-                                                                    pattern='cataluña_hospital'),
+                                               CallbackQueryHandler(show_cataluna_increment,
+                                                                    pattern='cataluna_increment'),
+                                               CallbackQueryHandler(show_cataluna_cumulative,
+                                                                    pattern='cataluna_cumulative'),
+                                               CallbackQueryHandler(show_cataluna_death,
+                                                                    pattern='cataluna_death'),
+                                               CallbackQueryHandler(show_cataluna_hospital,
+                                                                    pattern='cataluna_hospital'),
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
@@ -3630,6 +3870,294 @@ def main():
                                                CallbackQueryHandler(show_not_implemented,
                                                                     pattern='show_not_implemented')
                                            ],
+                                           INFO_ESPANA: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_espana_increment,
+                                                                    pattern='espana_increment'),
+                                               CallbackQueryHandler(show_espana_age,
+                                                                    pattern='espana_age'),
+                                               CallbackQueryHandler(show_espana_cumulative,
+                                                                    pattern='espana_cumulative'),
+                                               CallbackQueryHandler(show_espana_death,
+                                                                    pattern='espana_death'),
+                                               CallbackQueryHandler(show_espana_region,
+                                                                    pattern='espana_region'),
+                                               CallbackQueryHandler(show_espana_100_cumulative,
+                                                                    pattern='espana_100_cumulative'),
+                                               CallbackQueryHandler(show_espana_100_cumulative_media,
+                                                                    pattern='espana_100_cumulative_media'),
+                                               CallbackQueryHandler(show_espana_100_death,
+                                                                    pattern='espana_100_death'),
+                                               CallbackQueryHandler(show_espana_100_death_media,
+                                                                    pattern='espana_100_death_media'),
+                                               CallbackQueryHandler(show_espana_all,
+                                                                    pattern='espana_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_ESPANA_INCREMENT: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_espana_age,
+                                                                    pattern='espana_age'),
+                                               CallbackQueryHandler(show_espana_cumulative,
+                                                                    pattern='espana_cumulative'),
+                                               CallbackQueryHandler(show_espana_death,
+                                                                    pattern='espana_death'),
+                                               CallbackQueryHandler(show_espana_region,
+                                                                    pattern='espana_region'),
+                                               CallbackQueryHandler(show_espana_100_cumulative,
+                                                                    pattern='espana_100_cumulative'),
+                                               CallbackQueryHandler(show_espana_100_cumulative_media,
+                                                                    pattern='espana_100_cumulative_media'),
+                                               CallbackQueryHandler(show_espana_100_death,
+                                                                    pattern='espana_100_death'),
+                                               CallbackQueryHandler(show_espana_100_death_media,
+                                                                    pattern='espana_100_death_media'),
+                                               CallbackQueryHandler(show_espana_all,
+                                                                    pattern='espana_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_ESPANA_AGE: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_espana_increment,
+                                                                    pattern='espana_increment'),
+                                               CallbackQueryHandler(show_espana_cumulative,
+                                                                    pattern='espana_cumulative'),
+                                               CallbackQueryHandler(show_espana_death,
+                                                                    pattern='espana_death'),
+                                               CallbackQueryHandler(show_espana_region,
+                                                                    pattern='espana_region'),
+                                               CallbackQueryHandler(show_espana_100_cumulative,
+                                                                    pattern='espana_100_cumulative'),
+                                               CallbackQueryHandler(show_espana_100_cumulative_media,
+                                                                    pattern='espana_100_cumulative_media'),
+                                               CallbackQueryHandler(show_espana_100_death,
+                                                                    pattern='espana_100_death'),
+                                               CallbackQueryHandler(show_espana_100_death_media,
+                                                                    pattern='espana_100_death_media'),
+                                               CallbackQueryHandler(show_espana_all,
+                                                                    pattern='espana_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_ESPANA_CUMULATIVE: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_espana_increment,
+                                                                    pattern='espana_increment'),
+                                               CallbackQueryHandler(show_espana_age,
+                                                                    pattern='espana_age'),
+                                               CallbackQueryHandler(show_espana_death,
+                                                                    pattern='espana_death'),
+                                               CallbackQueryHandler(show_espana_region,
+                                                                    pattern='espana_region'),
+                                               CallbackQueryHandler(show_espana_100_cumulative,
+                                                                    pattern='espana_100_cumulative'),
+                                               CallbackQueryHandler(show_espana_100_cumulative_media,
+                                                                    pattern='espana_100_cumulative_media'),
+                                               CallbackQueryHandler(show_espana_100_death,
+                                                                    pattern='espana_100_death'),
+                                               CallbackQueryHandler(show_espana_100_death_media,
+                                                                    pattern='espana_100_death_media'),
+                                               CallbackQueryHandler(show_espana_all,
+                                                                    pattern='espana_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_ESPANA_DEATH: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_espana_increment,
+                                                                    pattern='espana_increment'),
+                                               CallbackQueryHandler(show_espana_age,
+                                                                    pattern='espana_age'),
+                                               CallbackQueryHandler(show_espana_cumulative,
+                                                                    pattern='espana_cumulative'),
+                                               CallbackQueryHandler(show_espana_region,
+                                                                    pattern='espana_region'),
+                                               CallbackQueryHandler(show_espana_100_cumulative,
+                                                                    pattern='espana_100_cumulative'),
+                                               CallbackQueryHandler(show_espana_100_cumulative_media,
+                                                                    pattern='espana_100_cumulative_media'),
+                                               CallbackQueryHandler(show_espana_100_death,
+                                                                    pattern='espana_100_death'),
+                                               CallbackQueryHandler(show_espana_100_death_media,
+                                                                    pattern='espana_100_death_media'),
+                                               CallbackQueryHandler(show_espana_all,
+                                                                    pattern='espana_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_ESPANA_REGION: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_espana_increment,
+                                                                    pattern='espana_increment'),
+                                               CallbackQueryHandler(show_espana_age,
+                                                                    pattern='espana_age'),
+                                               CallbackQueryHandler(show_espana_cumulative,
+                                                                    pattern='espana_cumulative'),
+                                               CallbackQueryHandler(show_espana_death,
+                                                                    pattern='espana_death'),
+                                               CallbackQueryHandler(show_espana_100_cumulative,
+                                                                    pattern='espana_100_cumulative'),
+                                               CallbackQueryHandler(show_espana_100_cumulative_media,
+                                                                    pattern='espana_100_cumulative_media'),
+                                               CallbackQueryHandler(show_espana_100_death,
+                                                                    pattern='espana_100_death'),
+                                               CallbackQueryHandler(show_espana_100_death_media,
+                                                                    pattern='espana_100_death_media'),
+                                               CallbackQueryHandler(show_espana_all,
+                                                                    pattern='espana_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_ESPANA_100_CUMULATIVE: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_espana_increment,
+                                                                    pattern='espana_increment'),
+                                               CallbackQueryHandler(show_espana_age,
+                                                                    pattern='espana_age'),
+                                               CallbackQueryHandler(show_espana_cumulative,
+                                                                    pattern='espana_cumulative'),
+                                               CallbackQueryHandler(show_espana_death,
+                                                                    pattern='espana_death'),
+                                               CallbackQueryHandler(show_espana_region,
+                                                                    pattern='espana_region'),
+                                               CallbackQueryHandler(show_espana_100_cumulative_media,
+                                                                    pattern='espana_100_cumulative_media'),
+                                               CallbackQueryHandler(show_espana_100_death,
+                                                                    pattern='espana_100_death'),
+                                               CallbackQueryHandler(show_espana_100_death_media,
+                                                                    pattern='espana_100_death_media'),
+                                               CallbackQueryHandler(show_espana_all,
+                                                                    pattern='espana_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_ESPANA_100_CUMULATIVE_MEDIA: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_espana_increment,
+                                                                    pattern='espana_increment'),
+                                               CallbackQueryHandler(show_espana_age,
+                                                                    pattern='espana_age'),
+                                               CallbackQueryHandler(show_espana_cumulative,
+                                                                    pattern='espana_cumulative'),
+                                               CallbackQueryHandler(show_espana_death,
+                                                                    pattern='espana_death'),
+                                               CallbackQueryHandler(show_espana_region,
+                                                                    pattern='espana_region'),
+                                               CallbackQueryHandler(show_espana_100_cumulative,
+                                                                    pattern='espana_100_cumulative'),
+                                               CallbackQueryHandler(show_espana_100_death,
+                                                                    pattern='espana_100_death'),
+                                               CallbackQueryHandler(show_espana_100_death_media,
+                                                                    pattern='espana_100_death_media'),
+                                               CallbackQueryHandler(show_espana_all,
+                                                                    pattern='espana_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_ESPANA_100_DEATH: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_espana_increment,
+                                                                    pattern='espana_increment'),
+                                               CallbackQueryHandler(show_espana_age,
+                                                                    pattern='espana_age'),
+                                               CallbackQueryHandler(show_espana_cumulative,
+                                                                    pattern='espana_cumulative'),
+                                               CallbackQueryHandler(show_espana_death,
+                                                                    pattern='espana_death'),
+                                               CallbackQueryHandler(show_espana_region,
+                                                                    pattern='espana_region'),
+                                               CallbackQueryHandler(show_espana_100_cumulative,
+                                                                    pattern='espana_100_cumulative'),
+                                               CallbackQueryHandler(show_espana_100_cumulative_media,
+                                                                    pattern='espana_100_cumulative_media'),
+                                               CallbackQueryHandler(show_espana_100_death_media,
+                                                                    pattern='espana_100_death_media'),
+                                               CallbackQueryHandler(show_espana_all,
+                                                                    pattern='espana_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_ESPANA_100_DEATH_MEDIA: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_espana_increment,
+                                                                    pattern='espana_increment'),
+                                               CallbackQueryHandler(show_espana_age,
+                                                                    pattern='espana_age'),
+                                               CallbackQueryHandler(show_espana_cumulative,
+                                                                    pattern='espana_cumulative'),
+                                               CallbackQueryHandler(show_espana_death,
+                                                                    pattern='espana_death'),
+                                               CallbackQueryHandler(show_espana_region,
+                                                                    pattern='espana_region'),
+                                               CallbackQueryHandler(show_espana_100_cumulative,
+                                                                    pattern='espana_100_cumulative'),
+                                               CallbackQueryHandler(show_espana_100_cumulative_media,
+                                                                    pattern='espana_100_cumulative_media'),
+                                               CallbackQueryHandler(show_espana_100_death,
+                                                                    pattern='espana_100_death'),
+                                               CallbackQueryHandler(show_espana_all,
+                                                                    pattern='espana_all'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
+                                           INFO_ESPANA_ALL: [
+                                               MessageHandler(Filters.regex('Menú'), show_inicio),
+                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
+                                               MessageHandler(Filters.regex('Información'), show_info),
+                                               MessageHandler(Filters.text & (~Filters.command), any_message),
+                                               CallbackQueryHandler(show_espana_increment,
+                                                                    pattern='espana_increment'),
+                                               CallbackQueryHandler(show_espana_age,
+                                                                    pattern='espana_age'),
+                                               CallbackQueryHandler(show_espana_cumulative,
+                                                                    pattern='espana_cumulative'),
+                                               CallbackQueryHandler(show_espana_death,
+                                                                    pattern='espana_death'),
+                                               CallbackQueryHandler(show_espana_region,
+                                                                    pattern='espana_region'),
+                                               CallbackQueryHandler(show_espana_100_cumulative,
+                                                                    pattern='espana_100_cumulative'),
+                                               CallbackQueryHandler(show_espana_100_cumulative_media,
+                                                                    pattern='espana_100_cumulative_media'),
+                                               CallbackQueryHandler(show_espana_100_death,
+                                                                    pattern='espana_100_death'),
+                                               CallbackQueryHandler(show_espana_100_death_media,
+                                                                    pattern='espana_100_death_media'),
+                                               CallbackQueryHandler(show_not_implemented,
+                                                                    pattern='show_not_implemented')
+                                           ],
                                            NOT_IMPLEMENTED: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
@@ -3742,17 +4270,17 @@ def main():
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='castillayleon_all'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
-                                                                pattern='cataluña_info'),
+                                                                pattern='cataluna_info'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
-                                                                pattern='cataluña_increment'),
+                                                                pattern='cataluna_increment'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
-                                                                pattern='cataluña_cumulative'),
+                                                                pattern='cataluna_cumulative'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
-                                                                pattern='cataluña_death'),
+                                                                pattern='cataluna_death'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
-                                                                pattern='cataluña_hospital'),
+                                                                pattern='cataluna_hospital'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
-                                                                pattern='cataluña_all'),
+                                                                pattern='cataluna_all'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='ceuta_info'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
@@ -3873,6 +4401,26 @@ def main():
                                                                 pattern='paisvasco_hospital'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='paisvasco_all'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='espana_increment'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='espana_age'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='espana_cumulative'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='espana_death'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='espana_region'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='espana_100_cumulative'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='espana_100_cumulative_media'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='espana_100_death'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='espana_100_death_media'),
+                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
+                                                                pattern='espana_all'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='show_not_implemented'),
                                        ])
@@ -4036,6 +4584,199 @@ def fecha_actualizacion_hospital(provincia):
                                       (df_ccaa_hospital['CCAA'] == provincia)]
 
     return str(actual_day-day_before)
+
+
+def casos_acumulados_espana():
+    return str(df_ccaa_casos['num_casos'].sum())
+
+
+def incremento_ultimo_dia_espana():
+    df_loc = df_ccaa_casos.loc[df_ccaa_casos['fecha'] == fecha_actualizacion_espana()]
+    return str(df_loc['num_casos'].sum())
+
+
+def media_casos_semana_espana():
+    ultima_fecha = fecha_actualizacion_espana()
+    fecha = datetime.strptime(ultima_fecha, "%Y-%m-%d")
+
+    total = 0
+    for i in range(7):
+        fecha2 = fecha - timedelta(days=i)
+        fecha_semana_antes = fecha2.strftime("%Y-%m-%d")
+
+        df_loc = df_ccaa_casos.loc[df_ccaa_casos['fecha'] == fecha_semana_antes]
+        total += int(df_loc['num_casos'].sum())
+
+    return str(round(total / 7, 1))
+
+
+def fecha_actualizacion_espana():
+    actual_day = date.today()
+    dias_antes = 0
+    day_before = timedelta(days=dias_antes)
+
+    # La primera fecha de la que se tiene datos
+    while df_ccaa_casos.loc[df_ccaa_casos['fecha'] == str(actual_day - day_before)].empty:
+        dias_antes += 1
+        day_before = timedelta(days=dias_antes)
+
+    return str(actual_day-day_before)
+
+
+def casos_edad(edad):
+    df_loc = df_edad.loc[(df_edad['fecha'] == fecha_actualizacion_edad()) & (df_edad['sexo'] == 'ambos') & (df_edad['rango_edad'] == edad)]
+    return str(df_loc['casos_confirmados'].values[0])
+
+
+def muertos_edad(edad):
+    df_loc = df_edad.loc[(df_edad['fecha'] == fecha_actualizacion_edad()) & (df_edad['sexo'] == 'ambos') & (df_edad['rango_edad'] == edad)]
+    return str(df_loc['fallecidos'].values[0])
+
+
+def tasa_edad(edad):
+    return str(round(int(muertos_edad(edad))*100/int(casos_edad(edad)), 2))
+
+
+def total_casos_edad():
+    df_loc = df_edad.loc[(df_edad['fecha'] == fecha_actualizacion_edad()) & (df_edad['sexo'] == 'ambos')]
+    return str(df_loc['casos_confirmados'].sum())
+
+
+def total_muertos_edad():
+    df_loc = df_edad.loc[(df_edad['fecha'] == fecha_actualizacion_edad()) & (df_edad['sexo'] == 'ambos')]
+    return str(df_loc['fallecidos'].sum())
+
+
+def total_tasa_edad():
+    return str(round(int(total_muertos_edad())*100/int(total_casos_edad()), 2))
+
+
+def fecha_actualizacion_edad():
+    actual_day = date.today()
+    dias_antes = 0
+    day_before = timedelta(days=dias_antes)
+
+    # La primera fecha de la que se tiene datos
+    while df_edad.loc[df_edad['fecha'] == str(actual_day - day_before)].empty:
+        dias_antes += 1
+        day_before = timedelta(days=dias_antes)
+
+    return str(actual_day - day_before)
+
+
+def muertes_totales_espana():
+    return str(df_ccaa_muertes.groupby(['CCAA'])['Fallecidos'].sum()['España'])
+
+
+def muertes_ultimo_dia_espana():
+    return str(muertes_ultimo_dia('España'))
+
+
+def media_muertes_semana_espana():
+    return media_muertes_semana('España')
+
+
+def tasa_letalidad_espana():
+    return str(int(muertes_totales('España'))*100/int(casos_acumulados_espana()))
+
+
+def top_5_casos():
+    provincias = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
+                  'Castilla La Mancha', 'Castilla y León', 'Cataluña', 'Ceuta', 'Extremadura', 'Galicia', 'La Rioja',
+                  'Madrid', 'Melilla', 'Murcia', 'Navarra', 'País Vasco']
+
+    dict = {}
+
+    for i in range(len(provincias)):
+        dict[provincias[i]] = int(casos_acumulados(provincias[i]))
+
+    text=''
+    new_dict = sorted(dict.items(), key=lambda x: x[1], reverse=True)
+
+    for i in range(5):
+        text += '\t - ' + new_dict[i][0] + ': <b>' + str(new_dict[i][1]) + '</b>. \n'
+
+    return text
+
+
+def top_5_casos_100():
+    provincias = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
+                  'Castilla La Mancha', 'Castilla y León', 'Cataluña', 'Ceuta', 'Extremadura', 'Galicia', 'La Rioja',
+                  'Madrid', 'Melilla', 'Murcia', 'Navarra', 'País Vasco']
+
+    dict = {}
+
+    for i in range(len(provincias)):
+        df_loc = df_ccaa_habitantes.loc[df_ccaa_habitantes['ccaa'] == provincias[i]]
+        dict[provincias[i]] = round((int(casos_acumulados(provincias[i]))*100000)/df_loc['habitantes'].values[0], 1)
+
+    text=''
+    new_dict = sorted(dict.items(), key=lambda x: x[1], reverse=True)
+
+    for i in range(5):
+        text += '\t - ' + new_dict[i][0] + ': <b>' + str(new_dict[i][1]) + '</b>. \n'
+
+    return text
+
+
+def top_5_casos_100_semana():
+    provincias = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
+                  'Castilla La Mancha', 'Castilla y León', 'Cataluña', 'Ceuta', 'Extremadura', 'Galicia', 'La Rioja',
+                  'Madrid', 'Melilla', 'Murcia', 'Navarra', 'País Vasco']
+
+    dict = {}
+
+    for i in range(len(provincias)):
+        df_loc = df_ccaa_habitantes.loc[df_ccaa_habitantes['ccaa'] == provincias[i]]
+        dict[provincias[i]] = round((float(media_casos_semana(provincias[i]))*100000)/df_loc['habitantes'].values[0], 1)
+
+    text=''
+    new_dict = sorted(dict.items(), key=lambda x: x[1], reverse=True)
+
+    for i in range(5):
+        text += '\t - ' + new_dict[i][0] + ': <b>' + str(new_dict[i][1]) + '</b>. \n'
+
+    return text
+
+
+def top_5_muertes_100():
+    provincias = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
+                  'Castilla La Mancha', 'Castilla y León', 'Cataluña', 'Ceuta', 'Extremadura', 'Galicia', 'La Rioja',
+                  'Madrid', 'Melilla', 'Murcia', 'Navarra', 'País Vasco']
+
+    dict = {}
+
+    for i in range(len(provincias)):
+        df_loc = df_ccaa_habitantes.loc[df_ccaa_habitantes['ccaa'] == provincias[i]]
+        dict[provincias[i]] = round((int(muertes_totales(provincias[i]))*100000)/df_loc['habitantes'].values[0], 1)
+
+    text=''
+    new_dict = sorted(dict.items(), key=lambda x: x[1], reverse=True)
+
+    for i in range(5):
+        text += '\t - ' + new_dict[i][0] + ': <b>' + str(new_dict[i][1]) + '</b>. \n'
+
+    return text
+
+
+def top_5_muertes_100_semana():
+    provincias = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
+                  'Castilla La Mancha', 'Castilla y León', 'Cataluña', 'Ceuta', 'Extremadura', 'Galicia', 'La Rioja',
+                  'Madrid', 'Melilla', 'Murcia', 'Navarra', 'País Vasco']
+
+    dict = {}
+
+    for i in range(len(provincias)):
+        df_loc = df_ccaa_habitantes.loc[df_ccaa_habitantes['ccaa'] == provincias[i]]
+        dict[provincias[i]] = round((float(media_muertes_semana(provincias[i]))*100000)/df_loc['habitantes'].values[0], 1)
+
+    text=''
+    new_dict = sorted(dict.items(), key=lambda x: x[1], reverse=True)
+
+    for i in range(5):
+        text += '\t - ' + new_dict[i][0] + ': <b>' + str(new_dict[i][1]) + '</b>. \n'
+
+    return text
 
 
 if __name__ == '__main__':

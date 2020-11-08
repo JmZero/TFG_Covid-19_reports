@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO,
 logger = logging.getLogger()
 
 # POSSIBLE STATES
-WELCOME, INICIO, HELP, STATUS_INFO, WELCOME_BAD, NOT_IMPLEMENTED, \
+WELCOME, INICIO, HELP, STATUS_INFO, WELCOME_BAD, \
 INFO_ANDALUCIA, INFO_ANDALUCIA_INCREMENT, INFO_ANDALUCIA_CUMULATIVE, INFO_ANDALUCIA_DEATH, INFO_ANDALUCIA_HOSPITAL, \
 INFO_ANDALUCIA_ALL, INFO_ARAGON, INFO_ARAGON_INCREMENT, INFO_ARAGON_CUMULATIVE, INFO_ARAGON_DEATH, \
 INFO_ARAGON_HOSPITAL, INFO_ARAGON_ALL, INFO_ASTURIAS, INFO_ASTURIAS_INCREMENT, INFO_ASTURIAS_CUMULATIVE, \
@@ -39,7 +39,7 @@ INFO_NAVARRA_DEATH, INFO_NAVARRA_HOSPITAL, INFO_NAVARRA_ALL, INFO_PAISVASCO, INF
 INFO_PAISVASCO_CUMULATIVE, INFO_PAISVASCO_DEATH, INFO_PAISVASCO_HOSPITAL, INFO_PAISVASCO_ALL, INFO_ESPANA, \
 INFO_ESPANA_INCREMENT, INFO_ESPANA_AGE, INFO_ESPANA_CUMULATIVE, INFO_ESPANA_DEATH, INFO_ESPANA_REGION, \
 INFO_ESPANA_100_CUMULATIVE, INFO_ESPANA_100_CUMULATIVE_MEDIA, INFO_ESPANA_100_DEATH, \
-INFO_ESPANA_100_DEATH_MEDIA, INFO_ESPANA_ALL = range(131)
+INFO_ESPANA_100_DEATH_MEDIA, INFO_ESPANA_ALL = range(130)
 
 
 # Getting mode, so we could define run function for local and Heroku setup
@@ -126,7 +126,27 @@ def start_handler(update, context):
 def help_handler(update, context):
     global current_state
 
-    update.message.reply_text(text="Actualmente la ayuda no está disponible")
+    update.message.reply_text(
+        text="<b>Botones generales:</b>\n\n"
+             "\t <b>📈 Incremento</b> - Incremento de los casos\n"
+             "\t <b>➕ Casos acumulados</b> - Total de casos acumulados\n"
+             "\t <b>☠ Fallecimientos</b> - Datos fallecidos\n"
+             "\t <b>🏥 Hospitalizaciones</b> - Datos hospitalizaciones\n"
+             "\t <b>⬇ Ver todo</b> - Ver toda la información disponible\n\n"
+             "<b>Botones España:</b>\n\n"
+             "\t <b>📈 Incremento</b> - Incremento de los casos\n"
+             "\t <b>🧔👩 Casos por edad</b> - Casos/muertes por sexo y edad\n"
+             "\t <b>➕ Casos acumulados</b> - Total de casos acumulados\n"
+             "\t <b>☠ Fallecimientos</b> - Datos fallecidos\n"
+             "\t <b>🗺 Casos por Región</b> - Datos casos por provincias\n"
+             "\t <b>📈💯 Casos 100K</b> - Casos por cada 100k habitantes por provincia\n"
+             "\t <b>📈🆕 Casos 100K semana</b> - Media semanal casos por cada 100k habitantes por provincia\n"
+             "\t <b>☠💯 Fallecimientos 100K</b> - Fallecimientos por cada 100k habitantes por provincia\n"
+             "\t <b>☠🆕 Fallecimientos 100K</b> semana - Media semanal fallecimientos por cada 100k habitantes por provincia\n"
+             "\t <b>⬇ Ver todo</b> - Ver toda la información disponible\n",
+        parse_mode='HTML',
+        disable_web_page_preview=True
+    )
 
     current_state = 'HELP'
     return HELP
@@ -160,7 +180,7 @@ def any_message(update, context):
 def show_inicio(update, context):
     global current_state
 
-    if current_state == "WELCOME_BAD" or current_state == "NOT_IMPLEMENTED":
+    if current_state == "WELCOME_BAD":
         username = update.callback_query.message.chat.username
         message = update.callback_query.message
     else:
@@ -424,7 +444,7 @@ def show_espana_info(update, context):
          InlineKeyboardButton("➕ Casos acumulados", callback_data='espana_cumulative')],
 
         [InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death'),
-         InlineKeyboardButton("Casos por Región", callback_data='espana_region')],
+         InlineKeyboardButton("🗺 Casos por Región", callback_data='espana_region')],
 
         [InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative'),
          InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media')],
@@ -1371,10 +1391,10 @@ def show_espana_age(update, context):
          InlineKeyboardButton("➕ Casos acumulados", callback_data='espana_cumulative')],
 
         [InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death'),
-         InlineKeyboardButton("Casos por Región", callback_data='espana_region')],
+         InlineKeyboardButton("🗺 Casos por Región", callback_data='espana_region')],
 
         [InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative'),
-         InlineKeyboardButton("Casos 100K semana", callback_data='espana_100_cumulative_media')],
+         InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media')],
 
          [InlineKeyboardButton("☠💯 Fallecimientos 100K", callback_data='espana_100_death'),
          InlineKeyboardButton("☠🆕 Fallecimientos 100K semana", callback_data='espana_100_death_media')],
@@ -1435,7 +1455,7 @@ def show_espana_cumulative(update, context):
          InlineKeyboardButton("🧔👩 Casos por edad", callback_data='espana_age')],
 
         [InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death'),
-         InlineKeyboardButton("Casos por Región", callback_data='espana_region')],
+         InlineKeyboardButton("🗺 Casos por Región", callback_data='espana_region')],
 
         [InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative'),
          InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media')],
@@ -1479,7 +1499,7 @@ def show_espana_death(update, context):
          InlineKeyboardButton("🧔👩 Casos por edad", callback_data='espana_age')],
 
         [InlineKeyboardButton("➕ Casos acumulados", callback_data='espana_cumulative'),
-         InlineKeyboardButton("Casos por Región", callback_data='espana_region')],
+         InlineKeyboardButton("🗺 Casos por Región", callback_data='espana_region')],
 
         [InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative'),
          InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media')],
@@ -1574,7 +1594,7 @@ def show_espana_100_cumulative(update, context):
         [InlineKeyboardButton("➕ Casos acumulados", callback_data='espana_cumulative'),
          InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death')],
 
-        [InlineKeyboardButton("Casos por Región", callback_data='espana_region'),
+        [InlineKeyboardButton("🗺 Casos por Región", callback_data='espana_region'),
          InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media')],
 
         [InlineKeyboardButton("☠💯 Fallecimientos 100K", callback_data='espana_100_death'),
@@ -1617,7 +1637,7 @@ def show_espana_100_cumulative_media(update, context):
         [InlineKeyboardButton("➕ Casos acumulados", callback_data='espana_cumulative'),
          InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death')],
 
-        [InlineKeyboardButton("Casos por Región", callback_data='espana_region'),
+        [InlineKeyboardButton("🗺 Casos por Región", callback_data='espana_region'),
          InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative')],
 
         [InlineKeyboardButton("☠💯 Fallecimientos 100K", callback_data='espana_100_death'),
@@ -1660,7 +1680,7 @@ def show_espana_100_death(update, context):
         [InlineKeyboardButton("➕ Casos acumulados", callback_data='espana_cumulative'),
          InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death')],
 
-        [InlineKeyboardButton("Casos por Región", callback_data='espana_region'),
+        [InlineKeyboardButton("🗺 Casos por Región", callback_data='espana_region'),
          InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative')],
 
         [InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media'),
@@ -1703,7 +1723,7 @@ def show_espana_100_death_media(update, context):
         [InlineKeyboardButton("➕ Casos acumulados", callback_data='espana_cumulative'),
          InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death')],
 
-        [InlineKeyboardButton("Casos por Región", callback_data='espana_region'),
+        [InlineKeyboardButton("🗺 Casos por Región", callback_data='espana_region'),
          InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative')],
 
         [InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media'),
@@ -1745,7 +1765,7 @@ def show_espana_all(update, context):
          InlineKeyboardButton("➕ Casos acumulados", callback_data='espana_cumulative')],
 
         [InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death'),
-         InlineKeyboardButton("Casos por Región", callback_data='espana_region')],
+         InlineKeyboardButton("🗺 Casos por Región", callback_data='espana_region')],
 
         [InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative'),
          InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media')],
@@ -1977,22 +1997,6 @@ def usuario_pulsa_boton_anterior(update, context):
     )
 
 
-def show_not_implemented(update, context):
-    global current_state
-
-    keyboard = [
-        [InlineKeyboardButton("Back", callback_data='start_menu')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    update.callback_query.message.reply_text(
-        text="Página no implementada, por favor vuelve atrás",
-        reply_markup=reply_markup
-    )
-
-    current_state = "NOT_IMPLEMENTED"
-    return NOT_IMPLEMENTED
-
-
 def normalize(s):
     replacements = (
         ("á", "a"),
@@ -2058,22 +2062,18 @@ def main():
                                                CallbackQueryHandler(show_navarra_info, pattern='navarra_info'),
                                                CallbackQueryHandler(show_paisvasco_info, pattern='paisvasco_info'),
                                                CallbackQueryHandler(show_espana_info, pattern='espana_info'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            HELP: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
                                            ],
                                            STATUS_INFO: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
                                                MessageHandler(Filters.regex('Información'), show_info),
                                                MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_not_implemented, pattern='show_not_implemented')
                                            ],
                                            INFO_ANDALUCIA: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2090,8 +2090,6 @@ def main():
                                                                     pattern='andalucia_hospital'),
                                                CallbackQueryHandler(show_andalucia_all,
                                                                     pattern='andalucia_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ANDALUCIA_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2106,8 +2104,6 @@ def main():
                                                                     pattern='andalucia_hospital'),
                                                CallbackQueryHandler(show_andalucia_all,
                                                                     pattern='andalucia_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ANDALUCIA_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2122,8 +2118,6 @@ def main():
                                                                     pattern='andalucia_hospital'),
                                                CallbackQueryHandler(show_andalucia_all,
                                                                     pattern='andalucia_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ANDALUCIA_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2138,8 +2132,6 @@ def main():
                                                                     pattern='andalucia_hospital'),
                                                CallbackQueryHandler(show_andalucia_all,
                                                                     pattern='andalucia_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ANDALUCIA_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2154,8 +2146,6 @@ def main():
                                                                     pattern='andalucia_death'),
                                                CallbackQueryHandler(show_andalucia_all,
                                                                     pattern='andalucia_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ANDALUCIA_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2170,8 +2160,6 @@ def main():
                                                                     pattern='andalucia_death'),
                                                CallbackQueryHandler(show_andalucia_hospital,
                                                                     pattern='andalucia_hospital'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ARAGON: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2188,8 +2176,6 @@ def main():
                                                                     pattern='aragon_hospital'),
                                                CallbackQueryHandler(show_aragon_all,
                                                                     pattern='aragon_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ARAGON_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2204,8 +2190,6 @@ def main():
                                                                     pattern='aragon_hospital'),
                                                CallbackQueryHandler(show_aragon_all,
                                                                     pattern='aragon_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ARAGON_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2220,8 +2204,6 @@ def main():
                                                                     pattern='aragon_hospital'),
                                                CallbackQueryHandler(show_aragon_all,
                                                                     pattern='aragon_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ARAGON_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2236,8 +2218,6 @@ def main():
                                                                     pattern='aragon_hospital'),
                                                CallbackQueryHandler(show_aragon_all,
                                                                     pattern='aragon_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ARAGON_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2252,8 +2232,6 @@ def main():
                                                                     pattern='aragon_death'),
                                                CallbackQueryHandler(show_aragon_all,
                                                                     pattern='aragon_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ARAGON_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2268,8 +2246,6 @@ def main():
                                                                     pattern='aragon_death'),
                                                CallbackQueryHandler(show_aragon_hospital,
                                                                     pattern='aragon_hospital'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ASTURIAS: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2286,8 +2262,6 @@ def main():
                                                                     pattern='asturias_hospital'),
                                                CallbackQueryHandler(show_asturias_all,
                                                                     pattern='asturias_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ASTURIAS_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2302,9 +2276,7 @@ def main():
                                                                     pattern='asturias_hospital'),
                                                CallbackQueryHandler(show_asturias_all,
                                                                     pattern='asturias_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
-                                           ],
+                                            ],
                                            INFO_ASTURIAS_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
@@ -2318,8 +2290,6 @@ def main():
                                                                     pattern='asturias_hospital'),
                                                CallbackQueryHandler(show_asturias_all,
                                                                     pattern='asturias_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ASTURIAS_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2334,8 +2304,6 @@ def main():
                                                                     pattern='asturias_hospital'),
                                                CallbackQueryHandler(show_asturias_all,
                                                                     pattern='asturias_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ASTURIAS_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2350,8 +2318,6 @@ def main():
                                                                     pattern='asturias_death'),
                                                CallbackQueryHandler(show_asturias_all,
                                                                     pattern='asturias_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ASTURIAS_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2366,8 +2332,6 @@ def main():
                                                                     pattern='asturias_death'),
                                                CallbackQueryHandler(show_asturias_hospital,
                                                                     pattern='asturias_hospital'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CVALENCIANA: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2384,8 +2348,6 @@ def main():
                                                                     pattern='cvalenciana_hospital'),
                                                CallbackQueryHandler(show_cvalenciana_all,
                                                                     pattern='cvalenciana_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CVALENCIANA_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2400,8 +2362,6 @@ def main():
                                                                     pattern='cvalenciana_hospital'),
                                                CallbackQueryHandler(show_cvalenciana_all,
                                                                     pattern='cvalenciana_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CVALENCIANA_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2416,8 +2376,6 @@ def main():
                                                                     pattern='cvalenciana_hospital'),
                                                CallbackQueryHandler(show_cvalenciana_all,
                                                                     pattern='cvalenciana_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CVALENCIANA_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2432,8 +2390,6 @@ def main():
                                                                     pattern='cvalenciana_hospital'),
                                                CallbackQueryHandler(show_cvalenciana_all,
                                                                     pattern='cvalenciana_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CVALENCIANA_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2448,8 +2404,6 @@ def main():
                                                                     pattern='cvalenciana_death'),
                                                CallbackQueryHandler(show_cvalenciana_all,
                                                                     pattern='cvalenciana_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CVALENCIANA_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2464,8 +2418,6 @@ def main():
                                                                     pattern='cvalenciana_death'),
                                                CallbackQueryHandler(show_cvalenciana_hospital,
                                                                     pattern='cvalenciana_hospital'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CANARIAS: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2482,8 +2434,6 @@ def main():
                                                                     pattern='canarias_hospital'),
                                                CallbackQueryHandler(show_canarias_all,
                                                                     pattern='canarias_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CANARIAS_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2498,8 +2448,6 @@ def main():
                                                                     pattern='canarias_hospital'),
                                                CallbackQueryHandler(show_canarias_all,
                                                                     pattern='canarias_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CANARIAS_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2514,8 +2462,6 @@ def main():
                                                                     pattern='canarias_hospital'),
                                                CallbackQueryHandler(show_canarias_all,
                                                                     pattern='canarias_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CANARIAS_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2530,8 +2476,6 @@ def main():
                                                                     pattern='canarias_hospital'),
                                                CallbackQueryHandler(show_canarias_all,
                                                                     pattern='canarias_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CANARIAS_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2546,8 +2490,6 @@ def main():
                                                                     pattern='canarias_death'),
                                                CallbackQueryHandler(show_canarias_all,
                                                                     pattern='canarias_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CANARIAS_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2562,8 +2504,6 @@ def main():
                                                                     pattern='canarias_death'),
                                                CallbackQueryHandler(show_canarias_hospital,
                                                                     pattern='canarias_hospital'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CANTABRIA: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2580,8 +2520,6 @@ def main():
                                                                     pattern='cantabria_hospital'),
                                                CallbackQueryHandler(show_cantabria_all,
                                                                     pattern='cantabria_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CANTABRIA_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2596,8 +2534,6 @@ def main():
                                                                     pattern='cantabria_hospital'),
                                                CallbackQueryHandler(show_cantabria_all,
                                                                     pattern='cantabria_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CANTABRIA_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2612,8 +2548,6 @@ def main():
                                                                     pattern='cantabria_hospital'),
                                                CallbackQueryHandler(show_cantabria_all,
                                                                     pattern='cantabria_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CANTABRIA_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2628,8 +2562,6 @@ def main():
                                                                     pattern='cantabria_hospital'),
                                                CallbackQueryHandler(show_cantabria_all,
                                                                     pattern='cantabria_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CANTABRIA_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2644,8 +2576,6 @@ def main():
                                                                     pattern='cantabria_death'),
                                                CallbackQueryHandler(show_cantabria_all,
                                                                     pattern='cantabria_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CANTABRIA_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2660,8 +2590,6 @@ def main():
                                                                     pattern='cantabria_death'),
                                                CallbackQueryHandler(show_cantabria_hospital,
                                                                     pattern='cantabria_hospital'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CASTILLALAMANCHA: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2678,8 +2606,6 @@ def main():
                                                                     pattern='castillalamancha_hospital'),
                                                CallbackQueryHandler(show_castillalamancha_all,
                                                                     pattern='castillalamancha_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CASTILLALAMANCHA_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2694,8 +2620,6 @@ def main():
                                                                     pattern='castillalamancha_hospital'),
                                                CallbackQueryHandler(show_castillalamancha_all,
                                                                     pattern='castillalamancha_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CASTILLALAMANCHA_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2710,8 +2634,6 @@ def main():
                                                                     pattern='castillalamancha_hospital'),
                                                CallbackQueryHandler(show_castillalamancha_all,
                                                                     pattern='castillalamancha_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CASTILLALAMANCHA_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2726,8 +2648,6 @@ def main():
                                                                     pattern='castillalamancha_hospital'),
                                                CallbackQueryHandler(show_castillalamancha_all,
                                                                     pattern='castillalamancha_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CASTILLALAMANCHA_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2742,8 +2662,6 @@ def main():
                                                                     pattern='castillalamancha_death'),
                                                CallbackQueryHandler(show_castillalamancha_all,
                                                                     pattern='castillalamancha_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CASTILLALAMANCHA_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2758,8 +2676,6 @@ def main():
                                                                     pattern='castillalamancha_death'),
                                                CallbackQueryHandler(show_castillalamancha_hospital,
                                                                     pattern='castillalamancha_hospital'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CASTILLAYLEON: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2776,8 +2692,6 @@ def main():
                                                                     pattern='castillayleon_hospital'),
                                                CallbackQueryHandler(show_castillayleon_all,
                                                                     pattern='castillayleon_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CASTILLAYLEON_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2792,8 +2706,6 @@ def main():
                                                                     pattern='castillayleon_hospital'),
                                                CallbackQueryHandler(show_castillayleon_all,
                                                                     pattern='castillayleon_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CASTILLAYLEON_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2808,8 +2720,6 @@ def main():
                                                                     pattern='castillayleon_hospital'),
                                                CallbackQueryHandler(show_castillayleon_all,
                                                                     pattern='castillayleon_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CASTILLAYLEON_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2824,8 +2734,6 @@ def main():
                                                                     pattern='castillayleon_hospital'),
                                                CallbackQueryHandler(show_castillayleon_all,
                                                                     pattern='castillayleon_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CASTILLAYLEON_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2840,8 +2748,6 @@ def main():
                                                                     pattern='castillayleon_death'),
                                                CallbackQueryHandler(show_castillayleon_all,
                                                                     pattern='castillayleon_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CASTILLAYLEON_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2856,8 +2762,6 @@ def main():
                                                                     pattern='castillayleon_death'),
                                                CallbackQueryHandler(show_castillayleon_hospital,
                                                                     pattern='castillayleon_hospital'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CATALUNA: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2874,8 +2778,6 @@ def main():
                                                                     pattern='cataluna_hospital'),
                                                CallbackQueryHandler(show_cataluna_all,
                                                                     pattern='cataluna_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CATALUNA_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2890,8 +2792,6 @@ def main():
                                                                     pattern='cataluna_hospital'),
                                                CallbackQueryHandler(show_cataluna_all,
                                                                     pattern='cataluna_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CATALUNA_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2906,8 +2806,6 @@ def main():
                                                                     pattern='cataluna_hospital'),
                                                CallbackQueryHandler(show_cataluna_all,
                                                                     pattern='cataluna_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CATALUNA_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2922,8 +2820,6 @@ def main():
                                                                     pattern='cataluna_hospital'),
                                                CallbackQueryHandler(show_cataluna_all,
                                                                     pattern='cataluna_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CATALUNA_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2938,8 +2834,6 @@ def main():
                                                                     pattern='cataluna_death'),
                                                CallbackQueryHandler(show_cataluna_all,
                                                                     pattern='cataluna_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CATALUNA_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2954,8 +2848,6 @@ def main():
                                                                     pattern='cataluna_death'),
                                                CallbackQueryHandler(show_cataluna_hospital,
                                                                     pattern='cataluna_hospital'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CEUTA: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2972,8 +2864,6 @@ def main():
                                                                     pattern='ceuta_hospital'),
                                                CallbackQueryHandler(show_ceuta_all,
                                                                     pattern='ceuta_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CEUTA_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -2988,8 +2878,6 @@ def main():
                                                                     pattern='ceuta_hospital'),
                                                CallbackQueryHandler(show_ceuta_all,
                                                                     pattern='ceuta_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CEUTA_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3004,8 +2892,6 @@ def main():
                                                                     pattern='ceuta_hospital'),
                                                CallbackQueryHandler(show_ceuta_all,
                                                                     pattern='ceuta_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CEUTA_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3020,9 +2906,7 @@ def main():
                                                                     pattern='ceuta_hospital'),
                                                CallbackQueryHandler(show_ceuta_all,
                                                                     pattern='ceuta_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
-                                           ],
+                                            ],
                                            INFO_CEUTA_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
                                                MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
@@ -3036,8 +2920,6 @@ def main():
                                                                     pattern='ceuta_death'),
                                                CallbackQueryHandler(show_ceuta_all,
                                                                     pattern='ceuta_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_CEUTA_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3052,8 +2934,6 @@ def main():
                                                                     pattern='ceuta_death'),
                                                CallbackQueryHandler(show_ceuta_hospital,
                                                                     pattern='ceuta_hospital'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_EXTREMADURA: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3070,8 +2950,6 @@ def main():
                                                                     pattern='extremadura_hospital'),
                                                CallbackQueryHandler(show_extremadura_all,
                                                                     pattern='extremadura_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_EXTREMADURA_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3086,8 +2964,6 @@ def main():
                                                                     pattern='extremadura_hospital'),
                                                CallbackQueryHandler(show_extremadura_all,
                                                                     pattern='extremadura_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_EXTREMADURA_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3102,8 +2978,6 @@ def main():
                                                                     pattern='extremadura_hospital'),
                                                CallbackQueryHandler(show_extremadura_all,
                                                                     pattern='extremadura_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_EXTREMADURA_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3118,8 +2992,6 @@ def main():
                                                                     pattern='extremadura_hospital'),
                                                CallbackQueryHandler(show_extremadura_all,
                                                                     pattern='extremadura_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_EXTREMADURA_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3134,8 +3006,6 @@ def main():
                                                                     pattern='extremadura_death'),
                                                CallbackQueryHandler(show_extremadura_all,
                                                                     pattern='extremadura_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_EXTREMADURA_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3150,8 +3020,6 @@ def main():
                                                                     pattern='extremadura_death'),
                                                CallbackQueryHandler(show_extremadura_hospital,
                                                                     pattern='extremadura_hospital'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_GALICIA: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3168,8 +3036,6 @@ def main():
                                                                     pattern='galicia_hospital'),
                                                CallbackQueryHandler(show_galicia_all,
                                                                     pattern='galicia_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_GALICIA_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3184,8 +3050,6 @@ def main():
                                                                     pattern='galicia_hospital'),
                                                CallbackQueryHandler(show_galicia_all,
                                                                     pattern='galicia_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_GALICIA_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3200,8 +3064,6 @@ def main():
                                                                     pattern='galicia_hospital'),
                                                CallbackQueryHandler(show_galicia_all,
                                                                     pattern='galicia_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_GALICIA_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3216,8 +3078,6 @@ def main():
                                                                     pattern='galicia_hospital'),
                                                CallbackQueryHandler(show_galicia_all,
                                                                     pattern='galicia_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_GALICIA_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3232,8 +3092,6 @@ def main():
                                                                     pattern='galicia_death'),
                                                CallbackQueryHandler(show_galicia_all,
                                                                     pattern='galicia_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_GALICIA_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3248,8 +3106,6 @@ def main():
                                                                     pattern='galicia_death'),
                                                CallbackQueryHandler(show_galicia_hospital,
                                                                     pattern='galicia_hospital'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_BALEARES: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3266,8 +3122,6 @@ def main():
                                                                     pattern='baleares_hospital'),
                                                CallbackQueryHandler(show_baleares_all,
                                                                     pattern='baleares_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_BALEARES_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3282,8 +3136,6 @@ def main():
                                                                     pattern='baleares_hospital'),
                                                CallbackQueryHandler(show_baleares_all,
                                                                     pattern='baleares_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_BALEARES_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3298,8 +3150,6 @@ def main():
                                                                     pattern='baleares_hospital'),
                                                CallbackQueryHandler(show_baleares_all,
                                                                     pattern='baleares_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_BALEARES_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3314,8 +3164,6 @@ def main():
                                                                     pattern='baleares_hospital'),
                                                CallbackQueryHandler(show_baleares_all,
                                                                     pattern='baleares_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_BALEARES_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3330,8 +3178,6 @@ def main():
                                                                     pattern='baleares_death'),
                                                CallbackQueryHandler(show_baleares_all,
                                                                     pattern='baleares_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_BALEARES_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3346,8 +3192,6 @@ def main():
                                                                     pattern='baleares_death'),
                                                CallbackQueryHandler(show_baleares_hospital,
                                                                     pattern='baleares_hospital'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_LARIOJA: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3364,8 +3208,6 @@ def main():
                                                                     pattern='larioja_hospital'),
                                                CallbackQueryHandler(show_larioja_all,
                                                                     pattern='larioja_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_LARIOJA_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3380,8 +3222,6 @@ def main():
                                                                     pattern='larioja_hospital'),
                                                CallbackQueryHandler(show_larioja_all,
                                                                     pattern='larioja_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_LARIOJA_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3396,8 +3236,6 @@ def main():
                                                                     pattern='larioja_hospital'),
                                                CallbackQueryHandler(show_larioja_all,
                                                                     pattern='larioja_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_LARIOJA_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3412,8 +3250,6 @@ def main():
                                                                     pattern='larioja_hospital'),
                                                CallbackQueryHandler(show_larioja_all,
                                                                     pattern='larioja_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_LARIOJA_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3428,8 +3264,6 @@ def main():
                                                                     pattern='larioja_death'),
                                                CallbackQueryHandler(show_larioja_all,
                                                                     pattern='larioja_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_LARIOJA_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3444,8 +3278,6 @@ def main():
                                                                     pattern='larioja_death'),
                                                CallbackQueryHandler(show_larioja_hospital,
                                                                     pattern='larioja_hospital'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_MADRID: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3462,8 +3294,6 @@ def main():
                                                                     pattern='madrid_hospital'),
                                                CallbackQueryHandler(show_madrid_all,
                                                                     pattern='madrid_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_MADRID_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3478,8 +3308,6 @@ def main():
                                                                     pattern='madrid_hospital'),
                                                CallbackQueryHandler(show_madrid_all,
                                                                     pattern='madrid_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_MADRID_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3494,8 +3322,6 @@ def main():
                                                                     pattern='madrid_hospital'),
                                                CallbackQueryHandler(show_madrid_all,
                                                                     pattern='madrid_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_MADRID_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3510,8 +3336,6 @@ def main():
                                                                     pattern='madrid_hospital'),
                                                CallbackQueryHandler(show_madrid_all,
                                                                     pattern='madrid_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_MADRID_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3526,8 +3350,6 @@ def main():
                                                                     pattern='madrid_death'),
                                                CallbackQueryHandler(show_madrid_all,
                                                                     pattern='madrid_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_MADRID_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3542,8 +3364,6 @@ def main():
                                                                     pattern='madrid_death'),
                                                CallbackQueryHandler(show_madrid_hospital,
                                                                     pattern='madrid_hospital'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_MELILLA: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3560,8 +3380,6 @@ def main():
                                                                     pattern='melilla_hospital'),
                                                CallbackQueryHandler(show_melilla_all,
                                                                     pattern='melilla_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_MELILLA_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3576,8 +3394,6 @@ def main():
                                                                     pattern='melilla_hospital'),
                                                CallbackQueryHandler(show_melilla_all,
                                                                     pattern='melilla_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_MELILLA_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3592,8 +3408,6 @@ def main():
                                                                     pattern='melilla_hospital'),
                                                CallbackQueryHandler(show_melilla_all,
                                                                     pattern='melilla_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_MELILLA_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3608,8 +3422,6 @@ def main():
                                                                     pattern='melilla_hospital'),
                                                CallbackQueryHandler(show_melilla_all,
                                                                     pattern='melilla_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_MELILLA_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3624,8 +3436,6 @@ def main():
                                                                     pattern='melilla_death'),
                                                CallbackQueryHandler(show_melilla_all,
                                                                     pattern='melilla_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_MELILLA_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3640,8 +3450,6 @@ def main():
                                                                     pattern='melilla_death'),
                                                CallbackQueryHandler(show_melilla_hospital,
                                                                     pattern='melilla_hospital'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_MURCIA: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3658,8 +3466,6 @@ def main():
                                                                     pattern='murcia_hospital'),
                                                CallbackQueryHandler(show_murcia_all,
                                                                     pattern='murcia_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_MURCIA_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3674,8 +3480,6 @@ def main():
                                                                     pattern='murcia_hospital'),
                                                CallbackQueryHandler(show_murcia_all,
                                                                     pattern='murcia_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_MURCIA_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3690,8 +3494,6 @@ def main():
                                                                     pattern='murcia_hospital'),
                                                CallbackQueryHandler(show_murcia_all,
                                                                     pattern='murcia_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_MURCIA_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3706,8 +3508,6 @@ def main():
                                                                     pattern='murcia_hospital'),
                                                CallbackQueryHandler(show_murcia_all,
                                                                     pattern='murcia_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_MURCIA_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3722,8 +3522,6 @@ def main():
                                                                     pattern='murcia_death'),
                                                CallbackQueryHandler(show_murcia_all,
                                                                     pattern='murcia_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_MURCIA_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3738,8 +3536,6 @@ def main():
                                                                     pattern='murcia_death'),
                                                CallbackQueryHandler(show_murcia_hospital,
                                                                     pattern='murcia_hospital'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_NAVARRA: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3756,8 +3552,6 @@ def main():
                                                                     pattern='navarra_hospital'),
                                                CallbackQueryHandler(show_navarra_all,
                                                                     pattern='navarra_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_NAVARRA_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3772,8 +3566,6 @@ def main():
                                                                     pattern='navarra_hospital'),
                                                CallbackQueryHandler(show_navarra_all,
                                                                     pattern='navarra_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_NAVARRA_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3788,8 +3580,6 @@ def main():
                                                                     pattern='navarra_hospital'),
                                                CallbackQueryHandler(show_navarra_all,
                                                                     pattern='navarra_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_NAVARRA_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3804,8 +3594,6 @@ def main():
                                                                     pattern='navarra_hospital'),
                                                CallbackQueryHandler(show_navarra_all,
                                                                     pattern='navarra_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_NAVARRA_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3820,8 +3608,6 @@ def main():
                                                                     pattern='navarra_death'),
                                                CallbackQueryHandler(show_navarra_all,
                                                                     pattern='navarra_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_NAVARRA_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3836,8 +3622,6 @@ def main():
                                                                     pattern='navarra_death'),
                                                CallbackQueryHandler(show_navarra_hospital,
                                                                     pattern='navarra_hospital'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_PAISVASCO: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3854,8 +3638,6 @@ def main():
                                                                     pattern='paisvasco_hospital'),
                                                CallbackQueryHandler(show_paisvasco_all,
                                                                     pattern='paisvasco_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_PAISVASCO_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3870,8 +3652,6 @@ def main():
                                                                     pattern='paisvasco_hospital'),
                                                CallbackQueryHandler(show_paisvasco_all,
                                                                     pattern='paisvasco_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_PAISVASCO_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3886,8 +3666,6 @@ def main():
                                                                     pattern='paisvasco_hospital'),
                                                CallbackQueryHandler(show_paisvasco_all,
                                                                     pattern='paisvasco_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_PAISVASCO_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3902,8 +3680,6 @@ def main():
                                                                     pattern='paisvasco_hospital'),
                                                CallbackQueryHandler(show_paisvasco_all,
                                                                     pattern='paisvasco_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_PAISVASCO_HOSPITAL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3918,8 +3694,6 @@ def main():
                                                                     pattern='paisvasco_death'),
                                                CallbackQueryHandler(show_paisvasco_all,
                                                                     pattern='paisvasco_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_PAISVASCO_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3934,8 +3708,6 @@ def main():
                                                                     pattern='paisvasco_death'),
                                                CallbackQueryHandler(show_paisvasco_hospital,
                                                                     pattern='paisvasco_hospital'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ESPANA: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3962,8 +3734,6 @@ def main():
                                                                     pattern='espana_100_death_media'),
                                                CallbackQueryHandler(show_espana_all,
                                                                     pattern='espana_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ESPANA_INCREMENT: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -3988,8 +3758,6 @@ def main():
                                                                     pattern='espana_100_death_media'),
                                                CallbackQueryHandler(show_espana_all,
                                                                     pattern='espana_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ESPANA_AGE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -4014,8 +3782,6 @@ def main():
                                                                     pattern='espana_100_death_media'),
                                                CallbackQueryHandler(show_espana_all,
                                                                     pattern='espana_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ESPANA_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -4040,8 +3806,6 @@ def main():
                                                                     pattern='espana_100_death_media'),
                                                CallbackQueryHandler(show_espana_all,
                                                                     pattern='espana_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ESPANA_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -4066,8 +3830,6 @@ def main():
                                                                     pattern='espana_100_death_media'),
                                                CallbackQueryHandler(show_espana_all,
                                                                     pattern='espana_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ESPANA_REGION: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -4092,8 +3854,6 @@ def main():
                                                                     pattern='espana_100_death_media'),
                                                CallbackQueryHandler(show_espana_all,
                                                                     pattern='espana_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ESPANA_100_CUMULATIVE: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -4118,8 +3878,6 @@ def main():
                                                                     pattern='espana_100_death_media'),
                                                CallbackQueryHandler(show_espana_all,
                                                                     pattern='espana_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ESPANA_100_CUMULATIVE_MEDIA: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -4144,8 +3902,6 @@ def main():
                                                                     pattern='espana_100_death_media'),
                                                CallbackQueryHandler(show_espana_all,
                                                                     pattern='espana_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ESPANA_100_DEATH: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -4170,8 +3926,6 @@ def main():
                                                                     pattern='espana_100_death_media'),
                                                CallbackQueryHandler(show_espana_all,
                                                                     pattern='espana_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ESPANA_100_DEATH_MEDIA: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -4196,8 +3950,6 @@ def main():
                                                                     pattern='espana_100_death'),
                                                CallbackQueryHandler(show_espana_all,
                                                                     pattern='espana_all'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            INFO_ESPANA_ALL: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -4222,8 +3974,6 @@ def main():
                                                                     pattern='espana_100_death'),
                                                CallbackQueryHandler(show_espana_100_death_media,
                                                                     pattern='espana_100_death_media'),
-                                               CallbackQueryHandler(show_not_implemented,
-                                                                    pattern='show_not_implemented')
                                            ],
                                            NOT_IMPLEMENTED: [
                                                MessageHandler(Filters.regex('Menú'), show_inicio),
@@ -4488,8 +4238,6 @@ def main():
                                                                 pattern='espana_100_death_media'),
                                            CallbackQueryHandler(usuario_pulsa_boton_anterior,
                                                                 pattern='espana_all'),
-                                           CallbackQueryHandler(usuario_pulsa_boton_anterior,
-                                                                pattern='show_not_implemented'),
                                        ])
 
     updater.dispatcher.add_handler(conv_handler)

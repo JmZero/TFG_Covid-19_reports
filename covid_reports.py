@@ -152,7 +152,9 @@ def any_message(update, context):
         current_state = 'WELCOME_BAD'
         return WELCOME_BAD
     else:
-        update.message.reply_text("No te he entendido. Si es necesario, puedes reiniciarme usando /start")
+        update.message.reply_text(text="No te he entendido. El comando <b>{}</b> no está en mi registro."
+                                  " Si es necesario, puedes reiniciarme usando /start".format(update.message.text),
+                                  parse_mode='HTML')
 
 
 def show_inicio(update, context):

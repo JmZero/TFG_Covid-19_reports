@@ -105,9 +105,9 @@ def start_handler(update, context):
     else:
         logger.info("User {} started bot".format(username + ':' + str(chat_id)))
 
-        main_menu_keyboard = [[KeyboardButton("Menú"),
+        main_menu_keyboard = [[KeyboardButton("📖 Menú"),
                                KeyboardButton("🆘 Ayuda"),
-                               KeyboardButton("Información")]]
+                               KeyboardButton("ℹ Información")]]
 
         reply_kb_markup = ReplyKeyboardMarkup(main_menu_keyboard,
                                               resize_keyboard=True,
@@ -193,7 +193,7 @@ def show_inicio(update, context):
          InlineKeyboardButton("Navarra", callback_data='navarra_info')],
 
         [InlineKeyboardButton("País Vasco", callback_data='paisvasco_info'),
-         InlineKeyboardButton("Toda España", callback_data='espana_info')]
+         InlineKeyboardButton("Toda España 🇪🇸", callback_data='espana_info')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -220,12 +220,12 @@ def show_main_info(update, context):
     autonomy_upper = normalize(current_autonomy).upper()
 
     keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='{}_increment'.format(autonomy_lower)),
-         InlineKeyboardButton("Casos acumulados", callback_data='{}_cumulative'.format(autonomy_lower)),
-         InlineKeyboardButton("Fallecimientos", callback_data='{}_death'.format(autonomy_lower))],
+        [InlineKeyboardButton("📈 Incremento", callback_data='{}_increment'.format(autonomy_lower)),
+         InlineKeyboardButton("➕ Casos acumulados", callback_data='{}_cumulative'.format(autonomy_lower)),
+         InlineKeyboardButton("☠ Fallecimientos", callback_data='{}_death'.format(autonomy_lower))],
 
-        [InlineKeyboardButton("Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower)),
-         InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower))],
+        [InlineKeyboardButton("🏥 Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower)),
+         InlineKeyboardButton("⬇ Ver todo", callback_data='{}_all'.format(autonomy_lower))],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -419,20 +419,20 @@ def show_espana_info(update, context):
     message = update.callback_query.message
 
     keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='espana_increment'),
-         InlineKeyboardButton("Casos por edad", callback_data='espana_age'),
-         InlineKeyboardButton("Casos acumulados", callback_data='espana_cumulative')],
+        [InlineKeyboardButton("📈 Incremento", callback_data='espana_increment'),
+         InlineKeyboardButton("🧔👩 Casos por edad", callback_data='espana_age'),
+         InlineKeyboardButton("➕ Casos acumulados", callback_data='espana_cumulative')],
 
-        [InlineKeyboardButton("Fallecimientos", callback_data='espana_death'),
+        [InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death'),
          InlineKeyboardButton("Casos por Región", callback_data='espana_region')],
 
-        [InlineKeyboardButton("Casos 100K", callback_data='espana_100_cumulative'),
-         InlineKeyboardButton("Casos 100K semana ", callback_data='espana_100_cumulative_media')],
+        [InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative'),
+         InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media')],
 
-         [InlineKeyboardButton("Fallecimientos 100K", callback_data='espana_100_death'),
-         InlineKeyboardButton("Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+         [InlineKeyboardButton("☠💯 Fallecimientos 100K", callback_data='espana_100_death'),
+          InlineKeyboardButton("☠🆕 Fallecimientos 100K semana", callback_data='espana_100_death_media')],
 
-        [InlineKeyboardButton("Ver todo", callback_data='espana_all')],
+        [InlineKeyboardButton("⬇ Ver todo", callback_data='espana_all')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -459,11 +459,11 @@ def show_increment(update, context):
     autonomy_upper = normalize(current_autonomy).upper()
 
     keyboard = [
-        [InlineKeyboardButton("Casos acumulados", callback_data='{}_cumulative'.format(autonomy_lower)),
-         InlineKeyboardButton("Fallecimientos", callback_data='{}_death'.format(autonomy_lower))],
+        [InlineKeyboardButton("➕ Casos acumulados", callback_data='{}_cumulative'.format(autonomy_lower)),
+         InlineKeyboardButton("☠ Fallecimientos", callback_data='{}_death'.format(autonomy_lower))],
 
-        [InlineKeyboardButton("Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower)),
-         InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower))],
+        [InlineKeyboardButton("🏥 Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower)),
+         InlineKeyboardButton("⬇ Ver todo", callback_data='{}_all'.format(autonomy_lower))],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -501,11 +501,11 @@ def show_cumulative(update, context):
     autonomy_upper = normalize(current_autonomy).upper()
 
     keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='{}_increment'.format(autonomy_lower)),
-         InlineKeyboardButton("Fallecimientos", callback_data='{}_death'.format(autonomy_lower))],
+        [InlineKeyboardButton("📈 Incremento", callback_data='{}_increment'.format(autonomy_lower)),
+         InlineKeyboardButton("☠ Fallecimientos", callback_data='{}_death'.format(autonomy_lower))],
 
-        [InlineKeyboardButton("Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower)),
-         InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower))],
+        [InlineKeyboardButton("🏥 Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower)),
+         InlineKeyboardButton("⬇ Ver todo", callback_data='{}_all'.format(autonomy_lower))],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -539,11 +539,11 @@ def show_death(update, context):
     autonomy_upper = normalize(current_autonomy).upper()
 
     keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='{}_increment'.format(autonomy_lower)),
-         InlineKeyboardButton("Casos acumulados", callback_data='{}_cumulative'.format(autonomy_lower))],
+        [InlineKeyboardButton("📈 Incremento", callback_data='{}_increment'.format(autonomy_lower)),
+         InlineKeyboardButton("➕ Casos acumulados", callback_data='{}_cumulative'.format(autonomy_lower))],
 
-        [InlineKeyboardButton("Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower)),
-         InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower))],
+        [InlineKeyboardButton("🏥 Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower)),
+         InlineKeyboardButton("⬇ Ver todo", callback_data='{}_all'.format(autonomy_lower))],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -583,11 +583,11 @@ def show_hospital(update, context):
     autonomy_upper = normalize(current_autonomy).upper()
 
     keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='{}_increment'.format(autonomy_lower)),
-         InlineKeyboardButton("Casos acumulados", callback_data='{}_cumulative'.format(autonomy_lower))],
+        [InlineKeyboardButton("📈 Incremento", callback_data='{}_increment'.format(autonomy_lower)),
+         InlineKeyboardButton("➕ Casos acumulados", callback_data='{}_cumulative'.format(autonomy_lower))],
 
-        [InlineKeyboardButton("Fallecimientos", callback_data='{}_death'.format(autonomy_lower)),
-         InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower))],
+        [InlineKeyboardButton("☠ Fallecimientos", callback_data='{}_death'.format(autonomy_lower)),
+         InlineKeyboardButton("⬇ Ver todo", callback_data='{}_all'.format(autonomy_lower))],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -631,11 +631,11 @@ def show_all_info(update, context):
     autonomy_upper = normalize(current_autonomy).upper()
 
     keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='{}_increment'.format(autonomy_lower)),
-         InlineKeyboardButton("Casos acumulados", callback_data='{}_cumulative'.format(autonomy_lower))],
+        [InlineKeyboardButton("📈 Incremento", callback_data='{}_increment'.format(autonomy_lower)),
+         InlineKeyboardButton("➕ Casos acumulados", callback_data='{}_cumulative'.format(autonomy_lower))],
 
-        [InlineKeyboardButton("Fallecimientos", callback_data='{}_death'.format(autonomy_lower)),
-         InlineKeyboardButton("Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower))],
+        [InlineKeyboardButton("☠ Fallecimientos", callback_data='{}_death'.format(autonomy_lower)),
+         InlineKeyboardButton("🏥 Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower))],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -1319,19 +1319,19 @@ def show_espana_increment(update, context):
     message = update.callback_query.message
 
     keyboard = [
-        [InlineKeyboardButton("Casos por edad", callback_data='espana_age'),
-         InlineKeyboardButton("Casos acumulados", callback_data='espana_cumulative')],
+        [InlineKeyboardButton("🧔👩 Casos por edad", callback_data='espana_age'),
+         InlineKeyboardButton("➕ Casos acumulados", callback_data='espana_cumulative')],
 
-        [InlineKeyboardButton("Fallecimientos", callback_data='espana_death'),
-         InlineKeyboardButton("Casos por Región", callback_data='espana_region')],
+        [InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death'),
+         InlineKeyboardButton("🗺 Casos por Región", callback_data='espana_region')],
 
-        [InlineKeyboardButton("Casos 100K", callback_data='espana_100_cumulative'),
-         InlineKeyboardButton("Casos 100K semana ", callback_data='espana_100_cumulative_media')],
+        [InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative'),
+         InlineKeyboardButton("📈🆕 Casos 100K semana ", callback_data='espana_100_cumulative_media')],
 
-         [InlineKeyboardButton("Fallecimientos 100K", callback_data='espana_100_death'),
-         InlineKeyboardButton("Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+         [InlineKeyboardButton("☠💯 Fallecimientos 100K", callback_data='espana_100_death'),
+          InlineKeyboardButton("☠🆕 Fallecimientos 100K semana", callback_data='espana_100_death_media')],
 
-        [InlineKeyboardButton("Ver todo", callback_data='espana_all')],
+        [InlineKeyboardButton("⬇ Ver todo", callback_data='espana_all')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -1367,19 +1367,19 @@ def show_espana_age(update, context):
     message = update.callback_query.message
 
     keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='espana_increment'),
-         InlineKeyboardButton("Casos acumulados", callback_data='espana_cumulative')],
+        [InlineKeyboardButton("📈 Incremento", callback_data='espana_increment'),
+         InlineKeyboardButton("➕ Casos acumulados", callback_data='espana_cumulative')],
 
-        [InlineKeyboardButton("Fallecimientos", callback_data='espana_death'),
+        [InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death'),
          InlineKeyboardButton("Casos por Región", callback_data='espana_region')],
 
-        [InlineKeyboardButton("Casos 100K", callback_data='espana_100_cumulative'),
-         InlineKeyboardButton("Casos 100K semana ", callback_data='espana_100_cumulative_media')],
+        [InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative'),
+         InlineKeyboardButton("Casos 100K semana", callback_data='espana_100_cumulative_media')],
 
-         [InlineKeyboardButton("Fallecimientos 100K", callback_data='espana_100_death'),
-         InlineKeyboardButton("Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+         [InlineKeyboardButton("☠💯 Fallecimientos 100K", callback_data='espana_100_death'),
+         InlineKeyboardButton("☠🆕 Fallecimientos 100K semana", callback_data='espana_100_death_media')],
 
-        [InlineKeyboardButton("Ver todo", callback_data='espana_all')],
+        [InlineKeyboardButton("⬇ Ver todo", callback_data='espana_all')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -1431,19 +1431,19 @@ def show_espana_cumulative(update, context):
     message = update.callback_query.message
 
     keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='espana_increment'),
-         InlineKeyboardButton("Casos por edad", callback_data='espana_age')],
+        [InlineKeyboardButton("📈 Incremento", callback_data='espana_increment'),
+         InlineKeyboardButton("🧔👩 Casos por edad", callback_data='espana_age')],
 
-        [InlineKeyboardButton("Fallecimientos", callback_data='espana_death'),
+        [InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death'),
          InlineKeyboardButton("Casos por Región", callback_data='espana_region')],
 
-        [InlineKeyboardButton("Casos 100K", callback_data='espana_100_cumulative'),
-         InlineKeyboardButton("Casos 100K semana ", callback_data='espana_100_cumulative_media')],
+        [InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative'),
+         InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media')],
 
-        [InlineKeyboardButton("Fallecimientos 100K", callback_data='espana_100_death'),
-         InlineKeyboardButton("Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+        [InlineKeyboardButton("☠💯 Fallecimientos 100K", callback_data='espana_100_death'),
+         InlineKeyboardButton("☠🆕 Fallecimientos 100K semana", callback_data='espana_100_death_media')],
 
-        [InlineKeyboardButton("Ver todo", callback_data='espana_all')],
+        [InlineKeyboardButton("⬇ Ver todo", callback_data='espana_all')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -1475,19 +1475,19 @@ def show_espana_death(update, context):
     message = update.callback_query.message
 
     keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='espana_increment'),
-         InlineKeyboardButton("Casos por edad", callback_data='espana_age')],
+        [InlineKeyboardButton("📈 Incremento", callback_data='espana_increment'),
+         InlineKeyboardButton("🧔👩 Casos por edad", callback_data='espana_age')],
 
-        [InlineKeyboardButton("Casos acumulados", callback_data='espana_cumulative'),
+        [InlineKeyboardButton("➕ Casos acumulados", callback_data='espana_cumulative'),
          InlineKeyboardButton("Casos por Región", callback_data='espana_region')],
 
-        [InlineKeyboardButton("Casos 100K", callback_data='espana_100_cumulative'),
-         InlineKeyboardButton("Casos 100K semana ", callback_data='espana_100_cumulative_media')],
+        [InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative'),
+         InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media')],
 
-        [InlineKeyboardButton("Fallecimientos 100K", callback_data='espana_100_death'),
-         InlineKeyboardButton("Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+        [InlineKeyboardButton("☠💯 Fallecimientos 100K", callback_data='espana_100_death'),
+         InlineKeyboardButton("☠🆕 Fallecimientos 100K semana", callback_data='espana_100_death_media')],
 
-        [InlineKeyboardButton("Ver todo", callback_data='espana_all')],
+        [InlineKeyboardButton("⬇ Ver todo", callback_data='espana_all')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -1525,19 +1525,19 @@ def show_espana_region(update, context):
     message = update.callback_query.message
 
     keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='espana_increment'),
-         InlineKeyboardButton("Casos por edad", callback_data='espana_age')],
+        [InlineKeyboardButton("📈 Incremento", callback_data='espana_increment'),
+         InlineKeyboardButton("🧔👩 Casos por edad", callback_data='espana_age')],
 
-        [InlineKeyboardButton("Casos acumulados", callback_data='espana_cumulative'),
-         InlineKeyboardButton("Fallecimientos", callback_data='espana_death')],
+        [InlineKeyboardButton("➕ Casos acumulados", callback_data='espana_cumulative'),
+         InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death')],
 
-        [InlineKeyboardButton("Casos 100K", callback_data='espana_100_cumulative'),
-         InlineKeyboardButton("Casos 100K semana ", callback_data='espana_100_cumulative_media')],
+        [InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative'),
+         InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media')],
 
-        [InlineKeyboardButton("Fallecimientos 100K", callback_data='espana_100_death'),
-         InlineKeyboardButton("Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+        [InlineKeyboardButton("☠💯 Fallecimientos 100K", callback_data='espana_100_death'),
+         InlineKeyboardButton("☠🆕 Fallecimientos 100K semana", callback_data='espana_100_death_media')],
 
-        [InlineKeyboardButton("Ver todo", callback_data='espana_all')],
+        [InlineKeyboardButton("⬇ Ver todo", callback_data='espana_all')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -1568,19 +1568,19 @@ def show_espana_100_cumulative(update, context):
     message = update.callback_query.message
 
     keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='espana_increment'),
-         InlineKeyboardButton("Casos por edad", callback_data='espana_age')],
+        [InlineKeyboardButton("📈 Incremento", callback_data='espana_increment'),
+         InlineKeyboardButton("🧔👩 Casos por edad", callback_data='espana_age')],
 
-        [InlineKeyboardButton("Casos acumulados", callback_data='espana_cumulative'),
-         InlineKeyboardButton("Fallecimientos", callback_data='espana_death')],
+        [InlineKeyboardButton("➕ Casos acumulados", callback_data='espana_cumulative'),
+         InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death')],
 
         [InlineKeyboardButton("Casos por Región", callback_data='espana_region'),
-         InlineKeyboardButton("Casos 100K semana ", callback_data='espana_100_cumulative_media')],
+         InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media')],
 
-        [InlineKeyboardButton("Fallecimientos 100K", callback_data='espana_100_death'),
-         InlineKeyboardButton("Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+        [InlineKeyboardButton("☠💯 Fallecimientos 100K", callback_data='espana_100_death'),
+         InlineKeyboardButton("☠🆕 Fallecimientos 100K semana", callback_data='espana_100_death_media')],
 
-        [InlineKeyboardButton("Ver todo", callback_data='espana_all')],
+        [InlineKeyboardButton("⬇ Ver todo", callback_data='espana_all')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -1611,19 +1611,19 @@ def show_espana_100_cumulative_media(update, context):
     message = update.callback_query.message
 
     keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='espana_increment'),
-         InlineKeyboardButton("Casos por edad", callback_data='espana_age')],
+        [InlineKeyboardButton("📈 Incremento", callback_data='espana_increment'),
+         InlineKeyboardButton("🧔👩 Casos por edad", callback_data='espana_age')],
 
-        [InlineKeyboardButton("Casos acumulados", callback_data='espana_cumulative'),
-         InlineKeyboardButton("Fallecimientos", callback_data='espana_death')],
+        [InlineKeyboardButton("➕ Casos acumulados", callback_data='espana_cumulative'),
+         InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death')],
 
         [InlineKeyboardButton("Casos por Región", callback_data='espana_region'),
-         InlineKeyboardButton("Casos 100K", callback_data='espana_100_cumulative')],
+         InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative')],
 
-        [InlineKeyboardButton("Fallecimientos 100K", callback_data='espana_100_death'),
-         InlineKeyboardButton("Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+        [InlineKeyboardButton("☠💯 Fallecimientos 100K", callback_data='espana_100_death'),
+         InlineKeyboardButton("☠🆕 Fallecimientos 100K semana", callback_data='espana_100_death_media')],
 
-        [InlineKeyboardButton("Ver todo", callback_data='espana_all')],
+        [InlineKeyboardButton("⬇ Ver todo", callback_data='espana_all')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -1654,19 +1654,19 @@ def show_espana_100_death(update, context):
     message = update.callback_query.message
 
     keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='espana_increment'),
-         InlineKeyboardButton("Casos por edad", callback_data='espana_age')],
+        [InlineKeyboardButton("📈 Incremento", callback_data='espana_increment'),
+         InlineKeyboardButton("🧔👩 Casos por edad", callback_data='espana_age')],
 
-        [InlineKeyboardButton("Casos acumulados", callback_data='espana_cumulative'),
-         InlineKeyboardButton("Fallecimientos", callback_data='espana_death')],
+        [InlineKeyboardButton("➕ Casos acumulados", callback_data='espana_cumulative'),
+         InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death')],
 
         [InlineKeyboardButton("Casos por Región", callback_data='espana_region'),
-         InlineKeyboardButton("Casos 100K", callback_data='espana_100_cumulative')],
+         InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative')],
 
-        [InlineKeyboardButton("Casos 100K semana ", callback_data='espana_100_cumulative_media'),
-         InlineKeyboardButton("Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+        [InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media'),
+         InlineKeyboardButton("☠🆕 Fallecimientos 100K semana", callback_data='espana_100_death_media')],
 
-        [InlineKeyboardButton("Ver todo", callback_data='espana_all')],
+        [InlineKeyboardButton("⬇ Ver todo", callback_data='espana_all')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -1697,19 +1697,19 @@ def show_espana_100_death_media(update, context):
     message = update.callback_query.message
 
     keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='espana_increment'),
-         InlineKeyboardButton("Casos por edad", callback_data='espana_age')],
+        [InlineKeyboardButton("📈 Incremento", callback_data='espana_increment'),
+         InlineKeyboardButton("🧔👩 Casos por edad", callback_data='espana_age')],
 
-        [InlineKeyboardButton("Casos acumulados", callback_data='espana_cumulative'),
-         InlineKeyboardButton("Fallecimientos", callback_data='espana_death')],
+        [InlineKeyboardButton("➕ Casos acumulados", callback_data='espana_cumulative'),
+         InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death')],
 
         [InlineKeyboardButton("Casos por Región", callback_data='espana_region'),
-         InlineKeyboardButton("Casos 100K", callback_data='espana_100_cumulative')],
+         InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative')],
 
-        [InlineKeyboardButton("Casos 100K semana ", callback_data='espana_100_cumulative_media'),
-         InlineKeyboardButton("Fallecimientos 100K", callback_data='espana_100_death')],
+        [InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media'),
+         InlineKeyboardButton("☠💯 Fallecimientos 100K", callback_data='espana_100_death')],
 
-        [InlineKeyboardButton("Ver todo", callback_data='espana_all')],
+        [InlineKeyboardButton("⬇ Ver todo", callback_data='espana_all')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -1740,18 +1740,18 @@ def show_espana_all(update, context):
     message = update.callback_query.message
 
     keyboard = [
-        [InlineKeyboardButton("Incremento", callback_data='espana_increment'),
-         InlineKeyboardButton("Casos por edad", callback_data='espana_age'),
-         InlineKeyboardButton("Casos acumulados", callback_data='espana_cumulative')],
+        [InlineKeyboardButton("📈 Incremento", callback_data='espana_increment'),
+         InlineKeyboardButton("🧔👩 Casos por edad", callback_data='espana_age'),
+         InlineKeyboardButton("➕ Casos acumulados", callback_data='espana_cumulative')],
 
-        [InlineKeyboardButton("Fallecimientos", callback_data='espana_death'),
+        [InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death'),
          InlineKeyboardButton("Casos por Región", callback_data='espana_region')],
 
-        [InlineKeyboardButton("Casos 100K", callback_data='espana_100_cumulative'),
-         InlineKeyboardButton("Casos 100K semana ", callback_data='espana_100_cumulative_media')],
+        [InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative'),
+         InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media')],
 
-        [InlineKeyboardButton("Fallecimientos 100K", callback_data='espana_100_death'),
-         InlineKeyboardButton("Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+        [InlineKeyboardButton("☠💯 Fallecimientos 100K", callback_data='espana_100_death'),
+         InlineKeyboardButton("☠🆕 Fallecimientos 100K semana", callback_data='espana_100_death_media')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 

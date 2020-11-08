@@ -11,9 +11,9 @@ async def test_ping(controller):
 # Click "Menu" keyboard button
 async def test_menu_button(controller):
     async with controller.collect(count=2) as res:  # type: Response
-        await controller.send_command("Menú")
+        await controller.send_command("📖 Menú")
 
-    assert not res.is_empty, 'Pressing the "Menu" button had no effect'
+    assert not res.is_empty, 'Pressing the "📖 Menú" button had no effect'
     keyboard = res.inline_keyboards[0]
     # Necesario revisar los botones
     # for i in range(keyboard.num_buttons):
@@ -31,11 +31,11 @@ async def test_menu_button(controller):
 # Click "Información" keyboard button
 async def test_info(controller):
     async with controller.collect(count=1) as res:  # type: Response
-        await controller.send_command("Información")
+        await controller.send_command("ℹ Información")
 
 
     assert res.num_messages == 1
-    assert not res.is_empty, "Bot did not respond to /help command"
+    assert not res.is_empty, 'Pressing the "ℹ Información" button had no effect'
     assert "este proyecto ha sido desarrollado como trabajo fin de grado" in res.full_text.lower()
 
 # Pendiente de revisión

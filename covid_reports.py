@@ -3,6 +3,7 @@ import os
 import sys
 import pandas as pd
 from datetime import date, timedelta, datetime
+import matplotlib.pyplot as plt
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Updater, CommandHandler, ConversationHandler, MessageHandler, Filters, CallbackQueryHandler
 
@@ -11,6 +12,7 @@ logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger()
 
+# POSSIBLE STATES
 WELCOME, INICIO, HELP, STATUS_INFO, WELCOME_BAD, NOT_IMPLEMENTED, \
 INFO_ANDALUCIA, INFO_ANDALUCIA_INCREMENT, INFO_ANDALUCIA_CUMULATIVE, INFO_ANDALUCIA_DEATH, INFO_ANDALUCIA_HOSPITAL, \
 INFO_ANDALUCIA_ALL, INFO_ARAGON, INFO_ARAGON_INCREMENT, INFO_ARAGON_CUMULATIVE, INFO_ARAGON_DEATH, \
@@ -221,8 +223,7 @@ def show_main_info(update, context):
          InlineKeyboardButton("Fallecimientos", callback_data='{}_death'.format(autonomy_lower))],
 
         [InlineKeyboardButton("Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower)),
-         InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower)),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
+         InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower))],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -457,17 +458,18 @@ def show_increment(update, context):
 
     keyboard = [
         [InlineKeyboardButton("Casos acumulados", callback_data='{}_cumulative'.format(autonomy_lower)),
-         InlineKeyboardButton("Fallecimientos", callback_data='{}_death'.format(autonomy_lower)),
-         InlineKeyboardButton("Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower))],
+         InlineKeyboardButton("Fallecimientos", callback_data='{}_death'.format(autonomy_lower))],
 
-        [InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower)),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
+        [InlineKeyboardButton("Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower)),
+         InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower))],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # message.reply_photo(
-    #     photo=open('./img/mapa_andalucia.png', 'rb')
-    # )
+    grafica_incremento()
+
+    message.reply_photo(
+        photo=open('./img_graficas/incremento_{}.png'.format(autonomy_lower), 'rb')
+    )
 
     message.reply_text(
         text="Incremento de casos en {}\n\n"
@@ -498,17 +500,18 @@ def show_cumulative(update, context):
 
     keyboard = [
         [InlineKeyboardButton("Incremento", callback_data='{}_increment'.format(autonomy_lower)),
-         InlineKeyboardButton("Fallecimientos", callback_data='{}_death'.format(autonomy_lower)),
-         InlineKeyboardButton("Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower))],
+         InlineKeyboardButton("Fallecimientos", callback_data='{}_death'.format(autonomy_lower))],
 
-        [InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower)),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
+        [InlineKeyboardButton("Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower)),
+         InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower))],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # message.reply_photo(
-    #     photo=open('./img/mapa_andalucia.png', 'rb')
-    # )
+    grafica_acumulado()
+
+    message.reply_photo(
+        photo=open('./img_graficas/acumulado_{}.png'.format(autonomy_lower), 'rb')
+    )
 
     message.reply_text(
         text="Incremento de casos en {}\n\n"
@@ -535,17 +538,18 @@ def show_death(update, context):
 
     keyboard = [
         [InlineKeyboardButton("Incremento", callback_data='{}_increment'.format(autonomy_lower)),
-         InlineKeyboardButton("Casos acumulados", callback_data='{}_cumulative'.format(autonomy_lower)),
-         InlineKeyboardButton("Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower))],
+         InlineKeyboardButton("Casos acumulados", callback_data='{}_cumulative'.format(autonomy_lower))],
 
-        [InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower)),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
+        [InlineKeyboardButton("Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower)),
+         InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower))],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # message.reply_photo(
-    #     photo=open('./img/mapa_andalucia.png', 'rb')
-    # )
+    grafica_muertes()
+
+    message.reply_photo(
+        photo=open('./img_graficas/fallecidos_{}.png'.format(autonomy_lower), 'rb')
+    )
 
     message.reply_text(
         text="Evolución de fallecimientos en {}\n\n"
@@ -578,17 +582,18 @@ def show_hospital(update, context):
 
     keyboard = [
         [InlineKeyboardButton("Incremento", callback_data='{}_increment'.format(autonomy_lower)),
-         InlineKeyboardButton("Casos acumulados", callback_data='{}_cumulative'.format(autonomy_lower)),
-         InlineKeyboardButton("Fallecimientos", callback_data='{}_death'.format(autonomy_lower))],
+         InlineKeyboardButton("Casos acumulados", callback_data='{}_cumulative'.format(autonomy_lower))],
 
-        [InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower)),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
+        [InlineKeyboardButton("Fallecimientos", callback_data='{}_death'.format(autonomy_lower)),
+         InlineKeyboardButton("Ver todo", callback_data='{}_all'.format(autonomy_lower))],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # message.reply_photo(
-    #     photo=open('./img/mapa_andalucia.png', 'rb')
-    # )
+    grafica_hospitales()
+
+    message.reply_photo(
+        photo=open('./img_graficas/hospital_{}.png'.format(autonomy_lower), 'rb')
+    )
 
     message.reply_text(
         text="Datos de hospitalización por COVID en {}\n\n"
@@ -625,17 +630,16 @@ def show_all_info(update, context):
 
     keyboard = [
         [InlineKeyboardButton("Incremento", callback_data='{}_increment'.format(autonomy_lower)),
-         InlineKeyboardButton("Casos acumulados", callback_data='{}_cumulative'.format(autonomy_lower)),
-         InlineKeyboardButton("Fallecimientos", callback_data='{}_death'.format(autonomy_lower))],
+         InlineKeyboardButton("Casos acumulados", callback_data='{}_cumulative'.format(autonomy_lower))],
 
-        [InlineKeyboardButton("Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower)),
-         InlineKeyboardButton("Consultar por provincia", callback_data='show_not_implemented')],
+        [InlineKeyboardButton("Fallecimientos", callback_data='{}_death'.format(autonomy_lower)),
+         InlineKeyboardButton("Hospitalizaciones", callback_data='{}_hospital'.format(autonomy_lower))],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # message.reply_photo(
-    #     photo=open('./img/mapa_andalucia.png', 'rb')
-    # )
+    message.reply_photo(
+        photo=open('./img_graficas/incremento_{}.png'.format(autonomy_lower), 'rb')
+    )
 
     message.reply_text(
         text="Incremento de casos en {}\n\n"
@@ -652,9 +656,9 @@ def show_all_info(update, context):
         parse_mode='HTML',
     )
 
-    # message.reply_photo(
-    #     photo=open('./img/mapa_andalucia.png', 'rb')
-    # )
+    message.reply_photo(
+        photo=open('./img_graficas/acumulado_{}.png'.format(autonomy_lower), 'rb')
+    )
 
     message.reply_text(
         text="Incremento de casos en {}\n\n"
@@ -667,9 +671,9 @@ def show_all_info(update, context):
         parse_mode='HTML',
     )
 
-    # message.reply_photo(
-    #     photo=open('./img/mapa_andalucia.png', 'rb')
-    # )
+    message.reply_photo(
+        photo=open('./img_graficas/fallecidos_{}.png'.format(autonomy_lower), 'rb')
+    )
 
     message.reply_text(
         text="Evolución de fallecimientos en {}\n\n"
@@ -688,9 +692,9 @@ def show_all_info(update, context):
         parse_mode='HTML',
     )
 
-    # message.reply_photo(
-    #     photo=open('./img/mapa_andalucia.png', 'rb')
-    # )
+    message.reply_photo(
+        photo=open('./img_graficas/hospital_{}.png'.format(autonomy_lower), 'rb')
+    )
 
     message.reply_text(
         text="Datos de hospitalización por COVID en {}\n\n"
@@ -1329,9 +1333,11 @@ def show_espana_increment(update, context):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # message.reply_photo(
-    #     photo=open('./img/mapa_espana.png', 'rb')
-    # )
+    grafica_incremento_espana()
+
+    message.reply_photo(
+        photo=open('./img_graficas/incremento_espana.png', 'rb')
+    )
 
     message.reply_text(
         text="Incremento de casos en {}\n\n"
@@ -1375,9 +1381,11 @@ def show_espana_age(update, context):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # message.reply_photo(
-    #     photo=open('./img/mapa_espana.png', 'rb')
-    # )
+    grafica_edades()
+
+    message.reply_photo(
+        photo=open('./img_graficas/casos_edad_espana.png', 'rb')
+    )
 
     message.reply_text(
         text="Casos (fallecidos) por edad: \n\n"
@@ -1437,9 +1445,11 @@ def show_espana_cumulative(update, context):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # message.reply_photo(
-    #     photo=open('./img/mapa_espana.png', 'rb')
-    # )
+    grafica_acumulado_espana()
+
+    message.reply_photo(
+        photo=open('./img_graficas/acumulado_espana.png', 'rb')
+    )
 
     message.reply_text(
         text="Incremento de casos en {}\n\n"
@@ -1479,9 +1489,11 @@ def show_espana_death(update, context):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # message.reply_photo(
-    #     photo=open('./img/mapa_espana.png', 'rb')
-    # )
+    grafica_muertes_espana()
+
+    message.reply_photo(
+        photo=open('./img_graficas/fallecidos_espana.png', 'rb')
+    )
 
     message.reply_text(
         text="Evolución de fallecimientos en {}\n\n"
@@ -1527,9 +1539,11 @@ def show_espana_region(update, context):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # message.reply_photo(
-    #     photo=open('./img/mapa_espana.png', 'rb')
-    # )
+    grafica_casos_comunidad()
+
+    message.reply_photo(
+        photo=open('./img_graficas/casos_comunidad.png', 'rb')
+    )
 
     message.reply_text(
         text="Casos por CCAA: \n\n"
@@ -1568,9 +1582,11 @@ def show_espana_100_cumulative(update, context):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # message.reply_photo(
-    #     photo=open('./img/mapa_espana.png', 'rb')
-    # )
+    grafica_casos_100()
+
+    message.reply_photo(
+        photo=open('./img_graficas/casos_100.png', 'rb')
+    )
 
     message.reply_text(
         text="Casos por cada 100k habitantes: \n\n"
@@ -1609,9 +1625,11 @@ def show_espana_100_cumulative_media(update, context):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # message.reply_photo(
-    #     photo=open('./img/mapa_espana.png', 'rb')
-    # )
+    grafica_casos_100_semana()
+
+    message.reply_photo(
+        photo=open('./img_graficas/casos_100_semana.png', 'rb')
+    )
 
     message.reply_text(
         text="Media semanal por cada 100k habitantes: \n\n"
@@ -1650,9 +1668,11 @@ def show_espana_100_death(update, context):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # message.reply_photo(
-    #     photo=open('./img/mapa_espana.png', 'rb')
-    # )
+    grafica_muertes_100()
+
+    message.reply_photo(
+        photo=open('./img_graficas/muertes_100.png', 'rb')
+    )
 
     message.reply_text(
         text="Fallecimientos por cada 100k habitantes: \n\n"
@@ -1691,9 +1711,11 @@ def show_espana_100_death_media(update, context):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # message.reply_photo(
-    #     photo=open('./img/mapa_espana.png', 'rb')
-    # )
+    grafica_muertes_100_semana()
+
+    message.reply_photo(
+        photo=open('./img_graficas/muertes_100_semana.png', 'rb')
+    )
 
     message.reply_text(
         text="Media fallecimientos semanal por cada 100k habitantes: \n\n"
@@ -1731,9 +1753,11 @@ def show_espana_all(update, context):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # message.reply_photo(
-    #     photo=open('./img/mapa_espana.png', 'rb')
-    # )
+    grafica_incremento_espana()
+
+    message.reply_photo(
+        photo=open('./img_graficas/incremento_espana.png', 'rb')
+    )
 
     message.reply_text(
         text="Incremento de casos en {}\n\n"
@@ -1748,6 +1772,12 @@ def show_espana_all(update, context):
                                                                          media_casos_semana_espana(),
                                                                          format_date(fecha_actualizacion_espana())),
         parse_mode='HTML',
+    )
+
+    grafica_edades()
+
+    message.reply_photo(
+        photo=open('./img_graficas/casos_edad_espana.png', 'rb')
     )
 
     message.reply_text(
@@ -1790,7 +1820,12 @@ def show_espana_all(update, context):
                                                                          total_tasa_edad(),
                                                                          format_date(fecha_actualizacion_edad())),
         parse_mode='HTML',
-        reply_markup=reply_markup
+    )
+
+    grafica_acumulado_espana()
+
+    message.reply_photo(
+        photo=open('./img_graficas/acumulado_espana.png', 'rb')
     )
 
     message.reply_text(
@@ -1802,7 +1837,12 @@ def show_espana_all(update, context):
                                                                          casos_acumulados_espana(),
                                                                          format_date(fecha_actualizacion_espana())),
         parse_mode='HTML',
-        reply_markup=reply_markup
+    )
+
+    grafica_muertes_espana()
+
+    message.reply_photo(
+        photo=open('./img_graficas/fallecidos_espana.png', 'rb')
     )
 
     message.reply_text(
@@ -1820,7 +1860,12 @@ def show_espana_all(update, context):
                                                                          tasa_letalidad_espana(),
                                                                          format_date(fecha_actualizacion_muertes())),
         parse_mode='HTML',
-        reply_markup=reply_markup
+    )
+
+    grafica_casos_comunidad()
+
+    message.reply_photo(
+        photo=open('./img_graficas/casos_comunidad.png', 'rb')
     )
 
     message.reply_text(
@@ -1831,7 +1876,12 @@ def show_espana_all(update, context):
              "pueden no estar actualizados a la fecha actual</b>".format(top_5_casos(),
                                                                          format_date(fecha_actualizacion_espana())),
         parse_mode='HTML',
-        reply_markup=reply_markup
+    )
+
+    grafica_casos_100()
+
+    message.reply_photo(
+        photo=open('./img_graficas/casos_100.png', 'rb')
     )
 
     message.reply_text(
@@ -1842,7 +1892,12 @@ def show_espana_all(update, context):
              "pueden no estar actualizados a la fecha actual</b>".format(top_5_casos_100(),
                                                                          format_date(fecha_actualizacion_espana())),
         parse_mode='HTML',
-        reply_markup=reply_markup
+    )
+
+    grafica_casos_100_semana()
+
+    message.reply_photo(
+        photo=open('./img_graficas/casos_100_semana.png', 'rb')
     )
 
     message.reply_text(
@@ -1853,7 +1908,12 @@ def show_espana_all(update, context):
              "pueden no estar actualizados a la fecha actual</b>".format(top_5_casos_100_semana(),
                                                                          format_date(fecha_actualizacion_espana())),
         parse_mode='HTML',
-        reply_markup=reply_markup
+    )
+
+    grafica_muertes_100()
+
+    message.reply_photo(
+        photo=open('./img_graficas/muertes_100.png', 'rb')
     )
 
     message.reply_text(
@@ -1864,7 +1924,12 @@ def show_espana_all(update, context):
              "pueden no estar actualizados a la fecha actual</b>".format(top_5_muertes_100(),
                                                                          format_date(fecha_actualizacion_muertes())),
         parse_mode='HTML',
-        reply_markup=reply_markup
+    )
+
+    grafica_muertes_100_semana()
+
+    message.reply_photo(
+        photo=open('./img_graficas/muertes_100_semana.png', 'rb')
     )
 
     message.reply_text(
@@ -4778,6 +4843,339 @@ def top_5_muertes_100_semana():
 
     return text
 
+
+########################  FUNCIONALIDAD GRÁFICAS  ########################
+inicio_mes = ['2020-01-01', '2020-02-01', '2020-03-01', '2020-04-01', '2020-05-01', '2020-06-01', '2020-07-01',
+              '2020-08-01', '2020-09-01', '2020-10-01', '2020-11-01', '2020-12-01']
+
+def grafica_acumulado():
+    df_casos_provincia = df_ccaa_casos.loc[df_ccaa_casos['ccaa'] == current_autonomy]
+    df_casos_provincia['casos_acumulados'] = df_casos_provincia['num_casos'].cumsum()
+    df_loc = df_casos_provincia.loc[:, ['fecha', 'casos_acumulados']]
+    df_loc.set_index("fecha", inplace=True)
+
+    autonomy_lower = normalize(current_autonomy).lower()
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    x = df_loc.index.get_level_values('fecha')
+
+    plt.bar(x, df_loc['casos_acumulados'], alpha=0.5, width=0.5, label=('Nº Casos'))
+
+    ax.set_xticks(inicio_mes)
+    ax.set_xlim('2020-03-01', x[-1])
+    ax.figure.autofmt_xdate()
+
+    plt.title('Casos acumulados en {}'.format(current_autonomy), fontsize=26)
+    ax.set_ylabel('Nº Casos', fontsize=15)
+    plt.savefig('./img_graficas/acumulado_{}.png'.format(autonomy_lower))
+    plt.close()
+
+
+def grafica_incremento():
+    df_casos_provincia = df_ccaa_casos.loc[df_ccaa_casos['ccaa'] == current_autonomy]
+    df_casos_provincia.set_index("fecha", inplace=True)
+
+    autonomy_lower = normalize(current_autonomy).lower()
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    x = df_casos_provincia.index.get_level_values('fecha')
+
+    plt.bar(x, df_casos_provincia['num_casos'], alpha=0.5, width=0.5, label=('Incremento diario'))
+    plt.plot(x, df_casos_provincia['num_casos'], color='red')
+
+    ax.set_xticks(inicio_mes)
+    ax.set_xlim('2020-03-01', x[-1])
+    ax.figure.autofmt_xdate()
+
+    plt.title('Incremento de casos en {}'.format(current_autonomy), fontsize=26)
+    ax.set_ylabel('Nº Casos', fontsize=15)
+    plt.savefig('./img_graficas/incremento_{}.png'.format(autonomy_lower))
+    plt.close()
+
+
+def grafica_muertes():
+    df_muertes_provincia = df_ccaa_muertes.loc[df_ccaa_muertes['CCAA'] == current_autonomy]
+    df_muertes_provincia.set_index("Fecha", inplace=True)
+
+    autonomy_lower = normalize(current_autonomy).lower()
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    x = df_muertes_provincia.index.get_level_values('Fecha')
+
+    plt.bar(x, df_muertes_provincia['Fallecidos'], alpha=0.5, width=0.7, label=('Fallecimientos diarios'), color='red')
+    plt.plot(x, df_muertes_provincia['Fallecidos'], color='red')
+
+    ax.set_xticks(inicio_mes)
+    ax.set_xlim('2020-03-01', x[-1])
+    ax.figure.autofmt_xdate()
+
+    plt.title('Evolución de fallecidos en {}'.format(current_autonomy), fontsize=26)
+    ax.set_ylabel('Fallecidos', fontsize=15)
+    plt.savefig('./img_graficas/fallecidos_{}.png'.format(autonomy_lower))
+    plt.close()
+
+
+def grafica_hospitales():
+    df_hospitales_provincia = df_ccaa_hospital.loc[df_ccaa_hospital['CCAA'] == current_autonomy]
+    df_hospitales_provincia['% Camas Ocupadas UCI COVID'] = df_hospitales_provincia['% Camas Ocupadas UCI COVID'].fillna('0%')
+    df_hospitales_provincia['% Camas Ocupadas COVID'] = df_hospitales_provincia['% Camas Ocupadas COVID'].str.replace(r'%$', '')
+    df_hospitales_provincia['% Camas Ocupadas UCI COVID'] = df_hospitales_provincia['% Camas Ocupadas UCI COVID'].str.replace(r'%$', '')
+
+    autonomy_lower = normalize(current_autonomy).lower()
+
+    df_hospitales_provincia.set_index("Fecha", inplace=True)
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 8))
+    x = df_hospitales_provincia.index.get_level_values('Fecha')
+
+    fig.suptitle('Evolución ocupación camas en {}'.format(current_autonomy), fontsize=26)
+
+    ax1.plot(x, df_hospitales_provincia['% Camas Ocupadas COVID'], color='blue')
+    ax1.set_ylabel('% camas ocupadas', fontsize=15)
+    ax1.set_xticks(inicio_mes)
+    ax1.set_xlim('2020-08-19', x[-1])
+    ax1.figure.autofmt_xdate()
+
+    ax2.plot(x, df_hospitales_provincia['% Camas Ocupadas UCI COVID'], color='red')
+    ax2.set_ylabel('% camas UCI ocupadas', fontsize=15)
+    ax2.set_xticks(inicio_mes)
+    ax2.set_xlim('2020-08-19', x[-1])
+    ax2.figure.autofmt_xdate()
+
+    plt.savefig('./img_graficas/hospital_{}.png'.format(autonomy_lower))
+    plt.close()
+
+
+def grafica_incremento_espana():
+    df_casos_fecha = df_ccaa_casos.groupby('fecha')['num_casos'].sum().reset_index()
+    df_casos_fecha.set_index("fecha", inplace=True)
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    x = df_casos_fecha.index.get_level_values('fecha')
+
+    plt.bar(x, df_casos_fecha['num_casos'], alpha=0.5, width=0.5)
+    plt.plot(x, df_casos_fecha['num_casos'], color='red')
+
+    ax.set_xticks(inicio_mes)
+    ax.set_xlim('2020-03-01', x[-1])
+    ax.figure.autofmt_xdate()
+
+    plt.title('Incremento de casos en España', fontsize=26)
+    ax.set_ylabel('Nº Casos', fontsize=15)
+    plt.savefig('./img_graficas/incremento_espana.png')
+    plt.close()
+
+
+def grafica_acumulado_espana():
+    df_casos_fecha = df_ccaa_casos.groupby('fecha')['num_casos'].sum().reset_index()
+    df_casos_fecha['casos_acumulados'] = df_casos_fecha['num_casos'].cumsum()
+    df_loc = df_casos_fecha.loc[:, ['fecha', 'casos_acumulados']]
+    df_loc.set_index("fecha", inplace=True)
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    x = df_loc.index.get_level_values('fecha')
+
+    plt.bar(x, df_loc['casos_acumulados'], alpha=0.5, width=0.5)
+    plt.plot(x, df_loc['casos_acumulados'], color='red')
+
+    ax.set_xticks(inicio_mes)
+    ax.set_xlim('2020-03-01', x[-1])
+    ax.figure.autofmt_xdate()
+
+    plt.title('Casos acumulados en España', fontsize=26)
+    ax.set_ylabel('Nº Casos', fontsize=15)
+    plt.savefig('./img_graficas/acumulado_espana.png')
+    plt.close()
+
+
+def grafica_muertes_espana():
+    df_muertes = df_ccaa_muertes.loc[df_ccaa_muertes['CCAA'] == 'España']
+    df_muertes.set_index("Fecha", inplace=True)
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    x = df_muertes.index.get_level_values('Fecha')
+
+    plt.bar(x, df_muertes['Fallecidos'], alpha=0.5, width=0.7, label=('Fallecimientos diarios'), color='red')
+    plt.plot(x, df_muertes['Fallecidos'], color='red')
+
+    ax.set_xticks(inicio_mes)
+    ax.set_xlim('2020-03-01', x[-1])
+    ax.figure.autofmt_xdate()
+
+    plt.title('Evolución de fallecidos en España', fontsize=26)
+    ax.set_ylabel('Fallecidos', fontsize=15)
+    plt.savefig('./img_graficas/fallecidos_espana.png')
+    plt.close()
+
+
+def grafica_casos_comunidad():
+    provincias = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
+                  'Castilla La Mancha', 'Castilla y León', 'Cataluña', 'Ceuta', 'Extremadura', 'Galicia', 'La Rioja',
+                  'Madrid', 'Melilla', 'Murcia', 'Navarra', 'País Vasco']
+
+    dict = {}
+
+    for i in range(len(provincias)):
+        dict[provincias[i]] = int(casos_acumulados(provincias[i]))
+
+    new_dict = sorted(dict.items(), key=lambda x: x[1], reverse=True)
+    df = pd.DataFrame(new_dict, columns=['ccaa', 'n_casos'])
+    df.set_index("ccaa", inplace=True)
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    x = df.index.get_level_values('ccaa')
+
+    plt.barh(x, df['n_casos'], alpha=0.5, height=0.8)
+
+    ax.figure.autofmt_xdate()
+
+    plt.title('Casos por comunidad', fontsize=26)
+    plt.gca().invert_yaxis()
+    plt.savefig('./img_graficas/casos_comunidad.png')
+    plt.close()
+
+
+def grafica_casos_100():
+    provincias = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
+                  'Castilla La Mancha', 'Castilla y León', 'Cataluña', 'Ceuta', 'Extremadura', 'Galicia', 'La Rioja',
+                  'Madrid', 'Melilla', 'Murcia', 'Navarra', 'País Vasco']
+
+    dict = {}
+
+    for i in range(len(provincias)):
+        df_loc = df_ccaa_habitantes.loc[df_ccaa_habitantes['ccaa'] == provincias[i]]
+        dict[provincias[i]] = round((int(casos_acumulados(provincias[i])) * 100000) / df_loc['habitantes'].values[0], 1)
+
+    new_dict = sorted(dict.items(), key=lambda x: x[1], reverse=True)
+    df = pd.DataFrame(new_dict, columns=['ccaa', 'n_casos'])
+    df.set_index("ccaa", inplace=True)
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    x = df.index.get_level_values('ccaa')
+
+    plt.barh(x, df['n_casos'], alpha=0.5, height=0.8)
+
+    ax.figure.autofmt_xdate()
+
+    plt.title('Casos por cada 100k habitantes', fontsize=26)
+    plt.gca().invert_yaxis()
+    plt.savefig('./img_graficas/casos_100.png')
+    plt.close()
+
+
+def grafica_casos_100_semana():
+    provincias = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
+                  'Castilla La Mancha', 'Castilla y León', 'Cataluña', 'Ceuta', 'Extremadura', 'Galicia', 'La Rioja',
+                  'Madrid', 'Melilla', 'Murcia', 'Navarra', 'País Vasco']
+
+    dict = {}
+
+    for i in range(len(provincias)):
+        df_loc = df_ccaa_habitantes.loc[df_ccaa_habitantes['ccaa'] == provincias[i]]
+        dict[provincias[i]] = round((float(media_casos_semana(provincias[i])) * 100000) / df_loc['habitantes'].values[0], 1)
+
+    new_dict = sorted(dict.items(), key=lambda x: x[1], reverse=True)
+    df = pd.DataFrame(new_dict, columns=['ccaa', 'n_muertes'])
+    df.set_index("ccaa", inplace=True)
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    x = df.index.get_level_values('ccaa')
+
+    plt.barh(x, df['n_muertes'], alpha=0.5, height=0.8)
+
+    ax.figure.autofmt_xdate()
+
+    plt.title('Casos última semana por cada 100k habitantes', fontsize=26)
+    plt.gca().invert_yaxis()
+
+    for index, value in enumerate(df['n_muertes']):
+        plt.text(value, index, str(value))
+
+    plt.savefig('./img_graficas/casos_100_semana.png')
+    plt.close()
+
+
+def grafica_muertes_100():
+    provincias = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
+                  'Castilla La Mancha', 'Castilla y León', 'Cataluña', 'Ceuta', 'Extremadura', 'Galicia', 'La Rioja',
+                  'Madrid', 'Melilla', 'Murcia', 'Navarra', 'País Vasco']
+
+    dict = {}
+
+    for i in range(len(provincias)):
+        df_loc = df_ccaa_habitantes.loc[df_ccaa_habitantes['ccaa'] == provincias[i]]
+        dict[provincias[i]] = round((int(muertes_totales(provincias[i])) * 100000) / df_loc['habitantes'].values[0], 1)
+
+    new_dict = sorted(dict.items(), key=lambda x: x[1], reverse=True)
+    df = pd.DataFrame(new_dict, columns=['ccaa', 'n_casos'])
+    df.set_index("ccaa", inplace=True)
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    x = df.index.get_level_values('ccaa')
+
+    plt.barh(x, df['n_casos'], alpha=0.5, height=0.8)
+
+    ax.figure.autofmt_xdate()
+
+    plt.title('Muertes por cada 100k habitantes', fontsize=26)
+    plt.gca().invert_yaxis()
+    plt.savefig('./img_graficas/muertes_100.png')
+    plt.close()
+
+
+def grafica_muertes_100_semana():
+    provincias = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
+                  'Castilla La Mancha', 'Castilla y León', 'Cataluña', 'Ceuta', 'Extremadura', 'Galicia', 'La Rioja',
+                  'Madrid', 'Melilla', 'Murcia', 'Navarra', 'País Vasco']
+
+    dict = {}
+
+    for i in range(len(provincias)):
+        df_loc = df_ccaa_habitantes.loc[df_ccaa_habitantes['ccaa'] == provincias[i]]
+        dict[provincias[i]] = round((float(media_muertes_semana(provincias[i])) * 100000) / df_loc['habitantes'].values[0], 1)
+
+    new_dict = sorted(dict.items(), key=lambda x: x[1], reverse=True)
+    df = pd.DataFrame(new_dict, columns=['ccaa', 'n_casos'])
+    df.set_index("ccaa", inplace=True)
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    x = df.index.get_level_values('ccaa')
+
+    plt.barh(x, df['n_casos'], alpha=0.5, height=0.8)
+
+    ax.figure.autofmt_xdate()
+
+    plt.title('Muertes última semana por cada 100k habitantes', fontsize=26)
+    plt.gca().invert_yaxis()
+    plt.savefig('./img_graficas/muertes_100_semana.png')
+    plt.close()
+
+
+def grafica_edades():
+    df_mujeres = df_edad.loc[(df_edad['fecha'] == fecha_actualizacion_edad()) & (df_edad['sexo'] == 'mujeres') & (df_edad['rango_edad'] != 'Total')]
+    df_hombres = df_edad.loc[(df_edad['fecha'] == fecha_actualizacion_edad()) & (df_edad['sexo'] == 'hombres') & (df_edad['rango_edad'] != 'Total')]
+    df_mujeres.set_index("rango_edad", inplace=True)
+    df_hombres.set_index("rango_edad", inplace=True)
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 6))
+    x = df_mujeres.index.get_level_values('rango_edad')
+
+    fig.suptitle('Casos por edad', fontsize=26)
+
+    ax1.bar(x, df_mujeres['casos_confirmados'], alpha=0.5, width=0.5, label=('Casos mujeres'), color='blue')
+    ax1.bar(x, df_mujeres['fallecidos'], alpha=0.5, width=0.5, label=('Mujeres fallecidas'), color='green')
+    ax1.set_title('Mujeres')
+    ax1.set_ylabel('Nº Casos', fontsize=15)
+    ax1.legend()
+
+    ax2.bar(x, df_hombres['casos_confirmados'], alpha=0.5, width=0.5, label=('Casos hombres'), color='red')
+    ax2.bar(x, df_hombres['fallecidos'], alpha=0.5, width=0.5, label=('Hombres fallecidos'), color='yellow')
+    ax2.set_title('Hombres')
+    ax2.set_ylabel('Nº Casos', fontsize=15)
+    ax2.legend()
+
+    plt.savefig('./img_graficas/casos_edad_espana.png')
+    plt.close()
 
 if __name__ == '__main__':
     main()

@@ -64,10 +64,10 @@ url_edad = 'https://raw.githubusercontent.com/datadista/datasets/master/COVID%20
 util_cols = ['fecha', 'rango_edad', 'sexo', 'casos_confirmados', 'fallecidos']
 df_edad = pd.read_csv(url_edad, sep=',', usecols=util_cols)
 
-df_ccaa_habitantes = pd.read_csv('./data/habitantes_provincia.csv', sep=',')
+df_ccaa_habitantes = pd.read_csv('./data/habitantes_ccaa.csv', sep=',')
 
 
-global current_state, conv_handler, current_autonomy
+global current_state, conv_handler
 
 if mode == "dev":
     def run(updater):
@@ -138,11 +138,11 @@ def help_handler(update, context):
              "\t <b>🧔👩 Casos por edad</b> - Casos/muertes por sexo y edad\n"
              "\t <b>➕ Casos acumulados</b> - Total de casos acumulados\n"
              "\t <b>☠ Fallecimientos</b> - Datos fallecidos\n"
-             "\t <b>🗺 Casos por Región</b> - Datos casos por provincias\n"
-             "\t <b>📈💯 Casos 100K</b> - Casos por cada 100k habitantes por provincia\n"
-             "\t <b>📈🆕 Casos 100K semana</b> - Media semanal casos por cada 100k habitantes por provincia\n"
-             "\t <b>☠💯 Fallecimientos 100K</b> - Fallecimientos por cada 100k habitantes por provincia\n"
-             "\t <b>☠🆕 Fallecimientos 100K</b> semana - Media semanal fallecimientos por cada 100k habitantes por provincia\n"
+             "\t <b>🗺 Casos por Región</b> - Datos casos por comunidad\n"
+             "\t <b>📈💯 Casos 100mil</b> - Casos por cada 100mil habitantes por comunidad\n"
+             "\t <b>📈🆕 Casos 100mil semana</b> - Media semanal casos por cada 100mil habitantes por comunidad\n"
+             "\t <b>☠💯 Fallecimientos 100mil</b> - Fallecimientos por cada 100mil habitantes por comunidad\n"
+             "\t <b>☠🆕 Fallecimientos 100mil</b> semana - Media semanal fallecimientos por cada 100mil habitantes por comunidad\n"
              "\t <b>⬇ Ver todo</b> - Ver toda la información disponible\n",
         parse_mode='HTML',
         disable_web_page_preview=True
@@ -222,7 +222,7 @@ def show_inicio(update, context):
     )
 
     message.reply_text(
-        text="{} elige la provincia de la que quieres consultar datos.".format(username),
+        text="{} elige la comunidad de la que quieres consultar datos.".format(username),
         reply_markup=reply_markup
     )
 
@@ -230,8 +230,8 @@ def show_inicio(update, context):
     return INICIO
 
 
-def show_main_info(update, context):
-    global current_state, current_autonomy
+def show_main_info(update, context, current_autonomy):
+    global current_state
 
     username = update.callback_query.message.chat.username
     message = update.callback_query.message
@@ -262,178 +262,159 @@ def show_main_info(update, context):
 
 
 def show_andalucia_info(update, context):
-    global current_state, current_autonomy
-    current_autonomy = "Andalucía"
+    global current_state
 
-    show_main_info(update, context)
+    show_main_info(update, context, "Andalucía")
 
     return INFO_ANDALUCIA
 
 
 def show_aragon_info(update, context):
-    global current_state, current_autonomy
-    current_autonomy = "Aragón"
+    global current_state
 
-    show_main_info(update, context)
+    show_main_info(update, context, "Aragón")
 
     return INFO_ARAGON
 
 
 def show_asturias_info(update, context):
-    global current_state, current_autonomy
-    current_autonomy = "Asturias"
+    global current_state
 
-    show_main_info(update, context)
+    show_main_info(update, context, "Asturias")
 
     return INFO_ASTURIAS
 
 
 def show_cvalenciana_info(update, context):
-    global current_state, current_autonomy
-    current_autonomy = "C. Valenciana"
+    global current_state
 
-    show_main_info(update, context)
+    show_main_info(update, context, "C. Valenciana")
 
     return INFO_CVALENCIANA
 
 
 def show_canarias_info(update, context):
-    global current_state, current_autonomy
-    current_autonomy = "Canarias"
+    global current_state
 
-    show_main_info(update, context)
+    show_main_info(update, context, "Canarias")
 
     return INFO_CANARIAS
 
 
 def show_cantabria_info(update, context):
-    global current_state, current_autonomy
-    current_autonomy = "Cantabria"
+    global current_state
 
-    show_main_info(update, context)
+    show_main_info(update, context, "Cantabria")
 
     return INFO_CANTABRIA
 
 
 def show_castillalamancha_info(update, context):
-    global current_state, current_autonomy
-    current_autonomy = "Castilla La Mancha"
+    global current_state
 
-    show_main_info(update, context)
+    show_main_info(update, context, "Castilla La Mancha")
 
     return INFO_CASTILLALAMANCHA
 
 
 def show_castillayleon_info(update, context):
-    global current_state, current_autonomy
-    current_autonomy = "Castilla y León"
+    global current_state
 
-    show_main_info(update, context)
+    show_main_info(update, context, "Castilla y León")
 
     return INFO_CASTILLAYLEON
 
 
 def show_cataluna_info(update, context):
-    global current_state, current_autonomy
-    current_autonomy = "Cataluña"
+    global current_state
 
-    show_main_info(update, context)
+    show_main_info(update, context, "Cataluña")
 
     return INFO_CATALUNA
 
 
 def show_ceuta_info(update, context):
-    global current_state, current_autonomy
-    current_autonomy = "Ceuta"
+    global current_state
 
-    show_main_info(update, context)
+    show_main_info(update, context, "Ceuta")
 
     return INFO_CEUTA
 
 
 def show_extremadura_info(update, context):
-    global current_state, current_autonomy
-    current_autonomy = "Extremadura"
+    global current_state
 
-    show_main_info(update, context)
+    show_main_info(update, context, "Extremadura")
 
     return INFO_EXTREMADURA
 
 
 def show_galicia_info(update, context):
-    global current_state, current_autonomy
-    current_autonomy = "Galicia"
+    global current_state
 
-    show_main_info(update, context)
+    show_main_info(update, context, "Galicia")
 
     return INFO_GALICIA
 
 
 def show_baleares_info(update, context):
-    global current_state, current_autonomy
-    current_autonomy = "Baleares"
+    global current_state
 
-    show_main_info(update, context)
+    show_main_info(update, context, "Baleares")
 
     return INFO_BALEARES
 
 
 def show_larioja_info(update, context):
-    global current_state, current_autonomy
-    current_autonomy = "La Rioja"
+    global current_state
 
-    show_main_info(update, context)
+    show_main_info(update, context, "La Rioja")
 
     return INFO_LARIOJA
 
 
 def show_madrid_info(update, context):
-    global current_state, current_autonomy
-    current_autonomy = "Madrid"
+    global current_state
 
-    show_main_info(update, context)
+    show_main_info(update, context, "Madrid")
 
     return INFO_MADRID
 
 
 def show_melilla_info(update, context):
-    global current_state, current_autonomy
-    current_autonomy = "Melilla"
+    global current_state
 
-    show_main_info(update, context)
+    show_main_info(update, context, "Melilla")
 
     return INFO_MELILLA
 
 
 def show_murcia_info(update, context):
-    global current_state, current_autonomy
-    current_autonomy = "Murcia"
+    global current_state
 
-    show_main_info(update, context)
+    show_main_info(update, context, "Murcia")
 
     return INFO_MURCIA
 
 
 def show_navarra_info(update, context):
-    global current_state, current_autonomy
-    current_autonomy = "Navarra"
+    global current_state
 
-    show_main_info(update, context)
+    show_main_info(update, context, "Navarra")
 
     return INFO_NAVARRA
 
 
 def show_paisvasco_info(update, context):
-    global current_state, current_autonomy
-    current_autonomy = "País Vasco"
+    global current_state
 
-    show_main_info(update, context)
+    show_main_info(update, context, "País Vasco")
 
     return INFO_PAISVASCO
 
 
 def show_espana_info(update, context):
-    global current_state, current_autonomy
+    global current_state
 
     username = update.callback_query.message.chat.username
     message = update.callback_query.message
@@ -446,11 +427,11 @@ def show_espana_info(update, context):
         [InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death'),
          InlineKeyboardButton("🗺 Casos por Región", callback_data='espana_region')],
 
-        [InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative'),
-         InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media')],
+        [InlineKeyboardButton("📈💯 Casos 100mil", callback_data='espana_100_cumulative'),
+         InlineKeyboardButton("📈🆕 Casos 100mil semana", callback_data='espana_100_cumulative_media')],
 
-         [InlineKeyboardButton("☠💯 Fallecimientos 100K", callback_data='espana_100_death'),
-          InlineKeyboardButton("☠🆕 Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+         [InlineKeyboardButton("☠💯 Fallecimientos 100mil", callback_data='espana_100_death'),
+          InlineKeyboardButton("☠🆕 Fallecimientos 100mil semana", callback_data='espana_100_death_media')],
 
         [InlineKeyboardButton("⬇ Ver todo", callback_data='espana_all')],
     ]
@@ -466,12 +447,11 @@ def show_espana_info(update, context):
     )
 
     current_state = "INFO_ESPANA"
-    current_autonomy = "España"
     return INFO_ESPANA
 
 
-def show_increment(update, context):
-    global current_state, current_autonomy
+def show_increment(update, context, current_autonomy):
+    global current_state
 
     message = update.callback_query.message
 
@@ -487,7 +467,7 @@ def show_increment(update, context):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    grafica_incremento()
+    grafica_incremento(current_autonomy)
 
     message.reply_photo(
         photo=open('./img_graficas/incremento_{}.png'.format(autonomy_lower), 'rb')
@@ -512,8 +492,8 @@ def show_increment(update, context):
     current_state = "INFO_{}_INCREMENT".format(autonomy_upper)
 
 
-def show_cumulative(update, context):
-    global current_state, current_autonomy
+def show_cumulative(update, context, current_autonomy):
+    global current_state
 
     message = update.callback_query.message
 
@@ -529,7 +509,7 @@ def show_cumulative(update, context):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    grafica_acumulado()
+    grafica_acumulado(current_autonomy)
 
     message.reply_photo(
         photo=open('./img_graficas/acumulado_{}.png'.format(autonomy_lower), 'rb')
@@ -550,8 +530,8 @@ def show_cumulative(update, context):
     current_state = "INFO_{}_CUMULATIVE".format(autonomy_upper)
 
 
-def show_death(update, context):
-    global current_state, current_autonomy
+def show_death(update, context, current_autonomy):
+    global current_state
 
     message = update.callback_query.message
 
@@ -567,7 +547,7 @@ def show_death(update, context):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    grafica_muertes()
+    grafica_muertes(current_autonomy)
 
     message.reply_photo(
         photo=open('./img_graficas/fallecidos_{}.png'.format(autonomy_lower), 'rb')
@@ -594,8 +574,8 @@ def show_death(update, context):
     current_state = "INFO_{}_DEATH".format(autonomy_upper)
 
 
-def show_hospital(update, context):
-    global current_state, current_autonomy
+def show_hospital(update, context, current_autonomy):
+    global current_state
 
     message = update.callback_query.message
 
@@ -611,7 +591,7 @@ def show_hospital(update, context):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    grafica_hospitales()
+    grafica_hospitales(current_autonomy)
 
     message.reply_photo(
         photo=open('./img_graficas/hospital_{}.png'.format(autonomy_lower), 'rb')
@@ -642,8 +622,8 @@ def show_hospital(update, context):
     current_state = "INFO_{}_HOSPITAL".format(autonomy_upper)
 
 
-def show_all_info(update, context):
-    global current_state, current_autonomy
+def show_all_info(update, context, current_autonomy):
+    global current_state
 
     message = update.callback_query.message
 
@@ -663,6 +643,8 @@ def show_all_info(update, context):
         photo=open('./img_graficas/incremento_{}.png'.format(autonomy_lower), 'rb')
     )
 
+    grafica_incremento(current_autonomy)
+
     message.reply_text(
         text="Incremento de casos en {}\n\n"
              "\t - Casos acumulados: <b>{}</b>.\n"
@@ -678,6 +660,8 @@ def show_all_info(update, context):
         parse_mode='HTML',
     )
 
+    grafica_acumulado(current_autonomy)
+
     message.reply_photo(
         photo=open('./img_graficas/acumulado_{}.png'.format(autonomy_lower), 'rb')
     )
@@ -692,6 +676,8 @@ def show_all_info(update, context):
                                                                          format_date(fecha_actualizacion(current_autonomy))),
         parse_mode='HTML',
     )
+
+    grafica_muertes(current_autonomy)
 
     message.reply_photo(
         photo=open('./img_graficas/fallecidos_{}.png'.format(autonomy_lower), 'rb')
@@ -713,6 +699,8 @@ def show_all_info(update, context):
                                                                          format_date(fecha_actualizacion_muertes())),
         parse_mode='HTML',
     )
+
+    grafica_hospitales(current_autonomy)
 
     message.reply_photo(
         photo=open('./img_graficas/hospital_{}.png'.format(autonomy_lower), 'rb')
@@ -745,596 +733,596 @@ def show_all_info(update, context):
 
 # ANDALUCÍA
 def show_andalucia_increment(update, context):
-    show_increment(update, context)
+    show_increment(update, context, "Andalucía")
 
     return INFO_ANDALUCIA_INCREMENT
 
 
 def show_andalucia_cumulative(update, context):
-    show_cumulative(update, context)
+    show_cumulative(update, context, "Andalucía")
 
     return INFO_ANDALUCIA_CUMULATIVE
 
 
 def show_andalucia_death(update, context):
-    show_death(update, context)
+    show_death(update, context, "Andalucía")
 
     return INFO_ANDALUCIA_DEATH
 
 
 def show_andalucia_hospital(update, context):
-    show_hospital(update, context)
+    show_hospital(update, context, "Andalucía")
 
     return INFO_ANDALUCIA_HOSPITAL
 
 
 def show_andalucia_all(update, context):
-    show_all_info(update, context)
+    show_all_info(update, context, "Andalucía")
 
     return INFO_ANDALUCIA_ALL
 
 
 # ARAGÓN
 def show_aragon_increment(update, context):
-    show_increment(update, context)
+    show_increment(update, context, "Aragón")
 
     return INFO_ARAGON_INCREMENT
 
 
 def show_aragon_cumulative(update, context):
-    show_cumulative(update, context)
+    show_cumulative(update, context, "Aragón")
 
     return INFO_ARAGON_CUMULATIVE
 
 
 def show_aragon_death(update, context):
-    show_death(update, context)
+    show_death(update, context, "Aragón")
 
     return INFO_ARAGON_DEATH
 
 
 def show_aragon_hospital(update, context):
-    show_hospital(update, context)
+    show_hospital(update, context, "Aragón")
 
     return INFO_ARAGON_HOSPITAL
 
 
 def show_aragon_all(update, context):
-    show_all_info(update, context)
+    show_all_info(update, context, "Aragón")
 
     return INFO_ARAGON_ALL
 
 
 # ASTURIAS
 def show_asturias_increment(update, context):
-    show_increment(update, context)
+    show_increment(update, context, "Asturias")
 
     return INFO_ASTURIAS_INCREMENT
 
 
 def show_asturias_cumulative(update, context):
-    show_cumulative(update, context)
+    show_cumulative(update, context, "Asturias")
 
     return INFO_ASTURIAS_CUMULATIVE
 
 
 def show_asturias_death(update, context):
-    show_death(update, context)
+    show_death(update, context, "Asturias")
 
     return INFO_ASTURIAS_DEATH
 
 
 def show_asturias_hospital(update, context):
-    show_hospital(update, context)
+    show_hospital(update, context, "Asturias")
 
     return INFO_ASTURIAS_HOSPITAL
 
 
 def show_asturias_all(update, context):
-    show_all_info(update, context)
+    show_all_info(update, context, "Asturias")
 
     return INFO_ASTURIAS_ALL
 
 
 # C. VALENCIANA
 def show_cvalenciana_increment(update, context):
-    show_increment(update, context)
+    show_increment(update, context, "C. Valenciana")
 
     return INFO_CVALENCIANA_INCREMENT
 
 
 def show_cvalenciana_cumulative(update, context):
-    show_cumulative(update, context)
+    show_cumulative(update, context, "C. Valenciana")
 
     return INFO_CVALENCIANA_CUMULATIVE
 
 
 def show_cvalenciana_death(update, context):
-    show_death(update, context)
+    show_death(update, context, "C. Valenciana")
 
     return INFO_CVALENCIANA_DEATH
 
 
 def show_cvalenciana_hospital(update, context):
-    show_hospital(update, context)
+    show_hospital(update, context, "C. Valenciana")
 
     return INFO_CVALENCIANA_HOSPITAL
 
 
 def show_cvalenciana_all(update, context):
-    show_all_info(update, context)
+    show_all_info(update, context, "C. Valenciana")
 
     return INFO_CVALENCIANA_ALL
 
 
 # CANARIAS
 def show_canarias_increment(update, context):
-    show_increment(update, context)
+    show_increment(update, context, "Canarias")
 
     return INFO_CANARIAS_INCREMENT
 
 
 def show_canarias_cumulative(update, context):
-    show_cumulative(update, context)
+    show_cumulative(update, context, "Canarias")
 
     return INFO_CANARIAS_CUMULATIVE
 
 
 def show_canarias_death(update, context):
-    show_death(update, context)
+    show_death(update, context, "Canarias")
 
     return INFO_CANARIAS_DEATH
 
 
 def show_canarias_hospital(update, context):
-    show_hospital(update, context)
+    show_hospital(update, context, "Canarias")
 
     return INFO_CANARIAS_HOSPITAL
 
 
 def show_canarias_all(update, context):
-    show_all_info(update, context)
+    show_all_info(update, context, "Canarias")
 
     return INFO_CANARIAS_ALL
 
 
 # CANTABRIA
 def show_cantabria_increment(update, context):
-    show_increment(update, context)
+    show_increment(update, context, "Cantabria")
 
     return INFO_CANTABRIA_INCREMENT
 
 
 def show_cantabria_cumulative(update, context):
-    show_cumulative(update, context)
+    show_cumulative(update, context, "Cantabria")
 
     return INFO_CANTABRIA_CUMULATIVE
 
 
 def show_cantabria_death(update, context):
-    show_death(update, context)
+    show_death(update, context, "Cantabria")
 
     return INFO_CANTABRIA_DEATH
 
 
 def show_cantabria_hospital(update, context):
-    show_hospital(update, context)
+    show_hospital(update, context, "Cantabria")
 
     return INFO_CANTABRIA_HOSPITAL
 
 
 def show_cantabria_all(update, context):
-    show_all_info(update, context)
+    show_all_info(update, context, "Cantabria")
 
     return INFO_CANTABRIA_ALL
 
 
 # CASTILLA LA MANCHA
 def show_castillalamancha_increment(update, context):
-    show_increment(update, context)
+    show_increment(update, context, "Castilla La Mancha")
 
     return INFO_CASTILLALAMANCHA_INCREMENT
 
 
 def show_castillalamancha_cumulative(update, context):
-    show_cumulative(update, context)
+    show_cumulative(update, context, "Castilla La Mancha")
 
     return INFO_CASTILLALAMANCHA_CUMULATIVE
 
 
 def show_castillalamancha_death(update, context):
-    show_death(update, context)
+    show_death(update, context, "Castilla La Mancha")
 
     return INFO_CASTILLALAMANCHA_DEATH
 
 
 def show_castillalamancha_hospital(update, context):
-    show_hospital(update, context)
+    show_hospital(update, context, "Castilla La Mancha")
 
     return INFO_CASTILLALAMANCHA_HOSPITAL
 
 
 def show_castillalamancha_all(update, context):
-    show_all_info(update, context)
+    show_all_info(update, context, "Castilla La Mancha")
 
     return INFO_CASTILLALAMANCHA_ALL
 
 
 # CASTILLA Y LEON
 def show_castillayleon_increment(update, context):
-    show_increment(update, context)
+    show_increment(update, context, "Castilla y León")
 
     return INFO_CASTILLAYLEON_INCREMENT
 
 
 def show_castillayleon_cumulative(update, context):
-    show_cumulative(update, context)
+    show_cumulative(update, context, "Castilla y León")
 
     return INFO_CASTILLAYLEON_CUMULATIVE
 
 
 def show_castillayleon_death(update, context):
-    show_death(update, context)
+    show_death(update, context, "Castilla y León")
 
     return INFO_CASTILLAYLEON_DEATH
 
 
 def show_castillayleon_hospital(update, context):
-    show_hospital(update, context)
+    show_hospital(update, context, "Castilla y León")
 
     return INFO_CASTILLAYLEON_HOSPITAL
 
 
 def show_castillayleon_all(update, context):
-    show_all_info(update, context)
+    show_all_info(update, context, "Castilla y León")
 
     return INFO_CASTILLAYLEON_ALL
 
 
 # CATALUÑA
 def show_cataluna_increment(update, context):
-    show_increment(update, context)
+    show_increment(update, context, "Cataluña")
 
     return INFO_CATALUNA_INCREMENT
 
 
 def show_cataluna_cumulative(update, context):
-    show_cumulative(update, context)
+    show_cumulative(update, context, "Cataluña")
 
     return INFO_CATALUNA_CUMULATIVE
 
 
 def show_cataluna_death(update, context):
-    show_death(update, context)
+    show_death(update, context, "Cataluña")
 
     return INFO_CATALUNA_DEATH
 
 
 def show_cataluna_hospital(update, context):
-    show_hospital(update, context)
+    show_hospital(update, context, "Cataluña")
 
     return INFO_CATALUNA_HOSPITAL
 
 
 def show_cataluna_all(update, context):
-    show_all_info(update, context)
+    show_all_info(update, context, "Cataluña")
 
     return INFO_CATALUNA_ALL
 
 
 # CEUTA
 def show_ceuta_increment(update, context):
-    show_increment(update, context)
+    show_increment(update, context, "Ceuta")
 
     return INFO_CEUTA_INCREMENT
 
 
 def show_ceuta_cumulative(update, context):
-    show_cumulative(update, context)
+    show_cumulative(update, context, "Ceuta")
 
     return INFO_CEUTA_CUMULATIVE
 
 
 def show_ceuta_death(update, context):
-    show_death(update, context)
+    show_death(update, context, "Ceuta")
 
     return INFO_CEUTA_DEATH
 
 
 def show_ceuta_hospital(update, context):
-    show_hospital(update, context)
+    show_hospital(update, context, "Ceuta")
 
     return INFO_CEUTA_HOSPITAL
 
 
 def show_ceuta_all(update, context):
-    show_all_info(update, context)
+    show_all_info(update, context, "Ceuta")
 
     return INFO_CEUTA_ALL
 
 
 # EXTREMADURA
 def show_extremadura_increment(update, context):
-    show_increment(update, context)
+    show_increment(update, context, "Extremadura")
 
     return INFO_EXTREMADURA_INCREMENT
 
 
 def show_extremadura_cumulative(update, context):
-    show_cumulative(update, context)
+    show_cumulative(update, context, "Extremadura")
 
     return INFO_EXTREMADURA_CUMULATIVE
 
 
 def show_extremadura_death(update, context):
-    show_death(update, context)
+    show_death(update, context, "Extremadura")
 
     return INFO_EXTREMADURA_DEATH
 
 
 def show_extremadura_hospital(update, context):
-    show_hospital(update, context)
+    show_hospital(update, context, "Extremadura")
 
     return INFO_EXTREMADURA_HOSPITAL
 
 
 def show_extremadura_all(update, context):
-    show_all_info(update, context)
+    show_all_info(update, context, "Extremadura")
 
     return INFO_EXTREMADURA_ALL
 
 
 # GALICIA
 def show_galicia_increment(update, context):
-    show_increment(update, context)
+    show_increment(update, context, "Galicia")
 
     return INFO_GALICIA_INCREMENT
 
 
 def show_galicia_cumulative(update, context):
-    show_cumulative(update, context)
+    show_cumulative(update, context, "Galicia")
 
     return INFO_GALICIA_CUMULATIVE
 
 
 def show_galicia_death(update, context):
-    show_death(update, context)
+    show_death(update, context, "Galicia")
 
     return INFO_GALICIA_DEATH
 
 
 def show_galicia_hospital(update, context):
-    show_hospital(update, context)
+    show_hospital(update, context, "Galicia")
 
     return INFO_GALICIA_HOSPITAL
 
 
 def show_galicia_all(update, context):
-    show_all_info(update, context)
+    show_all_info(update, context, "Galicia")
 
     return INFO_GALICIA_ALL
 
 
 # BALEARES
 def show_baleares_increment(update, context):
-    show_increment(update, context)
+    show_increment(update, context, "Baleares")
 
     return INFO_BALEARES_INCREMENT
 
 
 def show_baleares_cumulative(update, context):
-    show_cumulative(update, context)
+    show_cumulative(update, context, "Baleares")
 
     return INFO_BALEARES_CUMULATIVE
 
 
 def show_baleares_death(update, context):
-    show_death(update, context)
+    show_death(update, context, "Baleares")
 
     return INFO_BALEARES_DEATH
 
 
 def show_baleares_hospital(update, context):
-    show_hospital(update, context)
+    show_hospital(update, context, "Baleares")
 
     return INFO_BALEARES_HOSPITAL
 
 
 def show_baleares_all(update, context):
-    show_all_info(update, context)
+    show_all_info(update, context, "Baleares")
 
     return INFO_BALEARES_ALL
 
 
 # LA RIOJA
 def show_larioja_increment(update, context):
-    show_increment(update, context)
+    show_increment(update, context, "La Rioja")
 
     return INFO_LARIOJA_INCREMENT
 
 
 def show_larioja_cumulative(update, context):
-    show_cumulative(update, context)
+    show_cumulative(update, context, "La Rioja")
 
     return INFO_LARIOJA_CUMULATIVE
 
 
 def show_larioja_death(update, context):
-    show_death(update, context)
+    show_death(update, context, "La Rioja")
 
     return INFO_LARIOJA_DEATH
 
 
 def show_larioja_hospital(update, context):
-    show_hospital(update, context)
+    show_hospital(update, context, "La Rioja")
 
     return INFO_LARIOJA_HOSPITAL
 
 
 def show_larioja_all(update, context):
-    show_all_info(update, context)
+    show_all_info(update, context, "La Rioja")
 
     return INFO_LARIOJA_ALL
 
 
 # MADRID
 def show_madrid_increment(update, context):
-    show_increment(update, context)
+    show_increment(update, context, "Madrid")
 
     return INFO_MADRID_INCREMENT
 
 
 def show_madrid_cumulative(update, context):
-    show_cumulative(update, context)
+    show_cumulative(update, context, "Madrid")
 
     return INFO_MADRID_CUMULATIVE
 
 
 def show_madrid_death(update, context):
-    show_death(update, context)
+    show_death(update, context, "Madrid")
 
     return INFO_MADRID_DEATH
 
 
 def show_madrid_hospital(update, context):
-    show_hospital(update, context)
+    show_hospital(update, context, "Madrid")
 
     return INFO_MADRID_HOSPITAL
 
 
 def show_madrid_all(update, context):
-    show_all_info(update, context)
+    show_all_info(update, context, "Madrid")
 
     return INFO_MADRID_ALL
 
 
 # MELILLA
 def show_melilla_increment(update, context):
-    show_increment(update, context)
+    show_increment(update, context, "Melilla")
 
     return INFO_MELILLA_INCREMENT
 
 
 def show_melilla_cumulative(update, context):
-    show_cumulative(update, context)
+    show_cumulative(update, context, "Melilla")
 
     return INFO_MELILLA_CUMULATIVE
 
 
 def show_melilla_death(update, context):
-    show_death(update, context)
+    show_death(update, context, "Melilla")
 
     return INFO_MELILLA_DEATH
 
 
 def show_melilla_hospital(update, context):
-    show_hospital(update, context)
+    show_hospital(update, context, "Melilla")
 
     return INFO_MELILLA_HOSPITAL
 
 
 def show_melilla_all(update, context):
-    show_all_info(update, context)
+    show_all_info(update, context, "Melilla")
 
     return INFO_MELILLA_ALL
 
 
 # MURCIA
 def show_murcia_increment(update, context):
-    show_increment(update, context)
+    show_increment(update, context, "Murcia")
 
     return INFO_MURCIA_INCREMENT
 
 
 def show_murcia_cumulative(update, context):
-    show_cumulative(update, context)
+    show_cumulative(update, context, "Murcia")
 
     return INFO_MURCIA_CUMULATIVE
 
 
 def show_murcia_death(update, context):
-    show_death(update, context)
+    show_death(update, context, "Murcia")
 
     return INFO_MURCIA_DEATH
 
 
 def show_murcia_hospital(update, context):
-    show_hospital(update, context)
+    show_hospital(update, context, "Murcia")
 
     return INFO_MURCIA_HOSPITAL
 
 
 def show_murcia_all(update, context):
-    show_all_info(update, context)
+    show_all_info(update, context, "Murcia")
 
     return INFO_MURCIA_ALL
 
 
 # NAVARRA
 def show_navarra_increment(update, context):
-    show_increment(update, context)
+    show_increment(update, context, "Navarra")
 
     return INFO_NAVARRA_INCREMENT
 
 
 def show_navarra_cumulative(update, context):
-    show_cumulative(update, context)
+    show_cumulative(update, context, "Navarra")
 
     return INFO_NAVARRA_CUMULATIVE
 
 
 def show_navarra_death(update, context):
-    show_death(update, context)
+    show_death(update, context, "Navarra")
 
     return INFO_NAVARRA_DEATH
 
 
 def show_navarra_hospital(update, context):
-    show_hospital(update, context)
+    show_hospital(update, context, "Navarra")
 
     return INFO_NAVARRA_HOSPITAL
 
 
 def show_navarra_all(update, context):
-    show_all_info(update, context)
+    show_all_info(update, context, "Navarra")
 
     return INFO_NAVARRA_ALL
 
 
 # PAÍS VASCO
 def show_paisvasco_increment(update, context):
-    show_increment(update, context)
+    show_increment(update, context, "País Vasco")
 
     return INFO_PAISVASCO_INCREMENT
 
 
 def show_paisvasco_cumulative(update, context):
-    show_cumulative(update, context)
+    show_cumulative(update, context, "País Vasco")
 
     return INFO_PAISVASCO_CUMULATIVE
 
 
 def show_paisvasco_death(update, context):
-    show_death(update, context)
+    show_death(update, context, "País Vasco")
 
     return INFO_PAISVASCO_DEATH
 
 
 def show_paisvasco_hospital(update, context):
-    show_hospital(update, context)
+    show_hospital(update, context, "País Vasco")
 
     return INFO_PAISVASCO_HOSPITAL
 
 
 def show_paisvasco_all(update, context):
-    show_all_info(update, context)
+    show_all_info(update, context, "País Vasco")
 
     return INFO_PAISVASCO_ALL
 
 
 # ESPAÑA
 def show_espana_increment(update, context):
-    global current_state, current_autonomy
+    global current_state
 
     message = update.callback_query.message
 
@@ -1345,11 +1333,11 @@ def show_espana_increment(update, context):
         [InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death'),
          InlineKeyboardButton("🗺 Casos por Región", callback_data='espana_region')],
 
-        [InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative'),
-         InlineKeyboardButton("📈🆕 Casos 100K semana ", callback_data='espana_100_cumulative_media')],
+        [InlineKeyboardButton("📈💯 Casos 100mil", callback_data='espana_100_cumulative'),
+         InlineKeyboardButton("📈🆕 Casos 100mil semana ", callback_data='espana_100_cumulative_media')],
 
-         [InlineKeyboardButton("☠💯 Fallecimientos 100K", callback_data='espana_100_death'),
-          InlineKeyboardButton("☠🆕 Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+         [InlineKeyboardButton("☠💯 Fallecimientos 100mil", callback_data='espana_100_death'),
+          InlineKeyboardButton("☠🆕 Fallecimientos 100mil semana", callback_data='espana_100_death_media')],
 
         [InlineKeyboardButton("⬇ Ver todo", callback_data='espana_all')],
     ]
@@ -1368,7 +1356,7 @@ def show_espana_increment(update, context):
              "\t - Media del incremento de casos semanal: <b>{}</b>.\n\n"
              "Información actualizada a {}.\n"
              "<b>Los datos pueden tardar unos días en consolidarse y "
-             "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
+             "pueden no estar actualizados a la fecha actual</b>".format('España',
                                                                          casos_acumulados_espana(),
                                                                          incremento_ultimo_dia_espana(),
                                                                          media_casos_semana_espana(),
@@ -1382,7 +1370,7 @@ def show_espana_increment(update, context):
 
 
 def show_espana_age(update, context):
-    global current_state, current_autonomy
+    global current_state
 
     message = update.callback_query.message
 
@@ -1393,11 +1381,11 @@ def show_espana_age(update, context):
         [InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death'),
          InlineKeyboardButton("🗺 Casos por Región", callback_data='espana_region')],
 
-        [InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative'),
-         InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media')],
+        [InlineKeyboardButton("📈💯 Casos 100mil", callback_data='espana_100_cumulative'),
+         InlineKeyboardButton("📈🆕 Casos 100mil semana", callback_data='espana_100_cumulative_media')],
 
-         [InlineKeyboardButton("☠💯 Fallecimientos 100K", callback_data='espana_100_death'),
-         InlineKeyboardButton("☠🆕 Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+         [InlineKeyboardButton("☠💯 Fallecimientos 100mil", callback_data='espana_100_death'),
+         InlineKeyboardButton("☠🆕 Fallecimientos 100mil semana", callback_data='espana_100_death_media')],
 
         [InlineKeyboardButton("⬇ Ver todo", callback_data='espana_all')],
     ]
@@ -1446,7 +1434,7 @@ def show_espana_age(update, context):
 
 
 def show_espana_cumulative(update, context):
-    global current_state, current_autonomy
+    global current_state
 
     message = update.callback_query.message
 
@@ -1457,11 +1445,11 @@ def show_espana_cumulative(update, context):
         [InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death'),
          InlineKeyboardButton("🗺 Casos por Región", callback_data='espana_region')],
 
-        [InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative'),
-         InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media')],
+        [InlineKeyboardButton("📈💯 Casos 100mil", callback_data='espana_100_cumulative'),
+         InlineKeyboardButton("📈🆕 Casos 100mil semana", callback_data='espana_100_cumulative_media')],
 
-        [InlineKeyboardButton("☠💯 Fallecimientos 100K", callback_data='espana_100_death'),
-         InlineKeyboardButton("☠🆕 Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+        [InlineKeyboardButton("☠💯 Fallecimientos 100mil", callback_data='espana_100_death'),
+         InlineKeyboardButton("☠🆕 Fallecimientos 100mil semana", callback_data='espana_100_death_media')],
 
         [InlineKeyboardButton("⬇ Ver todo", callback_data='espana_all')],
     ]
@@ -1478,7 +1466,7 @@ def show_espana_cumulative(update, context):
              "\t - Casos acumulados: <b>{}</b>.\n\n"
              "Información actualizada a {}.\n"
              "<b>Los datos pueden tardar unos días en consolidarse y "
-             "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
+             "pueden no estar actualizados a la fecha actual</b>".format('España',
                                                                          casos_acumulados_espana(),
                                                                          format_date(fecha_actualizacion_espana())),
         parse_mode='HTML',
@@ -1490,7 +1478,7 @@ def show_espana_cumulative(update, context):
 
 
 def show_espana_death(update, context):
-    global current_state, current_autonomy
+    global current_state
 
     message = update.callback_query.message
 
@@ -1501,11 +1489,11 @@ def show_espana_death(update, context):
         [InlineKeyboardButton("➕ Casos acumulados", callback_data='espana_cumulative'),
          InlineKeyboardButton("🗺 Casos por Región", callback_data='espana_region')],
 
-        [InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative'),
-         InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media')],
+        [InlineKeyboardButton("📈💯 Casos 100mil", callback_data='espana_100_cumulative'),
+         InlineKeyboardButton("📈🆕 Casos 100mil semana", callback_data='espana_100_cumulative_media')],
 
-        [InlineKeyboardButton("☠💯 Fallecimientos 100K", callback_data='espana_100_death'),
-         InlineKeyboardButton("☠🆕 Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+        [InlineKeyboardButton("☠💯 Fallecimientos 100mil", callback_data='espana_100_death'),
+         InlineKeyboardButton("☠🆕 Fallecimientos 100mil semana", callback_data='espana_100_death_media')],
 
         [InlineKeyboardButton("⬇ Ver todo", callback_data='espana_all')],
     ]
@@ -1525,7 +1513,7 @@ def show_espana_death(update, context):
              "\t - Tasa de letalidad: <b>{}</b>.\n\n"
              "Información actualizada a {}.\n"
              "<b>Los datos pueden tardar unos días en consolidarse y "
-             "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
+             "pueden no estar actualizados a la fecha actual</b>".format('España',
                                                                          muertes_totales_espana(),
                                                                          muertes_ultimo_dia_espana(),
                                                                          media_muertes_semana_espana(),
@@ -1540,7 +1528,7 @@ def show_espana_death(update, context):
 
 
 def show_espana_region(update, context):
-    global current_state, current_autonomy
+    global current_state
 
     message = update.callback_query.message
 
@@ -1551,11 +1539,11 @@ def show_espana_region(update, context):
         [InlineKeyboardButton("➕ Casos acumulados", callback_data='espana_cumulative'),
          InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death')],
 
-        [InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative'),
-         InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media')],
+        [InlineKeyboardButton("📈💯 Casos 100mil", callback_data='espana_100_cumulative'),
+         InlineKeyboardButton("📈🆕 Casos 100mil semana", callback_data='espana_100_cumulative_media')],
 
-        [InlineKeyboardButton("☠💯 Fallecimientos 100K", callback_data='espana_100_death'),
-         InlineKeyboardButton("☠🆕 Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+        [InlineKeyboardButton("☠💯 Fallecimientos 100mil", callback_data='espana_100_death'),
+         InlineKeyboardButton("☠🆕 Fallecimientos 100mil semana", callback_data='espana_100_death_media')],
 
         [InlineKeyboardButton("⬇ Ver todo", callback_data='espana_all')],
     ]
@@ -1583,7 +1571,7 @@ def show_espana_region(update, context):
 
 
 def show_espana_100_cumulative(update, context):
-    global current_state, current_autonomy
+    global current_state
 
     message = update.callback_query.message
 
@@ -1595,10 +1583,10 @@ def show_espana_100_cumulative(update, context):
          InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death')],
 
         [InlineKeyboardButton("🗺 Casos por Región", callback_data='espana_region'),
-         InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media')],
+         InlineKeyboardButton("📈🆕 Casos 100mil semana", callback_data='espana_100_cumulative_media')],
 
-        [InlineKeyboardButton("☠💯 Fallecimientos 100K", callback_data='espana_100_death'),
-         InlineKeyboardButton("☠🆕 Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+        [InlineKeyboardButton("☠💯 Fallecimientos 100mil", callback_data='espana_100_death'),
+         InlineKeyboardButton("☠🆕 Fallecimientos 100mil semana", callback_data='espana_100_death_media')],
 
         [InlineKeyboardButton("⬇ Ver todo", callback_data='espana_all')],
     ]
@@ -1611,7 +1599,7 @@ def show_espana_100_cumulative(update, context):
     )
 
     message.reply_text(
-        text="Casos por cada 100k habitantes: \n\n"
+        text="Casos por cada 100mil habitantes: \n\n"
              "{}\n"
              "Información actualizada a {}.\n"
              "<b>Los datos pueden tardar unos días en consolidarse y "
@@ -1626,7 +1614,7 @@ def show_espana_100_cumulative(update, context):
 
 
 def show_espana_100_cumulative_media(update, context):
-    global current_state, current_autonomy
+    global current_state
 
     message = update.callback_query.message
 
@@ -1638,10 +1626,10 @@ def show_espana_100_cumulative_media(update, context):
          InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death')],
 
         [InlineKeyboardButton("🗺 Casos por Región", callback_data='espana_region'),
-         InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative')],
+         InlineKeyboardButton("📈💯 Casos 100mil", callback_data='espana_100_cumulative')],
 
-        [InlineKeyboardButton("☠💯 Fallecimientos 100K", callback_data='espana_100_death'),
-         InlineKeyboardButton("☠🆕 Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+        [InlineKeyboardButton("☠💯 Fallecimientos 100mil", callback_data='espana_100_death'),
+         InlineKeyboardButton("☠🆕 Fallecimientos 100mil semana", callback_data='espana_100_death_media')],
 
         [InlineKeyboardButton("⬇ Ver todo", callback_data='espana_all')],
     ]
@@ -1654,7 +1642,7 @@ def show_espana_100_cumulative_media(update, context):
     )
 
     message.reply_text(
-        text="Media semanal por cada 100k habitantes: \n\n"
+        text="Media semanal por cada 100mil habitantes: \n\n"
              "{}\n"
              "Información actualizada a {}.\n"
              "<b>Los datos pueden tardar unos días en consolidarse y "
@@ -1669,7 +1657,7 @@ def show_espana_100_cumulative_media(update, context):
 
 
 def show_espana_100_death(update, context):
-    global current_state, current_autonomy
+    global current_state
 
     message = update.callback_query.message
 
@@ -1681,10 +1669,10 @@ def show_espana_100_death(update, context):
          InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death')],
 
         [InlineKeyboardButton("🗺 Casos por Región", callback_data='espana_region'),
-         InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative')],
+         InlineKeyboardButton("📈💯 Casos 100mil", callback_data='espana_100_cumulative')],
 
-        [InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media'),
-         InlineKeyboardButton("☠🆕 Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+        [InlineKeyboardButton("📈🆕 Casos 100mil semana", callback_data='espana_100_cumulative_media'),
+         InlineKeyboardButton("☠🆕 Fallecimientos 100mil semana", callback_data='espana_100_death_media')],
 
         [InlineKeyboardButton("⬇ Ver todo", callback_data='espana_all')],
     ]
@@ -1697,7 +1685,7 @@ def show_espana_100_death(update, context):
     )
 
     message.reply_text(
-        text="Fallecimientos por cada 100k habitantes: \n\n"
+        text="Fallecimientos por cada 100mil habitantes: \n\n"
              "{}\n"
              "Información actualizada a {}.\n"
              "<b>Los datos pueden tardar unos días en consolidarse y "
@@ -1712,7 +1700,7 @@ def show_espana_100_death(update, context):
 
 
 def show_espana_100_death_media(update, context):
-    global current_state, current_autonomy
+    global current_state
 
     message = update.callback_query.message
 
@@ -1724,10 +1712,10 @@ def show_espana_100_death_media(update, context):
          InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death')],
 
         [InlineKeyboardButton("🗺 Casos por Región", callback_data='espana_region'),
-         InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative')],
+         InlineKeyboardButton("📈💯 Casos 100mil", callback_data='espana_100_cumulative')],
 
-        [InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media'),
-         InlineKeyboardButton("☠💯 Fallecimientos 100K", callback_data='espana_100_death')],
+        [InlineKeyboardButton("📈🆕 Casos 100mil semana", callback_data='espana_100_cumulative_media'),
+         InlineKeyboardButton("☠💯 Fallecimientos 100mil", callback_data='espana_100_death')],
 
         [InlineKeyboardButton("⬇ Ver todo", callback_data='espana_all')],
     ]
@@ -1740,7 +1728,7 @@ def show_espana_100_death_media(update, context):
     )
 
     message.reply_text(
-        text="Media fallecimientos semanal por cada 100k habitantes: \n\n"
+        text="Media fallecimientos semanal por cada 100mil habitantes: \n\n"
              "{}\n"
              "Información actualizada a {}.\n"
              "<b>Los datos pueden tardar unos días en consolidarse y "
@@ -1755,7 +1743,7 @@ def show_espana_100_death_media(update, context):
 
 
 def show_espana_all(update, context):
-    global current_state, current_autonomy
+    global current_state
 
     message = update.callback_query.message
 
@@ -1767,11 +1755,11 @@ def show_espana_all(update, context):
         [InlineKeyboardButton("☠ Fallecimientos", callback_data='espana_death'),
          InlineKeyboardButton("🗺 Casos por Región", callback_data='espana_region')],
 
-        [InlineKeyboardButton("📈💯 Casos 100K", callback_data='espana_100_cumulative'),
-         InlineKeyboardButton("📈🆕 Casos 100K semana", callback_data='espana_100_cumulative_media')],
+        [InlineKeyboardButton("📈💯 Casos 100mil", callback_data='espana_100_cumulative'),
+         InlineKeyboardButton("📈🆕 Casos 100mil semana", callback_data='espana_100_cumulative_media')],
 
-        [InlineKeyboardButton("☠💯 Fallecimientos 100K", callback_data='espana_100_death'),
-         InlineKeyboardButton("☠🆕 Fallecimientos 100K semana", callback_data='espana_100_death_media')],
+        [InlineKeyboardButton("☠💯 Fallecimientos 100mil", callback_data='espana_100_death'),
+         InlineKeyboardButton("☠🆕 Fallecimientos 100mil semana", callback_data='espana_100_death_media')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -1788,7 +1776,7 @@ def show_espana_all(update, context):
              "\t - Media del incremento de casos semanal: <b>{}</b>.\n\n"
              "Información actualizada a {}.\n"
              "<b>Los datos pueden tardar unos días en consolidarse y "
-             "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
+             "pueden no estar actualizados a la fecha actual</b>".format('España',
                                                                          casos_acumulados_espana(),
                                                                          incremento_ultimo_dia_espana(),
                                                                          media_casos_semana_espana(),
@@ -1855,7 +1843,7 @@ def show_espana_all(update, context):
              "\t - Casos acumulados: <b>{}</b>.\n\n"
              "Información actualizada a {}.\n"
              "<b>Los datos pueden tardar unos días en consolidarse y "
-             "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
+             "pueden no estar actualizados a la fecha actual</b>".format('España',
                                                                          casos_acumulados_espana(),
                                                                          format_date(fecha_actualizacion_espana())),
         parse_mode='HTML',
@@ -1875,7 +1863,7 @@ def show_espana_all(update, context):
              "\t - Tasa de letalidad: <b>{}</b>.\n\n"
              "Información actualizada a {}.\n"
              "<b>Los datos pueden tardar unos días en consolidarse y "
-             "pueden no estar actualizados a la fecha actual</b>".format(current_autonomy,
+             "pueden no estar actualizados a la fecha actual</b>".format('España',
                                                                          muertes_totales_espana(),
                                                                          muertes_ultimo_dia_espana(),
                                                                          media_muertes_semana_espana(),
@@ -1907,7 +1895,7 @@ def show_espana_all(update, context):
     )
 
     message.reply_text(
-        text="Casos por cada 100k habitantes: \n\n"
+        text="Casos por cada 100mil habitantes: \n\n"
              "{}\n"
              "Información actualizada a {}.\n"
              "<b>Los datos pueden tardar unos días en consolidarse y "
@@ -1923,7 +1911,7 @@ def show_espana_all(update, context):
     )
 
     message.reply_text(
-        text="Media semanal por cada 100k habitantes: \n\n"
+        text="Media semanal por cada 100mil habitantes: \n\n"
              "{}\n"
              "Información actualizada a {}.\n"
              "<b>Los datos pueden tardar unos días en consolidarse y "
@@ -1939,7 +1927,7 @@ def show_espana_all(update, context):
     )
 
     message.reply_text(
-        text="Fallecimientos por cada 100k habitantes: \n\n"
+        text="Fallecimientos por cada 100mil habitantes: \n\n"
              "{}\n"
              "Información actualizada a {}.\n"
              "<b>Los datos pueden tardar unos días en consolidarse y "
@@ -1955,7 +1943,7 @@ def show_espana_all(update, context):
     )
 
     message.reply_text(
-        text="Media fallecimientos semanal por cada 100k habitantes: \n\n"
+        text="Media fallecimientos semanal por cada 100mil habitantes: \n\n"
              "{}\n"
              "Información actualizada a {}.\n"
              "<b>Los datos pueden tardar unos días en consolidarse y "
@@ -1976,7 +1964,7 @@ def show_info(update, context):
         text="Este proyecto ha sido desarrollado como Trabajo Fin de Grado\n\n"
              "Este proyecto cuenta con una licencia AGPL, por lo que podeis usarlo si os es útil\n\n"
              "<b>Fuentes de datos</b>\n"
-             "Fuentes de datos para Espana y sus provincias de "
+             "Fuentes de datos para España y sus comunidades de "
              "<a href='https://github.com/datadista/datasets/'>Datadista</a>\n\n"
              "<b>Contacto</b>\n"
              "Puedes ponerte en contacto con el desarrollador @JmZero\n\n"
@@ -3975,14 +3963,6 @@ def main():
                                                CallbackQueryHandler(show_espana_100_death_media,
                                                                     pattern='espana_100_death_media'),
                                            ],
-                                           NOT_IMPLEMENTED: [
-                                               MessageHandler(Filters.regex('Menú'), show_inicio),
-                                               MessageHandler(Filters.regex('🆘 Ayuda'), help_handler),
-                                               MessageHandler(Filters.regex('Información'), show_info),
-                                               MessageHandler(Filters.text & (~Filters.command), any_message),
-                                               CallbackQueryHandler(show_inicio,
-                                                                    pattern='start_menu')
-                                           ]
                                        },
                                        fallbacks=[
                                            CommandHandler('start', start_handler),
@@ -4250,18 +4230,18 @@ def format_date(fecha):
     return datetime.strptime(fecha, "%Y-%m-%d").strftime("%d-%m-%Y")
 
 
-def casos_acumulados(provincia):
-    return str(df_ccaa_casos.groupby(['ccaa'])['num_casos'].sum()[provincia])
+def casos_acumulados(current_autonomy):
+    return str(df_ccaa_casos.groupby(['ccaa'])['num_casos'].sum()[current_autonomy])
 
 
-def incremento_ultimo_dia(provincia):
-    df_loc = df_ccaa_casos.loc[(df_ccaa_casos['fecha'] == fecha_actualizacion(provincia)) &
-                               (df_ccaa_casos['ccaa'] == provincia)]
+def incremento_ultimo_dia(current_autonomy):
+    df_loc = df_ccaa_casos.loc[(df_ccaa_casos['fecha'] == fecha_actualizacion(current_autonomy)) &
+                               (df_ccaa_casos['ccaa'] == current_autonomy)]
     return str(df_loc['num_casos'].values[0])
 
 
-def media_casos_semana(provincia):
-    ultima_fecha = fecha_actualizacion(provincia)
+def media_casos_semana(current_autonomy):
+    ultima_fecha = fecha_actualizacion(current_autonomy)
     fecha = datetime.strptime(ultima_fecha, "%Y-%m-%d")
 
     total = 0
@@ -4270,13 +4250,13 @@ def media_casos_semana(provincia):
         fecha_semana_antes = fecha2.strftime("%Y-%m-%d")
 
         df_loc = df_ccaa_casos.loc[(df_ccaa_casos['fecha'] == fecha_semana_antes) &
-                                   (df_ccaa_casos['ccaa'] == provincia)]
+                                   (df_ccaa_casos['ccaa'] == current_autonomy)]
         total += int(df_loc['num_casos'].values[0])
 
     return str(round(total/7, 1))
 
 
-def fecha_actualizacion(provincia):
+def fecha_actualizacion(current_autonomy):
     actual_day = date.today()
     dias_antes = 0
     day_before = timedelta(days=dias_antes)
@@ -4286,30 +4266,30 @@ def fecha_actualizacion(provincia):
         dias_antes += 1
         day_before = timedelta(days=dias_antes)
 
-    # Los ultimos datos de la provincia
+    # Los ultimos datos de la ccaa
     df_loc = df_ccaa_casos.loc[(df_ccaa_casos['fecha'] == str(actual_day-day_before)) &
-                               (df_ccaa_casos['ccaa'] == provincia)]
+                               (df_ccaa_casos['ccaa'] == current_autonomy)]
 
     while df_loc['num_casos'].values[0] == 0:
         dias_antes += 1
         day_before = timedelta(days=dias_antes)
         df_loc = df_ccaa_casos.loc[(df_ccaa_casos['fecha'] == str(actual_day-day_before)) &
-                                   (df_ccaa_casos['ccaa'] == provincia)]
+                                   (df_ccaa_casos['ccaa'] == current_autonomy)]
 
     return str(actual_day-day_before)
 
 
-def muertes_totales(provincia):
-    return str(df_ccaa_muertes.groupby(['CCAA'])['Fallecidos'].sum()[provincia])
+def muertes_totales(current_autonomy):
+    return str(df_ccaa_muertes.groupby(['CCAA'])['Fallecidos'].sum()[current_autonomy])
 
 
-def muertes_ultimo_dia(provincia):
+def muertes_ultimo_dia(current_autonomy):
     df_loc = df_ccaa_muertes.loc[(df_ccaa_muertes['Fecha'] == fecha_actualizacion_muertes()) &
-                                 (df_ccaa_muertes['CCAA'] == provincia)]
+                                 (df_ccaa_muertes['CCAA'] == current_autonomy)]
     return str(df_loc['Fallecidos'].values[0])
 
 
-def media_muertes_semana(provincia):
+def media_muertes_semana(current_autonomy):
     ultima_fecha = fecha_actualizacion_muertes()
     fecha = datetime.strptime(ultima_fecha, "%Y-%m-%d")
 
@@ -4319,14 +4299,14 @@ def media_muertes_semana(provincia):
         fecha_semana_antes = fecha2.strftime("%Y-%m-%d")
 
         df_loc = df_ccaa_muertes.loc[(df_ccaa_muertes['Fecha'] == fecha_semana_antes) &
-                                     (df_ccaa_muertes['CCAA'] == provincia)]
+                                     (df_ccaa_muertes['CCAA'] == current_autonomy)]
         total += int(df_loc['Fallecidos'].values[0])
 
     return str(round(total/7, 1))
 
 
-def tasa_letalidad(provincia):
-    return str(round(int(muertes_totales(provincia))*100/int(casos_acumulados(provincia)), 2))
+def tasa_letalidad(current_autonomy):
+    return str(round(int(muertes_totales(current_autonomy))*100/int(casos_acumulados(current_autonomy)), 2))
 
 
 def fecha_actualizacion_muertes():
@@ -4342,43 +4322,43 @@ def fecha_actualizacion_muertes():
     return str(actual_day-day_before)
 
 
-def pacientes_ingresados(provincia):
-    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(provincia)) &
-                                  (df_ccaa_hospital['CCAA'] == provincia)]
+def pacientes_ingresados(current_autonomy):
+    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(current_autonomy)) &
+                                  (df_ccaa_hospital['CCAA'] == current_autonomy)]
     return str(int(df_loc['Total Pacientes COVID ingresados']))
 
 
-def porcentaje_camas_ocupadas(provincia):
-    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(provincia)) &
-                                  (df_ccaa_hospital['CCAA'] == provincia)]
+def porcentaje_camas_ocupadas(current_autonomy):
+    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(current_autonomy)) &
+                                  (df_ccaa_hospital['CCAA'] == current_autonomy)]
     return str(df_loc['% Camas Ocupadas COVID'].values[0])
 
 
-def pacientes_ingresados_uci(provincia):
-    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(provincia)) &
-                                  (df_ccaa_hospital['CCAA'] == provincia)]
+def pacientes_ingresados_uci(current_autonomy):
+    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(current_autonomy)) &
+                                  (df_ccaa_hospital['CCAA'] == current_autonomy)]
     return str(int(df_loc['Total pacientes COVID en UCI']))
 
 
-def porcentaje_camas_uci_ocupadas(provincia):
-    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(provincia)) &
-                                  (df_ccaa_hospital['CCAA'] == provincia)]
+def porcentaje_camas_uci_ocupadas(current_autonomy):
+    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(current_autonomy)) &
+                                  (df_ccaa_hospital['CCAA'] == current_autonomy)]
     return str(df_loc['% Camas Ocupadas UCI COVID'].values[0])
 
 
-def ingresados_ultimo_dia(provincia):
-    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(provincia)) &
-                                  (df_ccaa_hospital['CCAA'] == provincia)]
+def ingresados_ultimo_dia(current_autonomy):
+    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(current_autonomy)) &
+                                  (df_ccaa_hospital['CCAA'] == current_autonomy)]
     return str(int(df_loc['Ingresos COVID últimas 24 h']))
 
 
-def altas_ultimo_dia(provincia):
-    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(provincia)) &
-                                  (df_ccaa_hospital['CCAA'] == provincia)]
+def altas_ultimo_dia(current_autonomy):
+    df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == fecha_actualizacion_hospital(current_autonomy)) &
+                                  (df_ccaa_hospital['CCAA'] == current_autonomy)]
     return str(int(df_loc['Altas COVID últimas 24 h']))
 
 
-def fecha_actualizacion_hospital(provincia):
+def fecha_actualizacion_hospital(current_autonomy):
     actual_day = date.today()
     dias_antes = 0
     day_before = timedelta(days=dias_antes)
@@ -4388,15 +4368,15 @@ def fecha_actualizacion_hospital(provincia):
         dias_antes += 1
         day_before = timedelta(days=dias_antes)
 
-    # Los ultimos datos de la provincia
+    # Los ultimos datos de la ccaa
     df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == str(actual_day-day_before)) &
-                                  (df_ccaa_hospital['CCAA'] == provincia)]
+                                  (df_ccaa_hospital['CCAA'] == current_autonomy)]
 
     while df_loc['Total Pacientes COVID ingresados'].values[0] == 0:
         dias_antes += 1
         day_before = timedelta(days=dias_antes)
         df_loc = df_ccaa_hospital.loc[(df_ccaa_hospital['Fecha'] == str(actual_day-day_before)) &
-                                      (df_ccaa_hospital['CCAA'] == provincia)]
+                                      (df_ccaa_hospital['CCAA'] == current_autonomy)]
 
     return str(actual_day-day_before)
 
@@ -4496,14 +4476,14 @@ def tasa_letalidad_espana():
 
 
 def top_5_casos():
-    provincias = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
+    ccaa = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
                   'Castilla La Mancha', 'Castilla y León', 'Cataluña', 'Ceuta', 'Extremadura', 'Galicia', 'La Rioja',
                   'Madrid', 'Melilla', 'Murcia', 'Navarra', 'País Vasco']
 
     dict = {}
 
-    for i in range(len(provincias)):
-        dict[provincias[i]] = int(casos_acumulados(provincias[i]))
+    for i in range(len(ccaa)):
+        dict[ccaa[i]] = int(casos_acumulados(ccaa[i]))
 
     text=''
     new_dict = sorted(dict.items(), key=lambda x: x[1], reverse=True)
@@ -4515,15 +4495,15 @@ def top_5_casos():
 
 
 def top_5_casos_100():
-    provincias = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
+    ccaa = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
                   'Castilla La Mancha', 'Castilla y León', 'Cataluña', 'Ceuta', 'Extremadura', 'Galicia', 'La Rioja',
                   'Madrid', 'Melilla', 'Murcia', 'Navarra', 'País Vasco']
 
     dict = {}
 
-    for i in range(len(provincias)):
-        df_loc = df_ccaa_habitantes.loc[df_ccaa_habitantes['ccaa'] == provincias[i]]
-        dict[provincias[i]] = round((int(casos_acumulados(provincias[i]))*100000)/df_loc['habitantes'].values[0], 1)
+    for i in range(len(ccaa)):
+        df_loc = df_ccaa_habitantes.loc[df_ccaa_habitantes['ccaa'] == ccaa[i]]
+        dict[ccaa[i]] = round((int(casos_acumulados(ccaa[i]))*100000)/df_loc['habitantes'].values[0], 1)
 
     text=''
     new_dict = sorted(dict.items(), key=lambda x: x[1], reverse=True)
@@ -4535,15 +4515,15 @@ def top_5_casos_100():
 
 
 def top_5_casos_100_semana():
-    provincias = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
+    ccaa = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
                   'Castilla La Mancha', 'Castilla y León', 'Cataluña', 'Ceuta', 'Extremadura', 'Galicia', 'La Rioja',
                   'Madrid', 'Melilla', 'Murcia', 'Navarra', 'País Vasco']
 
     dict = {}
 
-    for i in range(len(provincias)):
-        df_loc = df_ccaa_habitantes.loc[df_ccaa_habitantes['ccaa'] == provincias[i]]
-        dict[provincias[i]] = round((float(media_casos_semana(provincias[i]))*100000)/df_loc['habitantes'].values[0], 1)
+    for i in range(len(ccaa)):
+        df_loc = df_ccaa_habitantes.loc[df_ccaa_habitantes['ccaa'] == ccaa[i]]
+        dict[ccaa[i]] = round((float(media_casos_semana(ccaa[i]))*100000)/df_loc['habitantes'].values[0], 1)
 
     text=''
     new_dict = sorted(dict.items(), key=lambda x: x[1], reverse=True)
@@ -4555,15 +4535,15 @@ def top_5_casos_100_semana():
 
 
 def top_5_muertes_100():
-    provincias = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
+    ccaa = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
                   'Castilla La Mancha', 'Castilla y León', 'Cataluña', 'Ceuta', 'Extremadura', 'Galicia', 'La Rioja',
                   'Madrid', 'Melilla', 'Murcia', 'Navarra', 'País Vasco']
 
     dict = {}
 
-    for i in range(len(provincias)):
-        df_loc = df_ccaa_habitantes.loc[df_ccaa_habitantes['ccaa'] == provincias[i]]
-        dict[provincias[i]] = round((int(muertes_totales(provincias[i]))*100000)/df_loc['habitantes'].values[0], 1)
+    for i in range(len(ccaa)):
+        df_loc = df_ccaa_habitantes.loc[df_ccaa_habitantes['ccaa'] == ccaa[i]]
+        dict[ccaa[i]] = round((int(muertes_totales(ccaa[i]))*100000)/df_loc['habitantes'].values[0], 1)
 
     text=''
     new_dict = sorted(dict.items(), key=lambda x: x[1], reverse=True)
@@ -4575,15 +4555,15 @@ def top_5_muertes_100():
 
 
 def top_5_muertes_100_semana():
-    provincias = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
+    ccaa = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
                   'Castilla La Mancha', 'Castilla y León', 'Cataluña', 'Ceuta', 'Extremadura', 'Galicia', 'La Rioja',
                   'Madrid', 'Melilla', 'Murcia', 'Navarra', 'País Vasco']
 
     dict = {}
 
-    for i in range(len(provincias)):
-        df_loc = df_ccaa_habitantes.loc[df_ccaa_habitantes['ccaa'] == provincias[i]]
-        dict[provincias[i]] = round((float(media_muertes_semana(provincias[i]))*100000)/df_loc['habitantes'].values[0], 1)
+    for i in range(len(ccaa)):
+        df_loc = df_ccaa_habitantes.loc[df_ccaa_habitantes['ccaa'] == ccaa[i]]
+        dict[ccaa[i]] = round((float(media_muertes_semana(ccaa[i]))*100000)/df_loc['habitantes'].values[0], 1)
 
     text=''
     new_dict = sorted(dict.items(), key=lambda x: x[1], reverse=True)
@@ -4598,10 +4578,10 @@ def top_5_muertes_100_semana():
 inicio_mes = ['2020-01-01', '2020-02-01', '2020-03-01', '2020-04-01', '2020-05-01', '2020-06-01', '2020-07-01',
               '2020-08-01', '2020-09-01', '2020-10-01', '2020-11-01', '2020-12-01']
 
-def grafica_acumulado():
-    df_casos_provincia = df_ccaa_casos.loc[df_ccaa_casos['ccaa'] == current_autonomy]
-    df_casos_provincia['casos_acumulados'] = df_casos_provincia['num_casos'].cumsum()
-    df_loc = df_casos_provincia.loc[:, ['fecha', 'casos_acumulados']]
+def grafica_acumulado(current_autonomy):
+    df_casos_ccaa = df_ccaa_casos.loc[df_ccaa_casos['ccaa'] == current_autonomy]
+    df_casos_ccaa['casos_acumulados'] = df_casos_ccaa['num_casos'].cumsum()
+    df_loc = df_casos_ccaa.loc[:, ['fecha', 'casos_acumulados']]
     df_loc.set_index("fecha", inplace=True)
 
     autonomy_lower = normalize(current_autonomy).lower()
@@ -4621,17 +4601,17 @@ def grafica_acumulado():
     plt.close()
 
 
-def grafica_incremento():
-    df_casos_provincia = df_ccaa_casos.loc[df_ccaa_casos['ccaa'] == current_autonomy]
-    df_casos_provincia.set_index("fecha", inplace=True)
+def grafica_incremento(current_autonomy):
+    df_casos_ccaa = df_ccaa_casos.loc[df_ccaa_casos['ccaa'] == current_autonomy]
+    df_casos_ccaa.set_index("fecha", inplace=True)
 
     autonomy_lower = normalize(current_autonomy).lower()
 
     fig, ax = plt.subplots(figsize=(12, 6))
-    x = df_casos_provincia.index.get_level_values('fecha')
+    x = df_casos_ccaa.index.get_level_values('fecha')
 
-    plt.bar(x, df_casos_provincia['num_casos'], alpha=0.5, width=0.5, label=('Incremento diario'))
-    plt.plot(x, df_casos_provincia['num_casos'], color='red')
+    plt.bar(x, df_casos_ccaa['num_casos'], alpha=0.5, width=0.5, label=('Incremento diario'))
+    plt.plot(x, df_casos_ccaa['num_casos'], color='red')
 
     ax.set_xticks(inicio_mes)
     ax.set_xlim('2020-03-01', x[-1])
@@ -4643,17 +4623,17 @@ def grafica_incremento():
     plt.close()
 
 
-def grafica_muertes():
-    df_muertes_provincia = df_ccaa_muertes.loc[df_ccaa_muertes['CCAA'] == current_autonomy]
-    df_muertes_provincia.set_index("Fecha", inplace=True)
+def grafica_muertes(current_autonomy):
+    df_muertes_ccaa = df_ccaa_muertes.loc[df_ccaa_muertes['CCAA'] == current_autonomy]
+    df_muertes_ccaa.set_index("Fecha", inplace=True)
 
     autonomy_lower = normalize(current_autonomy).lower()
 
     fig, ax = plt.subplots(figsize=(12, 6))
-    x = df_muertes_provincia.index.get_level_values('Fecha')
+    x = df_muertes_ccaa.index.get_level_values('Fecha')
 
-    plt.bar(x, df_muertes_provincia['Fallecidos'], alpha=0.5, width=0.7, label=('Fallecimientos diarios'), color='red')
-    plt.plot(x, df_muertes_provincia['Fallecidos'], color='red')
+    plt.bar(x, df_muertes_ccaa['Fallecidos'], alpha=0.5, width=0.7, label=('Fallecimientos diarios'), color='red')
+    plt.plot(x, df_muertes_ccaa['Fallecidos'], color='red')
 
     ax.set_xticks(inicio_mes)
     ax.set_xlim('2020-03-01', x[-1])
@@ -4665,28 +4645,28 @@ def grafica_muertes():
     plt.close()
 
 
-def grafica_hospitales():
-    df_hospitales_provincia = df_ccaa_hospital.loc[df_ccaa_hospital['CCAA'] == current_autonomy]
-    df_hospitales_provincia['% Camas Ocupadas UCI COVID'] = df_hospitales_provincia['% Camas Ocupadas UCI COVID'].fillna('0%')
-    df_hospitales_provincia['% Camas Ocupadas COVID'] = df_hospitales_provincia['% Camas Ocupadas COVID'].str.replace(r'%$', '')
-    df_hospitales_provincia['% Camas Ocupadas UCI COVID'] = df_hospitales_provincia['% Camas Ocupadas UCI COVID'].str.replace(r'%$', '')
+def grafica_hospitales(current_autonomy):
+    df_hospitales_ccaa = df_ccaa_hospital.loc[df_ccaa_hospital['CCAA'] == current_autonomy]
+    df_hospitales_ccaa['% Camas Ocupadas UCI COVID'] = df_hospitales_ccaa['% Camas Ocupadas UCI COVID'].fillna('0%')
+    df_hospitales_ccaa['% Camas Ocupadas COVID'] = df_hospitales_ccaa['% Camas Ocupadas COVID'].str.replace(r'%$', '')
+    df_hospitales_ccaa['% Camas Ocupadas UCI COVID'] = df_hospitales_ccaa['% Camas Ocupadas UCI COVID'].str.replace(r'%$', '')
 
     autonomy_lower = normalize(current_autonomy).lower()
 
-    df_hospitales_provincia.set_index("Fecha", inplace=True)
+    df_hospitales_ccaa.set_index("Fecha", inplace=True)
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 8))
-    x = df_hospitales_provincia.index.get_level_values('Fecha')
+    x = df_hospitales_ccaa.index.get_level_values('Fecha')
 
     fig.suptitle('Evolución ocupación camas en {}'.format(current_autonomy), fontsize=26)
 
-    ax1.plot(x, df_hospitales_provincia['% Camas Ocupadas COVID'], color='blue')
+    ax1.plot(x, df_hospitales_ccaa['% Camas Ocupadas COVID'], color='blue')
     ax1.set_ylabel('% camas ocupadas', fontsize=15)
     ax1.set_xticks(inicio_mes)
     ax1.set_xlim('2020-08-19', x[-1])
     ax1.figure.autofmt_xdate()
 
-    ax2.plot(x, df_hospitales_provincia['% Camas Ocupadas UCI COVID'], color='red')
+    ax2.plot(x, df_hospitales_ccaa['% Camas Ocupadas UCI COVID'], color='red')
     ax2.set_ylabel('% camas UCI ocupadas', fontsize=15)
     ax2.set_xticks(inicio_mes)
     ax2.set_xlim('2020-08-19', x[-1])
@@ -4759,14 +4739,14 @@ def grafica_muertes_espana():
 
 
 def grafica_casos_comunidad():
-    provincias = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
+    ccaa = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
                   'Castilla La Mancha', 'Castilla y León', 'Cataluña', 'Ceuta', 'Extremadura', 'Galicia', 'La Rioja',
                   'Madrid', 'Melilla', 'Murcia', 'Navarra', 'País Vasco']
 
     dict = {}
 
-    for i in range(len(provincias)):
-        dict[provincias[i]] = int(casos_acumulados(provincias[i]))
+    for i in range(len(ccaa)):
+        dict[ccaa[i]] = int(casos_acumulados(ccaa[i]))
 
     new_dict = sorted(dict.items(), key=lambda x: x[1], reverse=True)
     df = pd.DataFrame(new_dict, columns=['ccaa', 'n_casos'])
@@ -4786,15 +4766,15 @@ def grafica_casos_comunidad():
 
 
 def grafica_casos_100():
-    provincias = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
+    ccaa = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
                   'Castilla La Mancha', 'Castilla y León', 'Cataluña', 'Ceuta', 'Extremadura', 'Galicia', 'La Rioja',
                   'Madrid', 'Melilla', 'Murcia', 'Navarra', 'País Vasco']
 
     dict = {}
 
-    for i in range(len(provincias)):
-        df_loc = df_ccaa_habitantes.loc[df_ccaa_habitantes['ccaa'] == provincias[i]]
-        dict[provincias[i]] = round((int(casos_acumulados(provincias[i])) * 100000) / df_loc['habitantes'].values[0], 1)
+    for i in range(len(ccaa)):
+        df_loc = df_ccaa_habitantes.loc[df_ccaa_habitantes['ccaa'] == ccaa[i]]
+        dict[ccaa[i]] = round((int(casos_acumulados(ccaa[i])) * 100000) / df_loc['habitantes'].values[0], 1)
 
     new_dict = sorted(dict.items(), key=lambda x: x[1], reverse=True)
     df = pd.DataFrame(new_dict, columns=['ccaa', 'n_casos'])
@@ -4807,22 +4787,22 @@ def grafica_casos_100():
 
     ax.figure.autofmt_xdate()
 
-    plt.title('Casos por cada 100k habitantes', fontsize=26)
+    plt.title('Casos por cada 100mil habitantes', fontsize=26)
     plt.gca().invert_yaxis()
     plt.savefig('./img_graficas/casos_100.png')
     plt.close()
 
 
 def grafica_casos_100_semana():
-    provincias = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
+    ccaa = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
                   'Castilla La Mancha', 'Castilla y León', 'Cataluña', 'Ceuta', 'Extremadura', 'Galicia', 'La Rioja',
                   'Madrid', 'Melilla', 'Murcia', 'Navarra', 'País Vasco']
 
     dict = {}
 
-    for i in range(len(provincias)):
-        df_loc = df_ccaa_habitantes.loc[df_ccaa_habitantes['ccaa'] == provincias[i]]
-        dict[provincias[i]] = round((float(media_casos_semana(provincias[i])) * 100000) / df_loc['habitantes'].values[0], 1)
+    for i in range(len(ccaa)):
+        df_loc = df_ccaa_habitantes.loc[df_ccaa_habitantes['ccaa'] == ccaa[i]]
+        dict[ccaa[i]] = round((float(media_casos_semana(ccaa[i])) * 100000) / df_loc['habitantes'].values[0], 1)
 
     new_dict = sorted(dict.items(), key=lambda x: x[1], reverse=True)
     df = pd.DataFrame(new_dict, columns=['ccaa', 'n_muertes'])
@@ -4835,7 +4815,7 @@ def grafica_casos_100_semana():
 
     ax.figure.autofmt_xdate()
 
-    plt.title('Casos última semana por cada 100k habitantes', fontsize=26)
+    plt.title('Casos última semana por cada 100mil habitantes', fontsize=26)
     plt.gca().invert_yaxis()
 
     for index, value in enumerate(df['n_muertes']):
@@ -4846,15 +4826,15 @@ def grafica_casos_100_semana():
 
 
 def grafica_muertes_100():
-    provincias = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
+    ccaa = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
                   'Castilla La Mancha', 'Castilla y León', 'Cataluña', 'Ceuta', 'Extremadura', 'Galicia', 'La Rioja',
                   'Madrid', 'Melilla', 'Murcia', 'Navarra', 'País Vasco']
 
     dict = {}
 
-    for i in range(len(provincias)):
-        df_loc = df_ccaa_habitantes.loc[df_ccaa_habitantes['ccaa'] == provincias[i]]
-        dict[provincias[i]] = round((int(muertes_totales(provincias[i])) * 100000) / df_loc['habitantes'].values[0], 1)
+    for i in range(len(ccaa)):
+        df_loc = df_ccaa_habitantes.loc[df_ccaa_habitantes['ccaa'] == ccaa[i]]
+        dict[ccaa[i]] = round((int(muertes_totales(ccaa[i])) * 100000) / df_loc['habitantes'].values[0], 1)
 
     new_dict = sorted(dict.items(), key=lambda x: x[1], reverse=True)
     df = pd.DataFrame(new_dict, columns=['ccaa', 'n_casos'])
@@ -4867,22 +4847,22 @@ def grafica_muertes_100():
 
     ax.figure.autofmt_xdate()
 
-    plt.title('Muertes por cada 100k habitantes', fontsize=26)
+    plt.title('Muertes por cada 100mil habitantes', fontsize=26)
     plt.gca().invert_yaxis()
     plt.savefig('./img_graficas/muertes_100.png')
     plt.close()
 
 
 def grafica_muertes_100_semana():
-    provincias = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
+    ccaa = ['Andalucía', 'Aragón', 'Asturias', 'Baleares', 'C. Valenciana', 'Canarias', 'Cantabria',
                   'Castilla La Mancha', 'Castilla y León', 'Cataluña', 'Ceuta', 'Extremadura', 'Galicia', 'La Rioja',
                   'Madrid', 'Melilla', 'Murcia', 'Navarra', 'País Vasco']
 
     dict = {}
 
-    for i in range(len(provincias)):
-        df_loc = df_ccaa_habitantes.loc[df_ccaa_habitantes['ccaa'] == provincias[i]]
-        dict[provincias[i]] = round((float(media_muertes_semana(provincias[i])) * 100000) / df_loc['habitantes'].values[0], 1)
+    for i in range(len(ccaa)):
+        df_loc = df_ccaa_habitantes.loc[df_ccaa_habitantes['ccaa'] == ccaa[i]]
+        dict[ccaa[i]] = round((float(media_muertes_semana(ccaa[i])) * 100000) / df_loc['habitantes'].values[0], 1)
 
     new_dict = sorted(dict.items(), key=lambda x: x[1], reverse=True)
     df = pd.DataFrame(new_dict, columns=['ccaa', 'n_casos'])
@@ -4895,7 +4875,7 @@ def grafica_muertes_100_semana():
 
     ax.figure.autofmt_xdate()
 
-    plt.title('Muertes última semana por cada 100k habitantes', fontsize=26)
+    plt.title('Muertes última semana por cada 100mil habitantes', fontsize=26)
     plt.gca().invert_yaxis()
     plt.savefig('./img_graficas/muertes_100_semana.png')
     plt.close()

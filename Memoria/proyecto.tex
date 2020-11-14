@@ -13,7 +13,7 @@
 \usepackage{listings} % para insertar código con formato similar al editor
 \usepackage[spanish, es-tabla]{babel} % Selecciona el español para palabras introducidas automáticamente, p.ej. "septiembre" en la fecha y especifica que se use la palabra Tabla en vez de Cuadro
 \usepackage{url} % ,href} %para incluir URLs e hipervínculos dentro del texto (aunque hay que instalar href)
-\usepackage{graphics,graphicx, float} %para incluir imágenes y colocarlas
+\usepackage{graphics,graphicx, float, adjustbox} %para incluir imágenes y colocarlas
 \usepackage[gen]{eurosym} %para incluir el símbolo del euro
 \usepackage{cite} %para incluir citas del archivo <nombre>.bib
 \usepackage{enumerate}
@@ -21,6 +21,7 @@
 \usepackage{graphicx}
 \usepackage{tabularx}
 \usepackage{booktabs}
+\usepackage{longtable}
 
 \usepackage[table,xcdraw]{xcolor}
 \hypersetup{
@@ -73,22 +74,10 @@
 	% Introducción 
 	\input{secciones/01_introduccion}
 
-	% Descripción del problema y hasta donde se llega
-	\input{secciones/02_descripcion}
-
 	% Estado del arte
 	% 	1. Crítica al estado del arte
 	% 	2. Propuesta
-	\input{secciones/03_estado_del_arte}
-	
-	\input{secciones/04_planificacion}
-
-	% Análisis del problema
-	% 1. Análisis de requisitos
-	% 2. Análisis de las soluciones
-	% 3. Solucion propuesta
-	% 4. Análisis de seguridad
-	\input{secciones/05_analisis}
+	\input{secciones/02_estado_del_arte}
 
 	% Desarrollo bajo sprints: 
 	% 	1. Permitir registros y login de usuarios
@@ -96,7 +85,30 @@
 	% 	3. Desarrollo del sistema de denuncias administrativas y accidentes
 	% 	4. Desarrollo del sistema de croquis
 	%   5. Instalación de la aplicación de manera automática
-	\input{secciones/06_implementacion}
+	\input{secciones/03_planificacion}
+	
+	% Análisis del problema
+	% 1. Análisis de requisitos
+	% 2. Análisis de las soluciones
+	% 3. Solucion propuesta
+	% 4. Análisis de seguridad
+	\input{secciones/04_analisis}
+
+	% Desarrollo bajo sprints: 
+	% 	1. Permitir registros y login de usuarios
+	% 	2. Desarrollo del sistema de incidencias
+	% 	3. Desarrollo del sistema de denuncias administrativas y accidentes
+	% 	4. Desarrollo del sistema de croquis
+	%   5. Instalación de la aplicación de manera automática
+	\input{secciones/05_implementacion}
+
+	% Desarrollo bajo sprints: 
+	% 	1. Permitir registros y login de usuarios
+	% 	2. Desarrollo del sistema de incidencias
+	% 	3. Desarrollo del sistema de denuncias administrativas y accidentes
+	% 	4. Desarrollo del sistema de croquis
+	%   5. Instalación de la aplicación de manera automática
+	\input{secciones/06_pruebas}
 
 	% Presupuesto
 
@@ -104,6 +116,7 @@
 	\input{secciones/07_conclusiones}
 
 	% Trabajos futuros
+	\input{secciones/08_trabajo_futuro}
 
 
 	

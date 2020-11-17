@@ -32,6 +32,8 @@ def test_grafica_muertes(current_autonomy):
 @pytest.mark.parametrize("current_autonomy", ccaa)
 def test_grafica_hospitales(current_autonomy):
     try:
+        if (current_autonomy == 'C. Valenciana'):
+            current_autonomy = 'C Valenciana'
         grafica_hospitales(current_autonomy)
     except Exception as e:
         raise e

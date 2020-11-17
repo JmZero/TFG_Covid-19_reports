@@ -66,36 +66,50 @@ def test_fecha_actualizacion_muertes():
 
 @pytest.mark.parametrize("current_autonomy", ccaa)
 def test_pacientes_ingresados(current_autonomy):
+    if (current_autonomy == 'C. Valenciana'):
+        current_autonomy = 'C Valenciana'
     assert isinstance(pacientes_ingresados(current_autonomy), str)
 
 
 @pytest.mark.parametrize("current_autonomy", ccaa)
 def test_porcentaje_camas_ocupadas(current_autonomy):
+    if (current_autonomy == 'C. Valenciana'):
+        current_autonomy = 'C Valenciana'
     assert isinstance(porcentaje_camas_ocupadas(current_autonomy), str)
 
 
 @pytest.mark.parametrize("current_autonomy", ccaa)
 def test_pacientes_ingresados_uci(current_autonomy):
+    if (current_autonomy == 'C. Valenciana'):
+        current_autonomy = 'C Valenciana'
     assert isinstance(pacientes_ingresados_uci(current_autonomy), str)
 
 
 @pytest.mark.parametrize("current_autonomy", ccaa)
 def test_porcentaje_camas_uci_ocupadas(current_autonomy):
+    if (current_autonomy == 'C. Valenciana'):
+        current_autonomy = 'C Valenciana'
     assert isinstance(porcentaje_camas_uci_ocupadas(current_autonomy), str)
 
 
 @pytest.mark.parametrize("current_autonomy", ccaa)
 def test_ingresados_ultimo_dia(current_autonomy):
+    if (current_autonomy == 'C. Valenciana'):
+        current_autonomy = 'C Valenciana'
     assert isinstance(ingresados_ultimo_dia(current_autonomy), str)
 
 
 @pytest.mark.parametrize("current_autonomy", ccaa)
 def test_altas_ultimo_dia(current_autonomy):
+    if (current_autonomy == 'C. Valenciana'):
+        current_autonomy = 'C Valenciana'
     assert isinstance(altas_ultimo_dia(current_autonomy), str)
 
 
 @pytest.mark.parametrize("current_autonomy", ccaa)
 def test_fecha_actualizacion_hospital(current_autonomy):
+    if (current_autonomy == 'C. Valenciana'):
+        current_autonomy = 'C Valenciana'
     date = fecha_actualizacion_hospital(current_autonomy)
     format = "%Y-%m-%d"
 

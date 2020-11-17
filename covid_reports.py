@@ -821,7 +821,7 @@ def show_cvalenciana_death(update, context):
 
 
 def show_cvalenciana_hospital(update, context):
-    show_hospital(update, context, "C. Valenciana")
+    show_hospital(update, context, "C Valenciana")
 
     return INFO_CVALENCIANA_HOSPITAL
 

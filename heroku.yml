@@ -2,4 +2,4 @@ build:
   docker:
     web: Dockerfile
 run:
-  web: python ./codid_reports.py
+  web: python ./covid_reports.py

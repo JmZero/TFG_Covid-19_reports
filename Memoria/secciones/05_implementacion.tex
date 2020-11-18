@@ -78,7 +78,7 @@ La primera función que definirá el Bot será su funcionó de inicio, la cual p
 
 \begin{itemize}
 	\item \textbf{Lineas 1 y 2:} Recogen en dos variables los valores del nombre del usuario y el identificador del chat desde los parámetros.
-	\item \textbf{Lineas 4 a 7:} Comprueba que el usuriario tiene un usuario de \textbf{Telegram} y si no lo tiene le informa de como hacerlo.
+	\item \textbf{Lineas 4 a 7:} Comprueba que el usurario tiene un usuario de \textbf{Telegram} y si no lo tiene le informa de como hacerlo.
 	\item \textbf{Lineas 11 a 13:} Se crea una lista con los botones del teclado que se quieren mostrar al usuario. A diferencia de los botones que se muestran en el chat, estos carecen de un parámetro \textbf{callback\_data}.
 	\item \textbf{Lineas 15 a 17:} Se crea el objeto que contendrá los botones y se le especifica que quiere que se adapte al tamaño del teclado (\textbf{resize\_keyboard}), así como que quiere que siempre se mantenga visible (\textbf{one\_time\_keyboard}).
 	\item \textbf{Lineas 19 a 22:} Se usará la función \textbf{reply\_text} sobre el mensaje que nos da el Bot para añadirle el texto que queremos que este devuelva, asi como un parámetro adicional (\textbf{reply\_markup}) donde se encuentra el listado de botones del menú del teclado.
@@ -194,7 +194,7 @@ INICIO: [
 ],
 \end{lstlisting}
 
-Como se puede ver, en este contexto el Bot presenta una diversidad de opciones asociadas tanto a botones como con texto que se puede introducir. Pero, ¿que pasa si se produce un acción en otro contexto? Para ello existen los \textbf{fallbacks}. Los \textbf{fallbacks} estarán representados en una lista donde se implementarán los \textbf{handlers} que no se encuentran en el contexto correcto. Por ello, como podremos ver en el Listing \ref{lst:fallback}, se han definido los mismos \textbf{handlers} implementados en el Listing \ref{lst:contexto}. Esto es porque estos mismos handlers pueden no corresponder a cualquier otro contexto, por lo que el \textbf{fallback} asociado al \textbf{pattern} se encargará de llamar a otra función diferente a la original de manera que se realice una acción diferente. Para \textbf{Covid-19 Reports}, esa opción será la de mostrar un mensaje comunicando que no se encuentra en el contexto de la petición.
+Como se puede ver, en este contexto el Bot presenta una diversidad de opciones asociadas tanto a botones como con texto que se puede introducir. Pero, ¿que pasa si se produce un acción en otro contexto? Para ello existen los \textbf{fallbacks}. Éstos estarán representados en una lista donde se implementarán los \textbf{handlers} que no se encuentran en el contexto correcto. Por ello, como podremos ver en el Listing \ref{lst:fallback}, se han definido los mismos \textbf{handlers} implementados en el Listing \ref{lst:contexto}. Esto es porque estos mismos handlers pueden no corresponder a cualquier otro contexto, por lo que el \textbf{fallback} asociado al \textbf{pattern} se encargará de llamar a otra función diferente a la original de manera que se realice una acción diferente. Para \textbf{Covid-19 Reports}, esa opción será la de mostrar un mensaje comunicando que no se encuentra en el contexto de la petición.
 
 \begin{lstlisting}[language=Python, caption={Fallbacks.}, label={lst:fallback}]
 INICIO: [
@@ -360,7 +360,7 @@ Para los gráficos de barras y tramas se ha seguido la estructura que de muestra
 
 \begin{itemize}
 	\item \textbf{Lineas 1 y 2:} Se creará creará un nuevo \textbf{dataframe} con los datos de los que se desea mostrar y por medio de la función \textbf{set\_index} se asignará la columna del \textbf{dataframe} como el index del mismo.
-	\item \textbf{Lineas 4:} Se creará el tamaño de la imágen y se crearán las variables \textbf{fig} y \textbf{ax} que se usarán mas adelante.
+	\item \textbf{Lineas 4:} Se creará el tamaño de la imagen y se crearán las variables \textbf{fig} y \textbf{ax} que se usarán mas adelante.
 	\item \textbf{Lineas 5:} Se creará una variable que contendrá un objeto \textit{Index} que será el que contenga los indices de la gráfica.
 	\item \textbf{Lineas 7:} Se creará la gráfica de barras, donde los parámetros introducisos serán el Index creado antes, el listado de valores correspondientes a cada index, así como la opacidad de la barra (alpha) y el grosor de éstas (width).
 	\item \textbf{Lineas 8:} Se creará la gráfica de tramas, donde los parámetros introducisos serán el Index creado antes, el listado de valores correspondientes a cada index, así como el color de la misma.

@@ -1,0 +1,145 @@
+\chapter{Test y Despliegue}
+
+\section{Desarrollo basado en test}
+
+El desarrollo de test es una de las actividades más importantes y necesarias a la hora de desarrollar un proyecto. Estos se utilizan para poder asegurar la calidad del producto. Al aplicar una metodología como Scrum, se han pretendido que los ciclos de trabajo no sean largos, donde se tengan que arreglar un gran nº de errores a la vez que se añaden nuevas características al producto. Por ello, para minimizar el trabajo lo máximo posible y evitar fallos que pueden llegar a no solucionarse de manera facil.
+
+El desarrollo de test en la teoria ha de preceder al desarrollo del propio código. Los tests se crean partiendo del punto de vista donde ya se conoce las funcionalidades que se van a implementar, como queremos que estas respondan y como medida para estas no fallen al implementarse.
+
+Por esto, para poder afirma que se ha desarrollado un producto funcional, primero este ha de haber pasado una serie de pruebas, las cuales estarán automatizadas por medio de los test. Para el desarrollo de este proyecto se ha hecho uso de dos de estos tipos, ya que ambos son importantes: \textbf{test unitarios} y \textbf{test integrados}. Cada uno de estos test se encargará de realizar pruebas en un aspecto del proyecto.
+
+\subsection{Test unitarios}
+
+Definiremos como \textbf{test unitarios} a aquellos que realizarán pruebas mediante las llamadas de funciones con diferentes valores. Un aspecto a tener en cuenta a la hora de desarrollar pruebas unitarias es que estas siempre han de cubrir todo el código desarrollado, o lo que es lo mismo, tener un \textbf{coverage} del 100\%. Esto se debe a que si dejamos algún punto del código sin testear, este puede darnos algún problema en algún momento y no saberlo porque no se está probando.
+
+Para desarrollar los \textbf{test unitario} de este proyecto se ha utilizado la biblioteca \textbf{pytest}, la cual nos aporta la capacidad de parametrizar el código, de manera que con un mismo test podamos comprobar diferentes casos. Un ejemplo de esto es el test que se muestra en el Listing \ref{lst:unit-test}, donde vemos como se han parametrizado los parámetros del test para comprobar su funcionamiento.
+
+\begin{lstlisting}[language=Python, caption={Ejemplo test unitario parametrizado.}, label={lst:unit-test}]
+@pytest.mark.parametrize("fecha,expected", [("2020-12-12", '12-12-2020'), ("0001-07-16", '16-07-1'), ("2098-05-07", '07-05-2098')])
+def test_format_date(fecha, expected):
+	assert format_date(fecha) == expected
+\end{lstlisting}
+
+Como se puede ver, el test recibe los parámetros \textit{fecha} y \textit{expected}, los cuales corresponderán a los valores que se pasarán como parámetro de la función que se va a probar y al resultado que debería devolver la misma.
+
+\subsection{Test integrados}
+
+Definiremos como \textbf{test integrados} a aquellos que realizan pruebas sobre el conjunto del producto una vez este ha pasado satisfactoriamente los test unitarios. Los test integrados serán los encargados de comprobar el funcionamiento completo del proyecto, en nuestro caso, simulando acciones que podría llevar a cabo un usuario.
+
+Para desarrollar los test integrados de este proyecto se ha hecho uso de la biblioteca \textbf{pyrogram}, la cual es una de las que se nos recomienda a la hora de seleccionar \textbf{python-telegram-bot}. Cuenta con una serie de ejemplos en su \textbf{GitHub} los cuales nos permiten probar las diferentes combinaciones en las que se puede realizar esto.
+
+En primer lugar explicaremos el archivo \textit{conftest}, el cual podemos ver en el Listing \ref{lst:conftest} y será el encargado de implementar las funcionalidades principales que luego serán utilizadas para simular un usuario a la hora de realizar los test. 
+
+\begin{itemize}
+	\item \textbf{Lineas 1 a 4:} Se habilita el logging y se le asignan los valores que se quieren tener.
+	\item \textbf{Lineas 7 a 11:} Se define la función \textit{event\_loop}, la cual crea una instancia del event loop por defecto para la sesión.
+	\item \textbf{Lineas 14 a 23:} Se define la función \textit{client}, la cual creará un nuevo cliente para probar el Bot.
+	\item \textbf{Lineas 26 a 37:} Se define la función \textit{controller}, la cual se encargará de enviarles las peticiones del cliente al Bot.
+\end{itemize}
+
+\begin{lstlisting}[language=Python, caption={Contenido del archivo conftest.}, label={lst:conftest}]
+logger = logging.getLogger("test")
+logger.setLevel(logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
+logging.getLogger("pyrogram").setLevel(logging.WARNING)
+
+
+@pytest.yield_fixture(scope="session", autouse=True)
+def event_loop(request):
+	loop = asyncio.get_event_loop_policy().new_event_loop()
+	yield loop
+	loop.close()
+
+
+@pytest.fixture(scope="session")
+async def client() -> Client:
+	client = Client(
+	config("SESSION_STRING", default=None) or "test_covid_reports",
+	workdir=test_dir,
+	config_file=str(test_dir / "config.ini")
+	)
+	await client.start()
+	yield client
+	await client.stop()
+
+
+@pytest.fixture(scope="module")
+async def controller(client):
+	c = BotController(
+	client=client,
+	peer="@CovidReportsBot",
+	max_wait=10.0,
+	wait_consecutive=0.8, (optional)
+	)
+	
+	await c.clear_chat()
+	await c.initialize(start_client=False)
+	yield c
+\end{lstlisting}
+
+Una ver vista la estructura del archivo \textit{conftest}, procederemos a ver la estructura de los tests, la cual veremos en el Listing \ref{integrate-test}.
+
+\begin{itemize}
+	\item \textbf{Lineas 2 y 3:} Se almacenará la respuesta del Bot cuando se haya realizado una llama con el comando \textbf{start}.
+	\item \textbf{Linea 5:} El test comprobará que la respuesta no está vacía.
+	\item \textbf{Linea 6:} El test comprobará el nº de mensajes con los que el Bot ha respondido, en este caso 1.
+	\item \textbf{Linea 7:} El test comprobará que el texto se encuentra en la respuesta del Bot.
+	\item \textbf{Linea 8 y 9:} El test comprobará que el Bot ha devuelto en el mensaje 3 botones situados en el teclado.
+\end{itemize}
+
+
+\begin{lstlisting}[language=Python, caption={Ejemplo de test integrado.}, label={lst:integrate-test}]
+async def test_start(controller):
+	async with controller.collect(count=1) as res:  # type: Response
+		await controller.send_command("/start")
+	
+	assert not res.is_empty, "Bot did not respond to /start command"
+	assert res.num_messages == 1
+	assert "bienvenido a covid-19 report!" in res.full_text.lower()
+	keyboard = res.keyboard_buttons
+	assert len(keyboard) == 3   # 3 buttons in keyboard
+\end{lstlisting}
+
+\section{Despliegue}
+
+Para llevar a cabo el despliegue del proyecto se ha hecho uso de dos herramientas, \textbf{Docker} y \textbf{Heroku}.
+
+\textbf{Docker} permite crear contenedores ligeros para aplicaciones software para que puedan ejecutarse en cualquier máquina que lo tenga instalado, independientemente del sistema operativo, facilitando a su vez los despliegues.
+
+\textbf{Heroku} es un PaaS que se utiliza para resolver el despliegue de una aplicación.
+
+Lo primeros que hemos tenido que crear es cuentas tanto en \textbf{DockerHub} como \textbf{Heroku}. De esta misma manera, las sincronizaremos con nuestro repositorio de \textbf{GitHub} que almacena el proyecto para que al crear los archivos necesarios se automatice la creacion del contenedor así como el despliegue del Bot en \textbf{Heroku}.
+
+Para poder automatizar la creación del contenedor crearemos el archivo \textit{Dockerfile}, el cual se muestra en el Listing \ref{lst:dockerfile}. Mediante de este archivo se creará un contenedor con una imagen de \textbf{Python} ligera, instalando previamente los requisitos definidos en el archivo \textit{requirements.txt} y se ejecutará en el archivo del Bot.
+
+\begin{lstlisting}[language=Python, caption={Archivo Dockerfile.}, label={lst:dockerfile}]
+# set base image (host OS)
+FROM python:3.8.0-slim
+
+# set the working directory in the container
+WORKDIR /bot
+
+# copy the content of the local src directory to the working directory
+COPY . /bot
+
+# install dependencies
+RUN pip install --upgrade pip
+RUN pip install --no-cache -r requirements.txt
+
+# command to run on container start
+CMD [ "python", "./covid_reports.py" ]
+\end{lstlisting}
+
+Para poder automatizar el despliegue en \textbf{Heroku} se ha creado el archivo \textit{heroku.yml}, el cual, al tener sincronizado nuestra cuenta de \textbf{Heroku}, desplegará automáticamente el contenedor. El Listing \ref{lst:heroku} muestra el contenido del archivo. En primer lugar se construirá el contenedor y una vez construido se ejecutará el comando indicado para iniciar el Bot (este último comando puede no usarse y entonces se usará el comando CMD del contenedor)
+
+\begin{lstlisting}[language=Python, caption={Archivo heroku.yml.}, label={lst:heroku}]
+build:
+	docker:
+		web: Dockerfile
+run:
+	web: python ./covid_reports.py
+\end{lstlisting}
+
+De esta manera, cada vez que actualicemos nuestro Bot y lo despleguemos en \textbf{GitHub}, estos archivos automáticamente crearan el contenedor y lo desplegarán en \textbf{Heroku}
+
+Como hemos visto, tanto los test como el despliegue son dos procesos esenciales para nuestro proyecto. Los primeros permitiéndonos asegurar que el código funciona correctamente y el despliegue permitiendo cumplir uno de los requisitos del proyecto, que el Bot esté disponible en todo momento.

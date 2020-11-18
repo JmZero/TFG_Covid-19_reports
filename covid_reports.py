@@ -44,7 +44,7 @@ INFO_ESPANA_100_DEATH_MEDIA, INFO_ESPANA_ALL = range(130)
 mode = os.getenv("MODE")
 TOKEN = os.getenv("TOKEN")
 
-global current_state #, conv_handler
+global current_state
 
 if mode == "dev":
     def run(updater):

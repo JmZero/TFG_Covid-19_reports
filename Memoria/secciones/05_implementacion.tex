@@ -4,7 +4,7 @@ Como ya se explicó en el Capítulo \ref{ch:planificación} la implementación d
 
 \section{Creación del Bot}
 
-La creación de un Bot de \textbf{Telgram} es un proceso muy simple, ya que podemos hacerlos desde la propia aplicación. \textbf{Telegram} tiene su propio Bot implementado que permite crear el resto de estos, este es \textbf{@BotFather}. Al iniciar la comunicación con este Bot lo primero que se nos dará será un listado de las diferentes opciones de las que disponemos para crear, editar, eliminar un Bot entre otras, como puede verse en la Figura \ref{fig:crear-bot-1}.
+La creación de un Bot de \textbf{Telegram} es un proceso muy simple, ya que podemos hacerlos desde la propia aplicación. \textbf{Telegram} tiene su propio Bot implementado que permite crear el resto de estos, este es \textbf{@BotFather}. Al iniciar la comunicación con este Bot lo primero que se nos dará será un listado de las diferentes opciones de las que disponemos para crear, editar, eliminar un Bot entre otras, como puede verse en la Figura \ref{fig:crear-bot-1}.
 
 \begin{figure}[p]
 	\centering
@@ -30,7 +30,7 @@ A lo largo de este apartado se explicarán como se ha llevado a cabo la implemen
 
 \subsection{Handlers}
 
-Para poder majenar las diferentes acciones que realizará el Bot se ha hecho uso de una serie de \textbf{handlers} que nos proporciona la propia biblioteca \textbf{python-telegram-bot}. En este caso, entre los diferentes \textbf{handlers} que puede proveernos esta biblioteca a lo largo del proyecto se han utilizado los siguientes:
+Para poder manejar las diferentes acciones que realizará el Bot se ha hecho uso de una serie de \textbf{handlers} que nos proporciona la propia biblioteca \textbf{python-telegram-bot}. En este caso, entre los diferentes \textbf{handlers} que puede proveernos esta biblioteca a lo largo del proyecto se han utilizado los siguientes:
 
 \begin{itemize}
 	\item \textbf{CallbackQueryHandler:} con la siguiente estructura en su llamada \textit{CallbackQueryHandler(callback, pattern), este handler se encargará de ejecutar la función definida en el \textit{callback} cuando se pulse un botón cuyo \textit{pattern} coincide con el del handler.
@@ -40,7 +40,7 @@ Para poder majenar las diferentes acciones que realizará el Bot se ha hecho uso
 
 \subsection{Funciones de respuesta}
 
-Como hemos dicho con anterioridad, este Bot será de tipo conversacional. Esto conlleva que el Bot tendrá que responder a las solicitudes que el usuario le realice. Para ello se han definido una serie de funciones que, haciendo uso de los \textbf{handlers} definidos en el apartado anterior compondrán nuestro Bot, permitiendo reponder al usuario.
+Como hemos dicho con anterioridad, este Bot será de tipo conversacional. Esto conlleva que el Bot tendrá que responder a las solicitudes que el usuario le realice. Para ello se han definido una serie de funciones que, haciendo uso de los \textbf{handlers} definidos en el apartado anterior compondrán nuestro Bot, permitiendo responder al usuario.
 
 Estas funciones estarán caracterizadas por estar definidas todas con dos parámetros (\textbf{update} y \textbf{context}) los cuales contienen información del mensaje enviado (nombre y apellidos del usuario, alias, identificador del chat). Podemos verlo en el Listing \ref{lst:def-funcion}
 
@@ -300,7 +300,7 @@ Este \textbf{dataframe} contendrá la información del nº de casos y fallecidos
 \begin{itemize}
 	\item \textbf{fecha:} clave principal, fecha en formato YYYY-mm-dd.
 	\item \textbf{rango\_edad:} rango de edad donde se han producido los casos, divididos en intervalos de 10 años, desde \textit{0-9} hasta \textit{80 y +}. También existe un \textit{Total} de los datos.
-	\item \textbf{sexo:} indicará el sexo de la población, dividiendose en \textit{hombres}, \textit{mujeres} y \textit{ambos}.
+	\item \textbf{sexo:} indicará el sexo de la población, dividiéndose en \textit{hombres}, \textit{mujeres} y \textit{ambos}.
 	\item \textbf{casos\_confirmados:} nº de casos detectados por edad y rango en la fecha.
 	\item \textbf{hospitalizados:} nº de pacientes Covid hospitalizados por edad y rango en la fecha.
 	\item \textbf{ingresos\_uci:} nº de pacientes Covid hospitalizados en UCI por edad y rango en la fecha.
@@ -397,9 +397,9 @@ Para los gráficos de barras y tramas se ha seguido la estructura que de muestra
 
 \begin{itemize}
 	\item \textbf{Lineas 1 y 2:} Se creará creará un nuevo \textbf{dataframe} con los datos de los que se desea mostrar y por medio de la función \textbf{set\_index} se asignará la columna del \textbf{dataframe} como el index del mismo.
-	\item \textbf{Lineas 4:} Se creará el tamaño de la imágen y se crearán las variables \textbf{fig} y \textbf{ax} que se usarán mas adelante.
+	\item \textbf{Lineas 4:} Se creará el tamaño de la imagen y se crearán las variables \textbf{fig} y \textbf{ax} que se usarán mas adelante.
 	\item \textbf{Lineas 5:} Se creará una variable que contendrá un objeto \textit{Index} que será el que contenga los indices de la gráfica.
-	\item \textbf{Lineas 7:} Se creará la gráfica de barra laterales, donde los parámetros introducisos serán el Index creado antes, el listado de valores correspondientes a cada index, así como la opacidad de la barra (alpha) y el grosor de éstas (width).
+	\item \textbf{Lineas 7:} Se creará la gráfica de barra laterales, donde los parámetros introducidos serán el Index creado antes, el listado de valores correspondientes a cada index, así como la opacidad de la barra (alpha) y el grosor de éstas (width).
 	\item \textbf{Lineas 9:} Se formateará como se muestras los diferentes valores de axis.
 	\item \textbf{Lineas 11 y 12:} Se le da nombre a la gráfica y se invertirá si eje y.
 	\item \textbf{Lineas 14 y 15:} Se le añadirá al final de cada barra el valor que representa la misma.

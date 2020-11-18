@@ -2,9 +2,9 @@
 
 \section{Desarrollo basado en test}
 
-El desarrollo de test es una de las actividades más importantes y necesarias a la hora de desarrollar un proyecto. Estos se utilizan para poder asegurar la calidad del producto. Al aplicar una metodología como Scrum, se han pretendido que los ciclos de trabajo no sean largos, donde se tengan que arreglar un gran nº de errores a la vez que se añaden nuevas características al producto. Por ello, para minimizar el trabajo lo máximo posible y evitar fallos que pueden llegar a no solucionarse de manera facil.
+El desarrollo de test es una de las actividades más importantes y necesarias a la hora de desarrollar un proyecto. Estos se utilizan para poder asegurar la calidad del producto. Al aplicar una metodología como Scrum, se han pretendido que los ciclos de trabajo no sean largos, donde se tengan que arreglar un gran nº de errores a la vez que se añaden nuevas características al producto. Por ello, para minimizar el trabajo lo máximo posible y evitar fallos que pueden llegar a no solucionarse de manera fácil.
 
-El desarrollo de test en la teoria ha de preceder al desarrollo del propio código. Los tests se crean partiendo del punto de vista donde ya se conoce las funcionalidades que se van a implementar, como queremos que estas respondan y como medida para estas no fallen al implementarse.
+El desarrollo de test en la teoría ha de preceder al desarrollo del propio código. Los tests se crean partiendo del punto de vista donde ya se conoce las funcionalidades que se van a implementar, como queremos que estas respondan y como medida para estas no fallen al implementarse.
 
 Por esto, para poder afirma que se ha desarrollado un producto funcional, primero este ha de haber pasado una serie de pruebas, las cuales estarán automatizadas por medio de los test. Para el desarrollo de este proyecto se ha hecho uso de dos de estos tipos, ya que ambos son importantes: \textbf{test unitarios} y \textbf{test integrados}. Cada uno de estos test se encargará de realizar pruebas en un aspecto del proyecto.
 
@@ -108,7 +108,7 @@ Para llevar a cabo el despliegue del proyecto se ha hecho uso de dos herramienta
 
 \textbf{Heroku} es un PaaS que se utiliza para resolver el despliegue de una aplicación.
 
-Lo primeros que hemos tenido que crear es cuentas tanto en \textbf{DockerHub} como \textbf{Heroku}. De esta misma manera, las sincronizaremos con nuestro repositorio de \textbf{GitHub} que almacena el proyecto para que al crear los archivos necesarios se automatice la creacion del contenedor así como el despliegue del Bot en \textbf{Heroku}.
+Lo primeros que hemos tenido que crear es cuentas tanto en \textbf{DockerHub} como \textbf{Heroku}. De esta misma manera, las sincronizaremos con nuestro repositorio de \textbf{GitHub} que almacena el proyecto para que al crear los archivos necesarios se automatice la creación del contenedor así como el despliegue del Bot en \textbf{Heroku}.
 
 Para poder automatizar la creación del contenedor crearemos el archivo \textit{Dockerfile}, el cual se muestra en el Listing \ref{lst:dockerfile}. Mediante de este archivo se creará un contenedor con una imagen de \textbf{Python} ligera, instalando previamente los requisitos definidos en el archivo \textit{requirements.txt} y se ejecutará en el archivo del Bot.
 

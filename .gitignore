@@ -6,5 +6,6 @@
 *.lot
 *.out
 *.gz
+*.pdf
 *.toc
 *.text
